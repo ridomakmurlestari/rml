@@ -477,3 +477,8 @@
 
 /* v1.0.2 Stable - Admin hapus riwayat kunjungan */
 .history-delete-toolbar{width:100%;display:flex;align-items:center;justify-content:flex-end;padding-top:4px}.history-bulk-delete{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.history-bulk-delete span{font-size:12px;font-weight:800;color:#475569}.history-select-check{display:flex;align-items:center;gap:8px;padding:9px 11px;margin:0 0 12px;border-radius:10px;background:#ecfdf5;font-size:12px;font-weight:800;color:#115e59}.history-select-check input{width:18px;height:18px;margin:0;accent-color:#0f766e}.history-card.selected-for-delete{border-color:#0f766e;box-shadow:0 0 0 2px rgba(15,118,110,.12)}.history-card-actions{display:flex;justify-content:flex-end;align-items:center;gap:8px;flex-wrap:wrap;margin-top:12px}.history-card-actions button{margin:0}.history-bulk-delete button:disabled{opacity:.55;cursor:not-allowed}@media(max-width:560px){.history-delete-toolbar,.history-bulk-delete{align-items:stretch}.history-delete-toolbar{justify-content:stretch}.history-delete-toolbar>button,.history-bulk-delete{width:100%}.history-bulk-delete{display:grid;grid-template-columns:1fr 1fr}.history-bulk-delete span{grid-column:1/-1}.history-bulk-delete button,.history-card-actions button{width:100%}.history-card-actions{display:grid;grid-template-columns:1fr}.history-filter-card{align-items:stretch}}
+
+
+/* v1.0.3 Performance */
+.history-load-more{display:block;width:100%;margin:14px 0 8px;}
+.history-photo{content-visibility:auto;}
