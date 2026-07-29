@@ -11,3 +11,6 @@ Perubahan:
 - Check Out tetap wajib diselesaikan sebelum menutup tugas area atau logout.
 
 Tidak memerlukan SQL baru.
+
+
+Versi 0.11.4: filter sales, pencarian lengkap, multi-delete, import/export Excel, dan menu Pembagian Area Sales.
