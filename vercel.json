@@ -1,0 +1,7 @@
+{
+  "headers": [
+    {"source": "/index.html", "headers": [{"key":"Cache-Control","value":"no-store, max-age=0"}]},
+    {"source": "/app-v0-10-3.js", "headers": [{"key":"Cache-Control","value":"no-store, max-age=0"}]},
+    {"source": "/customers-v0-10-3.js", "headers": [{"key":"Cache-Control","value":"no-store, max-age=0"}]}
+  ]
+}
