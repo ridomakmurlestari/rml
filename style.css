@@ -484,3 +484,5 @@
 .history-photo{content-visibility:auto;}
 
 .order-bullet-list{margin:4px 0 0;padding-left:18px}.order-bullet-list li{margin:0 0 3px;line-height:1.35}.visit-note-content{white-space:normal}.visit-note-content .order-bullet-list{margin-top:2px}
+
+.history-last-edited{font-weight:700;color:#8a5a00;background:#fff7df;border-radius:8px;padding:5px 8px;margin-top:4px}

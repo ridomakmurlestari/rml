@@ -21,7 +21,7 @@ function loadPreview(){
  const rows=Array.isArray(previewData.rows)?previewData.rows:[];
  document.getElementById("reportRows").innerHTML=rows.length?rows.map(r=>{
    const detail=r.status==="Ada Order"?orderHtml(r.note):esc(r.note).replace(/\n/g,"<br>");
-   return `<tr><td>${esc(r.no)}</td><td><strong>${esc(r.code)}</strong><br>${esc(r.outlet)}<br><small>${esc(r.area)}</small></td><td>${esc(r.sales)}</td><td>${esc(r.status)}</td><td>Masuk: ${esc(r.checkIn)}<br>Keluar: ${esc(r.checkOut)}<br>Durasi: ${esc(r.duration)}</td><td><strong>${esc(r.detailLabel)}</strong><br>${detail}</td></tr>`;
+   return `<tr><td data-label="No.">${esc(r.no)}</td><td data-label="Outlet"><strong>${esc(r.code)}</strong><br>${esc(r.outlet)}<br><small>${esc(r.area)}</small></td><td data-label="Sales">${esc(r.sales)}</td><td data-label="Status">${esc(r.status)}</td><td data-label="Waktu">Masuk: ${esc(r.checkIn)}<br>Keluar: ${esc(r.checkOut)}<br>Durasi: ${esc(r.duration)}</td><td data-label="Orderan / Catatan"><strong>${esc(r.detailLabel)}</strong><br>${detail}</td></tr>`;
  }).join(""):'<tr><td class="empty" colspan="6">Belum ada data kunjungan untuk filter yang dipilih.</td></tr>';
 }
 function goBackToHistory(){window.location.href="index.html#history";}
