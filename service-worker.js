@@ -1,9 +1,9 @@
-const CACHE_NAME="rml-sales-visit-v0-10-8-secure-login";
+const CACHE_NAME="rml-sales-visit-v0-10-9-supervisor-area";
 const APP_SHELL=[
  "./",
  "./index.html",
  "./style.css",
- "./app-v0-10-8.js",
+ "./app-v0-10-9.js",
  "./customers-v0-10-3.js",
  "./manifest.webmanifest",
  "./icon-192.svg",

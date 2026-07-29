@@ -24,3 +24,11 @@ PERUBAHAN v0.10.8
 - Nama login Administrator diubah menjadi Admin.
 - Untuk database yang sudah aktif, jalankan supabase/rename-administrator-to-admin.sql sebagai query baru.
 - Password admin tetap sama dan seluruh riwayat tetap terhubung melalui account_key admin@rml.app.
+
+
+PERUBAHAN v0.10.9
+- Hak akses bebas ganti area untuk supervisor.
+- Septino aktif secara default.
+- Pengaturan Admin dapat mengaktifkan/mematikan hak tersebut pada akun sales.
+- Sales dengan hak ini tidak wajib mengisi alasan outlet saat pindah area atau menyelesaikan sesi.
+- Check Out aktif tetap wajib diselesaikan sebelum pindah area.

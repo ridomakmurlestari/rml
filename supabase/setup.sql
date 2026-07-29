@@ -25,6 +25,7 @@ create table public.app_users (
   role text not null check (role in ('admin','sales')),
   must_change_password boolean not null default true,
   active boolean not null default true,
+  can_switch_area_freely boolean not null default false,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -212,6 +213,8 @@ values
  ('septino@rml.app','septino','Septino','08116946999',extensions.crypt('08116946999',extensions.gen_salt('bf')),'sales',true),
  ('admin@rml.app','admin','Admin','082284879722',extensions.crypt('082284879722',extensions.gen_salt('bf')),'admin',true)
 on conflict(account_key) do update set login_name=excluded.login_name,display_name=excluded.display_name,phone=excluded.phone,role=excluded.role;
+
+update public.app_users set can_switch_area_freely=true where account_key='septino@rml.app';
 
 -- Verifikasi: hasil harus menampilkan 4 akun.
 select account_key,login_name,display_name,phone,role,must_change_password from public.app_users order by role,display_name;
