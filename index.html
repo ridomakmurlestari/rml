@@ -94,7 +94,10 @@
 <section id="appPage" class="hidden">
 <header class="topbar">
   <div><small id="roleText"></small><h2 id="userText"></h2></div>
-  <button id="finishBtn" class="ghost" onclick="logout()">Selesai</button>
+  <div class="topbar-actions">
+    <button id="finishBtn" class="ghost finish-task-btn" onclick="finishAreaTask()">Selesai Tugas Area Hari Ini</button>
+    <button id="logoutBtn" class="ghost logout-btn" onclick="logout()">Logout</button>
+  </div>
 </header>
 
 <main>
@@ -381,7 +384,7 @@
     <div id="finishCompleteMessage" class="success-box hidden"><strong>✓ Semua outlet sudah selesai.</strong><span>Anda dapat mengakhiri pekerjaan hari ini.</span></div>
     <div class="page-actions sticky-page-actions">
       <button class="secondary" type="button" onclick="closeUnvisitedReasonModal()">Kembali</button>
-      <button id="saveFinishAreaBtn" class="primary" type="button" onclick="saveUnvisitedReasons()">Simpan Alasan & Selesai</button>
+      <button id="saveFinishAreaBtn" class="primary" type="button" onclick="saveUnvisitedReasons()">Simpan Alasan & Selesai Tugas Area Hari Ini</button>
     </div>
   </div>
 </section>
@@ -451,6 +454,6 @@
 
 
 <script src="customers-v0-10-3.js"></script>
-<script src="app-v0-10-9.js"></script>
+<script src="app-v0-11-0.js"></script>
 </body>
 </html>

@@ -458,3 +458,6 @@
 .account-active-row{display:flex!important;align-items:center;gap:10px;margin:12px 0 2px;font-weight:700}.account-active-row input{width:18px;height:18px;margin:0}.user-setting-actions button:disabled{opacity:.65;cursor:wait}
 
 .password-input-wrap{position:relative}.password-input-wrap input{padding-right:52px}.password-toggle{position:absolute;right:7px;top:50%;transform:translateY(-50%);width:38px;height:38px;border:0;border-radius:9px;background:transparent;cursor:pointer;font-size:18px;line-height:1}.password-toggle:hover{background:#eef8f6}
+
+/* v0.11.0: pemisahan selesai tugas area dan logout */
+.topbar-actions{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap}.finish-task-btn{background:#e5f3f1;color:#0f766e}.logout-btn{background:#fff1f0;color:#b42318;border:1px solid #ffd5d2}@media(max-width:560px){.topbar{align-items:flex-start;gap:10px}.topbar-actions{max-width:220px}.topbar-actions .ghost{font-size:12px;padding:8px 10px}.finish-task-btn{max-width:145px;line-height:1.2}}

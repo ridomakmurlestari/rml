@@ -1,34 +1,13 @@
-RML SALES VISIT v0.10.2 — INTERNAL LOGIN + SUPABASE
+RML Sales Visit v0.11.0 - Selesai Tugas Area & Logout Terpisah
 
-Perubahan utama:
-- Tidak memakai Supabase Authentication Users.
-- Login langsung dengan Nama + Password melalui RPC aman.
-- Password disimpan sebagai hash bcrypt di database.
-- Admin mengelola akun dan penugasan area dari aplikasi.
-- Kunjungan tetap tersimpan offline di IndexedDB.
-- Saat online dan aplikasi dibuka, data otomatis disinkronkan ke Supabase.
+Perubahan:
+- Tombol Selesai untuk Sales/Supervisor menjadi "Selesai Tugas Area Hari Ini".
+- Menyelesaikan tugas area tidak lagi melakukan logout.
+- Setelah selesai, area aktif dibersihkan dan pengguna kembali ke Dashboard.
+- Sales biasa tetap wajib mengisi alasan untuk outlet yang belum dikunjungi.
+- Supervisor dengan izin bebas ganti area tidak wajib mengisi alasan.
+- Tombol Logout terpisah tersedia di kanan atas untuk semua akun.
+- Logout tidak meminta alasan outlet yang belum dikunjungi.
+- Check Out tetap wajib diselesaikan sebelum menutup tugas area atau logout.
 
-Instalasi wajib: jalankan supabase/setup.sql terlebih dahulu.
-Lihat SUPABASE-SETUP.txt.
-
-
-V0.10.3 FORCE REFRESH
-- Aset JavaScript diberi nama baru untuk memastikan Vercel/browser tidak memakai file lama.
-- Service worker lama otomatis dihapus sementara untuk pengujian login.
-- Login harus memanggil RPC app_login, bukan lookup_login_email.
-
-
-v0.10.8: Memperbaiki ubah password. Verifikasi password lama dilakukan langsung oleh Supabase, bukan data lokal browser.
-
-PERUBAHAN v0.10.8
-- Nama login Administrator diubah menjadi Admin.
-- Untuk database yang sudah aktif, jalankan supabase/rename-administrator-to-admin.sql sebagai query baru.
-- Password admin tetap sama dan seluruh riwayat tetap terhubung melalui account_key admin@rml.app.
-
-
-PERUBAHAN v0.10.9
-- Hak akses bebas ganti area untuk supervisor.
-- Septino aktif secara default.
-- Pengaturan Admin dapat mengaktifkan/mematikan hak tersebut pada akun sales.
-- Sales dengan hak ini tidak wajib mengisi alasan outlet saat pindah area atau menyelesaikan sesi.
-- Check Out aktif tetap wajib diselesaikan sebelum pindah area.
+Tidak memerlukan SQL baru.
