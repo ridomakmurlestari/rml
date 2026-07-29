@@ -1,9 +1,9 @@
-const CACHE_NAME="rml-sales-visit-v1-0-4-auto-sync";
+const CACHE_NAME="rml-sales-visit-v1-0-5-fast-refresh";
 const APP_SHELL=[
  "./",
  "./index.html",
  "./style.css",
- "./app-v1-0-4.js",
+ "./app-v1-0-5.js",
  "./customers-v0-10-3.js",
  "./manifest.webmanifest",
  "./icon-192.svg",

@@ -120,7 +120,7 @@
 <section id="dashboardView" class="view hidden">
   <div class="title-row">
     <div><h3 id="dashboardTitle">Dashboard Kunjungan</h3><p id="dashboardSubtitle">Ringkasan aktivitas hari ini</p></div>
-    <button class="secondary compact" onclick="refreshDashboard()">Refresh</button>
+    <button id="dashboardRefreshBtn" class="secondary compact" onclick="manualRefreshDashboard()">Refresh</button>
   </div>
 
   <div id="dashboardSummary" class="dashboard-grid"></div>
@@ -490,7 +490,7 @@
 
 <nav class="bottom-nav">
   <button onclick="showDashboard()">⌂<span>Dashboard</span></button>
-  <button onclick="showCustomers()">▦<span>Pembagian</span></button>
+  <button onclick="showCustomers()">▦<span id="customersNavLabel">Pelanggan</span></button>
   <button onclick="showHistory()">◷<span>Riwayat</span></button>
   <button id="assignmentNavBtn" class="hidden" onclick="showAreaAssignments()">⚙<span>Pengaturan</span></button>
   <button id="accountNavBtn" class="hidden" onclick="showAccount()">♙<span>Akun</span></button>
@@ -500,6 +500,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="customers-v0-10-3.js"></script>
-<script src="app-v1-0-4.js"></script>
+<script src="app-v1-0-5.js"></script>
 </body>
 </html>
