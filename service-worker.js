@@ -1,5 +1,5 @@
 
-const CACHE_NAME="rml-sales-visit-v0-10-6-admin-name";
+const CACHE_NAME="rml-sales-visit-v0-10-7-admin-name";
 const APP_SHELL=[
  "./",
  "./index.html",

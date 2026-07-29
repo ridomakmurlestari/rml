@@ -455,3 +455,4 @@
 .account-profile-card{display:grid;grid-template-columns:1fr 1fr;gap:16px}.account-profile-card div{display:flex;flex-direction:column;gap:5px;padding:14px;background:#f8fafc;border-radius:12px}.account-profile-card small{font-weight:800;color:#64748b}.account-profile-card strong{font-size:18px;color:#163f38}
 .account-password-card{max-width:620px;margin-top:16px}.account-password-card label{display:block;font-weight:800;margin:14px 0 6px}.account-password-card input{width:100%;box-sizing:border-box}.account-password-card button{margin-top:16px}
 @media(max-width:640px){.user-setting-actions,.account-profile-card{grid-template-columns:1fr}}
+.account-active-row{display:flex!important;align-items:center;gap:10px;margin:12px 0 2px;font-weight:700}.account-active-row input{width:18px;height:18px;margin:0}.user-setting-actions button:disabled{opacity:.65;cursor:wait}
