@@ -482,3 +482,5 @@
 /* v1.0.3 Performance */
 .history-load-more{display:block;width:100%;margin:14px 0 8px;}
 .history-photo{content-visibility:auto;}
+
+.order-bullet-list{margin:4px 0 0;padding-left:18px}.order-bullet-list li{margin:0 0 3px;line-height:1.35}.visit-note-content{white-space:normal}.visit-note-content .order-bullet-list{margin-top:2px}
