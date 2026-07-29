@@ -408,6 +408,16 @@
   <div class="title-row"><div><h3>Pengaturan Admin</h3><p>Atur penugasan area serta akun admin dan sales.</p></div><button class="secondary compact" onclick="resetAreaAssignments()">Reset Penugasan</button></div>
   <div class="dashboard-card"><h3>Penugasan Area Sales</h3><div class="assignment-help">Centang area untuk sales yang bertugas. Perubahan tersimpan otomatis.</div><div id="areaAssignmentMatrix" class="assignment-matrix-wrap"></div></div>
   <div class="dashboard-card user-management-card"><div class="title-row inner-title"><div><h3>Data Akun</h3><p>Admin dapat mengubah nama dan nomor handphone tanpa melihat password pengguna.</p></div></div><div class="account-warning">Tombol Reset Password akan mengembalikan password menjadi nomor handphone dan mewajibkan pengguna menggantinya saat login berikutnya.</div><div id="userManagementList" class="user-management-list"></div></div>
+  <div class="dashboard-card backup-restore-card">
+    <div class="title-row inner-title"><div><h3>Backup & Restore Data</h3><p>Simpan salinan data aplikasi atau pulihkan data dari file backup.</p></div></div>
+    <div class="backup-notice"><strong>Backup tidak menyimpan password atau sesi login.</strong><span>Data pelanggan, pembagian tugas, pengaturan akun, area, dan riwayat kunjungan akan disertakan.</span></div>
+    <div class="backup-actions">
+      <button class="primary" type="button" onclick="downloadDatabaseBackup()">📥 Download Backup</button>
+      <button class="secondary" type="button" onclick="document.getElementById('restoreBackupInput').click()">📤 Pilih File Restore</button>
+      <input id="restoreBackupInput" class="hidden" type="file" accept="application/json,.json" onchange="handleRestoreBackupFile(event)">
+    </div>
+    <div id="restoreBackupInfo" class="restore-backup-info hidden"></div>
+  </div>
 </section>
 
 <section id="accountView" class="view hidden">
@@ -470,6 +480,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="customers-v0-10-3.js"></script>
-<script src="app-v0-11-4.js"></script>
+<script src="app-v1-0-0.js"></script>
 </body>
 </html>

@@ -1,3 +1,5 @@
+RML Sales Visit v1.0.0 Stable
+
 RML Sales Visit v0.11.0 - Selesai Tugas Area & Logout Terpisah
 
 Perubahan:
@@ -14,3 +16,9 @@ Tidak memerlukan SQL baru.
 
 
 Versi 0.11.4: filter sales, pencarian lengkap, multi-delete, import/export Excel, dan menu Pembagian Area Sales.
+
+Tambahan v1.0.0:
+- Backup data dalam format JSON dari menu Pengaturan Admin.
+- Restore data dengan validasi file dan konfirmasi.
+- Backup mencakup pelanggan, penugasan, pengaturan akun tanpa password, area, dan riwayat kunjungan.
+- Password dan sesi login tidak dimasukkan ke file backup.

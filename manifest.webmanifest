@@ -1,11 +1,11 @@
 {
-  "name": "RML Sales Visit — MVP",
+  "name": "RML Sales Visit",
   "short_name": "RML Visit",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#f5f8f7",
   "theme_color": "#0f766e",
-  "description": "Aplikasi kunjungan sales offline-first RML, versi Supabase Pilot 0.10.1",
+  "description": "Aplikasi kunjungan sales RML versi 1.0.0 Stable",
   "icons": [
     {
       "src": "icon-192.svg",
