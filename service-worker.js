@@ -1,9 +1,9 @@
-const CACHE_NAME="rml-sales-visit-v0-11-2-remove-account-version";
+const CACHE_NAME="rml-sales-visit-v0-11-3-customer-assignment";
 const APP_SHELL=[
  "./",
  "./index.html",
  "./style.css",
- "./app-v0-11-0.js",
+ "./app-v0-11-3.js",
  "./customers-v0-10-3.js",
  "./manifest.webmanifest",
  "./icon-192.svg",
