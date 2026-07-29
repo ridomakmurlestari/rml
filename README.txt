@@ -18,4 +18,9 @@ V0.10.3 FORCE REFRESH
 - Login harus memanggil RPC app_login, bukan lookup_login_email.
 
 
-v0.10.5: Memperbaiki ubah password. Verifikasi password lama dilakukan langsung oleh Supabase, bukan data lokal browser.
+v0.10.6: Memperbaiki ubah password. Verifikasi password lama dilakukan langsung oleh Supabase, bukan data lokal browser.
+
+PERUBAHAN v0.10.6
+- Nama login Administrator diubah menjadi Admin.
+- Untuk database yang sudah aktif, jalankan supabase/rename-administrator-to-admin.sql sebagai query baru.
+- Password admin tetap sama dan seluruh riwayat tetap terhubung melalui account_key admin@rml.app.

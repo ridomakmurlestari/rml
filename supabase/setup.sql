@@ -210,7 +210,7 @@ values
  ('rini@rml.app','rini','Rini','085668027045',extensions.crypt('085668027045',extensions.gen_salt('bf')),'sales',true),
  ('lisna@rml.app','lisna','Lisna','085218600582',extensions.crypt('085218600582',extensions.gen_salt('bf')),'sales',true),
  ('septino@rml.app','septino','Septino','08116946999',extensions.crypt('08116946999',extensions.gen_salt('bf')),'sales',true),
- ('admin@rml.app','administrator','Administrator','082284879722',extensions.crypt('082284879722',extensions.gen_salt('bf')),'admin',true)
+ ('admin@rml.app','admin','Admin','082284879722',extensions.crypt('082284879722',extensions.gen_salt('bf')),'admin',true)
 on conflict(account_key) do update set login_name=excluded.login_name,display_name=excluded.display_name,phone=excluded.phone,role=excluded.role;
 
 -- Verifikasi: hasil harus menampilkan 4 akun.

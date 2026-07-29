@@ -17,7 +17,7 @@ LOGIN AWAL
 Rini / 085668027045
 Lisna / 085218600582
 Septino / 08116946999
-Administrator / 082284879722
+Admin / 082284879722
 
 Setiap akun wajib mengganti password pada login pertama.
 Admin dapat mengubah nama, nomor HP, penugasan area, dan reset password dari aplikasi.
