@@ -457,11 +457,31 @@
         <option value="">Semua Sales</option>
       </select>
     </div>
+    <div class="history-filter-field">
+      <label for="historyAreaFilter">Area</label>
+      <select id="historyAreaFilter" onchange="handleHistoryAreaChange()">
+        <option value="">Semua Area</option>
+      </select>
+    </div>
+    <div class="history-filter-field">
+      <label for="historyOutletFilter">Outlet</label>
+      <select id="historyOutletFilter" onchange="renderHistory()">
+        <option value="">Semua Outlet</option>
+      </select>
+    </div>
     <div id="historyCustomDateWrap" class="history-custom-dates hidden">
       <div class="history-filter-field"><label for="historyDateFrom">Dari</label><input id="historyDateFrom" type="date" onchange="renderHistory()"></div>
       <div class="history-filter-field"><label for="historyDateTo">Sampai</label><input id="historyDateTo" type="date" onchange="renderHistory()"></div>
     </div>
     <div id="historyFilterSummary" class="history-filter-summary"></div>
+    <div id="adminHistoryDeleteToolbar" class="history-delete-toolbar hidden">
+      <button id="historySelectModeBtn" class="secondary compact" type="button" onclick="toggleHistorySelectMode()">Pilih Riwayat</button>
+      <div id="historyBulkDeleteActions" class="history-bulk-delete hidden">
+        <span id="historySelectedCount">0 dipilih</span>
+        <button class="secondary compact" type="button" onclick="cancelHistorySelectMode()">Batal</button>
+        <button id="historyBulkDeleteBtn" class="danger compact" type="button" onclick="deleteSelectedVisits()">Hapus (0)</button>
+      </div>
+    </div>
   </div>
 
   <div id="historyList" class="history-list"></div>
@@ -480,6 +500,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="customers-v0-10-3.js"></script>
-<script src="app-v1-0-1.js"></script>
+<script src="app-v1-0-2.js"></script>
 </body>
 </html>

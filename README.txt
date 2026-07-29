@@ -27,3 +27,14 @@ Tambahan v1.0.0:
 Perubahan v1.0.1:
 - Export data pelanggan disederhanakan menjadi 6 kolom: Kode Outlet, Nama Outlet, Area, Sales, Aktif, dan Status.
 - Email sales, pemilik, dan kolom lain tidak lagi ikut diekspor.
+
+
+Perubahan v1.0.2:
+- Admin dapat menghapus satu riwayat kunjungan dengan konfirmasi.
+- Admin dapat memilih dan menghapus beberapa riwayat sekaligus.
+- Filter riwayat Admin ditambah berdasarkan Area dan Outlet.
+- Penghapusan permanen dilakukan di Supabase dan penyimpanan lokal.
+- Sales tidak memiliki tombol hapus.
+
+PENTING:
+Jalankan file supabase/add-admin-delete-visits-v1-0-2.sql satu kali di Supabase SQL Editor sebelum memakai tombol Hapus.
