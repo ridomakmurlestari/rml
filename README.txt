@@ -16,3 +16,6 @@ V0.10.3 FORCE REFRESH
 - Aset JavaScript diberi nama baru untuk memastikan Vercel/browser tidak memakai file lama.
 - Service worker lama otomatis dihapus sementara untuk pengujian login.
 - Login harus memanggil RPC app_login, bukan lookup_login_email.
+
+
+v0.10.5: Memperbaiki ubah password. Verifikasi password lama dilakukan langsung oleh Supabase, bukan data lokal browser.

@@ -99,7 +99,7 @@ begin
   if v_user.id is null or v_user.password_hash <> extensions.crypt(p_password,v_user.password_hash) then
     raise exception 'Nama atau password salah';
   end if;
-  delete from public.app_sessions where expires_at<=now();
+  delete from public.app_sessions s where s.expires_at<=now();
   v_token:=encode(extensions.gen_random_bytes(32),'hex'); v_exp:=now()+interval '30 days';
   insert into public.app_sessions(user_id,token_hash,expires_at)
   values(v_user.id,encode(extensions.digest(v_token,'sha256'),'hex'),v_exp);
