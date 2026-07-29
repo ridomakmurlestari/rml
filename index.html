@@ -67,9 +67,9 @@
     <h1>Sales Visit</h1>
     <p>Master pelanggan dan kunjungan sales</p>
     <label>Nama</label>
-    <input id="loginName" type="text" value="Rini" autocomplete="username">
+    <input id="loginName" type="text" value="" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false">
     <label>Password</label>
-    <input id="password" type="password" value="085668027045" autocomplete="current-password">
+    <div class="password-input-wrap"><input id="password" type="password" value="" autocomplete="new-password"><button type="button" class="password-toggle" id="passwordToggle" aria-label="Tampilkan password" onclick="toggleLoginPassword()">👁</button></div>
     <button class="primary" onclick="login()">Masuk</button>
     <div class="demo">
       <b>Login menggunakan nama dan password</b>
@@ -451,6 +451,6 @@
 
 
 <script src="customers-v0-10-3.js"></script>
-<script src="app-v0-10-7.js"></script>
+<script src="app-v0-10-8.js"></script>
 </body>
 </html>
