@@ -1,4 +1,4 @@
-const CACHE_NAME="rml-sales-visit-v0-11-0-finish-area-logout";
+const CACHE_NAME="rml-sales-visit-v0-11-2-remove-account-version";
 const APP_SHELL=[
  "./",
  "./index.html",
