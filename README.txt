@@ -1,4 +1,4 @@
-RML Sales Visit v1.0.0 Stable
+RML Sales Visit v1.0.1 Stable
 
 RML Sales Visit v0.11.0 - Selesai Tugas Area & Logout Terpisah
 
@@ -22,3 +22,8 @@ Tambahan v1.0.0:
 - Restore data dengan validasi file dan konfirmasi.
 - Backup mencakup pelanggan, penugasan, pengaturan akun tanpa password, area, dan riwayat kunjungan.
 - Password dan sesi login tidak dimasukkan ke file backup.
+
+
+Perubahan v1.0.1:
+- Export data pelanggan disederhanakan menjadi 6 kolom: Kode Outlet, Nama Outlet, Area, Sales, Aktif, dan Status.
+- Email sales, pemilik, dan kolom lain tidak lagi ikut diekspor.
