@@ -434,7 +434,10 @@
 <section id="historyView" class="view hidden">
   <div class="title-row">
     <div><h3>Riwayat Kunjungan</h3><p>Daftar aktivitas sales</p></div>
-    <button id="exportPdfBtn" class="secondary compact" onclick="exportPDF()">Export PDF</button>
+    <div class="title-actions">
+      <button id="historyRefreshBtn" class="secondary compact" type="button" onclick="refreshHistoryFromServer()">Refresh</button>
+      <button id="exportPdfBtn" class="secondary compact" onclick="exportPDF()">Export PDF</button>
+    </div>
   </div>
 
   <div id="adminHistorySalesFilterWrap" class="history-filter-card hidden">
@@ -500,6 +503,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="customers-v0-10-3.js"></script>
-<script src="app-v1-0-5.js"></script>
+<script src="app-v1-0-6.js"></script>
 </body>
 </html>
