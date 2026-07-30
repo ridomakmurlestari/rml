@@ -624,6 +624,52 @@ function normalizeOrderNote(value){
  const lines=orderLines(value);
  return lines.map(line=>`• ${line}`).join("\n");
 }
+function getDeliveryItems(visit){
+ if(!visit||visit.status!=="Ada Order")return [];
+ const existing=Array.isArray(visit.deliveryItems)?visit.deliveryItems:[];
+ const lines=orderLines(visit.note);
+ return lines.map((text,index)=>{
+   const old=existing[index];
+   return {text,delivered:Boolean(old&&old.text===text&&old.delivered)};
+ });
+}
+function pendingDeliveryItemsForCustomer(customerNo){
+ return visitCache
+   .filter(v=>String(v.customerNo)===String(customerNo)&&v.status==="Ada Order")
+   .flatMap(v=>getDeliveryItems(v).filter(item=>!item.delivered).map(item=>({...item,visitId:v.id,date:v.checkOutAt||v.createdAt})));
+}
+function renderPendingDeliveryReminder(customerNo){
+ const box=document.getElementById("pendingDeliveryReminder");
+ const list=document.getElementById("pendingDeliveryReminderList");
+ if(!box||!list)return;
+ const pending=pendingDeliveryItemsForCustomer(customerNo);
+ box.classList.toggle("hidden",pending.length===0);
+ list.innerHTML=pending.length?`<ul>${pending.map(item=>`<li>${esc(item.text)} <small>(${esc(formatOnlyDate(item.date))})</small></li>`).join("")}</ul>`:"";
+}
+function deliveryStatusHtml(visit,editable=false){
+ if(visit.status!=="Ada Order")return "";
+ const items=getDeliveryItems(visit);
+ if(!items.length)return "";
+ if(editable){
+   return `<div class="delivery-admin-box"><strong>Status Pengiriman</strong>${items.map((item,index)=>`<label class="delivery-item-row"><span>${esc(item.text)}</span><span><input type="checkbox" ${item.delivered?"checked":""} onchange="setDeliveryItemStatus('${esc(visit.id)}',${index},this.checked)"> Kirim</span></label>`).join("")}</div>`;
+ }
+ return `<div class="delivery-status-readonly"><strong>Status Pengiriman</strong><ul>${items.map(item=>`<li>${esc(item.text)} — ${item.delivered?"✓ Sudah dikirim":"✕ Belum dikirim"}</li>`).join("")}</ul></div>`;
+}
+async function setDeliveryItemStatus(visitId,index,checked){
+ if(!currentUser||currentUser.role!=="admin")return toast("Hanya admin yang dapat mengubah status pengiriman");
+ await refreshVisitCache();
+ const visit=visitCache.find(v=>String(v.id)===String(visitId));
+ if(!visit)return toast("Data kunjungan tidak ditemukan");
+ const items=getDeliveryItems(visit);
+ if(!items[index])return;
+ items[index].delivered=Boolean(checked);
+ const updated={...visit,deliveryItems:items,lastDeliveryEditedAt:new Date().toISOString(),lastDeliveryEditedBy:currentUser.email};
+ try{
+   await saveVisitOffline(updated);
+   await refreshVisitCache();
+   toast("Status pengiriman disimpan");
+ }catch(e){console.error(e);toast("Gagal menyimpan status pengiriman");}
+}
 function formatVisitNoteHtml(status,value){
  if(status!=="Ada Order")return esc(value||"-").replace(/\n/g,"<br>");
  const lines=orderLines(value);
@@ -705,6 +751,8 @@ async function openVisitDetailModal(salesEmail,status){
        <small>${fieldLabel}</small>
        <div class="visit-note-content">${formatVisitNoteHtml(v.status,v.note)}</div>
      </div>
+     ${v.paymentStatus?`<div class="pills"><span class="pill payment-pill">Pembayaran: ${esc(v.paymentStatus)}</span></div>`:""}
+     ${deliveryStatusHtml(v,true)}
      ${formatAuditHistory(v.editHistory)}
      ${canEditVisitNote(v)?`<button class="secondary compact edit-visit-button" onclick="openEditVisitModal('${esc(v.id)}')">Edit ${esc(fieldLabel)}</button>`:""}
    </div>`;
@@ -1414,6 +1462,8 @@ function showCheckOutPanel(active){
  document.getElementById("activeCheckInPhoto").src=active.checkInPhoto;
  document.getElementById("visitStatus").value="";
  document.getElementById("visitNote").value="";
+ document.querySelectorAll('input[name="visitPaymentStatus"]').forEach(el=>el.checked=false);
+ renderPendingDeliveryReminder(active.customerNo);
  updateVisitNoteField();
 }
 function updateVisitNoteField(){
@@ -1455,6 +1505,8 @@ async function confirmCheckOut(){
 
  const noteInput=document.getElementById("visitNote");
  const note=status==="Ada Order"?normalizeOrderNote(noteInput.value):noteInput.value.trim();
+ const paymentStatus=document.querySelector('input[name="visitPaymentStatus"]:checked')?.value||"";
+ if(!paymentStatus)return toast("Pilih status pembayaran: Bayar atau Tidak Bayar");
  if(!note){
    const message=status==="Ada Order"
      ?"Orderan wajib diisi."
@@ -1471,6 +1523,8 @@ async function confirmCheckOut(){
    ...active,
    status,
    note,
+   paymentStatus,
+   deliveryItems:status==="Ada Order"?orderLines(note).map(text=>({text,delivered:false})):[],
    checkOutAt:checkOut.toISOString(),
    durationMinutes:calculateDurationMinutes(active.checkInAt,checkOut.toISOString()),
    visitState:"completed",
@@ -1682,6 +1736,7 @@ async function renderHistory(){
    <div class="pills">
      <span class="pill">${esc(v.status||"-")}</span>
      <span class="pill">${esc(v.salesName)}</span>
+     ${v.paymentStatus?`<span class="pill payment-pill">${esc(v.paymentStatus)}</span>`:""}
      <span class="pill">${esc(String(v.durationMinutes??calculateDurationMinutes(v.checkInAt,v.checkOutAt)))} menit</span>
      <span class="sync-badge ${getSyncClass(v.syncStatus)}">${getSyncLabel(v.syncStatus)}</span>
    </div>
@@ -1695,6 +1750,7 @@ async function renderHistory(){
      <small>${esc(getVisitDetailFieldLabel(v.status))}</small>
      <div class="visit-note-content">${formatVisitNoteHtml(v.status,v.note||"Tanpa catatan")}</div>
    </div>
+   ${deliveryStatusHtml(v,currentUser.role==="admin")}
    ${formatAuditHistory(v.editHistory)}
    <div class="history-card-actions">
      ${canEditVisitNote(v)?`<button class="secondary compact edit-visit-button" onclick="openEditVisitModal('${esc(v.id)}')">Edit ${esc(getVisitDetailFieldLabel(v.status))}</button>`:""}
@@ -1759,7 +1815,9 @@ async function exportPDF(){
        checkOut:formatVisitDateTime(v.checkOutAt||v.createdAt),
        duration:`${v.durationMinutes??calculateDurationMinutes(v.checkInAt,v.checkOutAt)} menit`,
        detailLabel:getVisitDetailFieldLabel(v.status),
-       note:v.status==="Ada Order"?normalizeOrderNote(v.note):(v.note||"-")
+       note:v.status==="Ada Order"?normalizeOrderNote(v.note):(v.note||"-"),
+       paymentStatus:v.paymentStatus||"-",
+       deliveryItems:getDeliveryItems(v)
      }))
    };
    localStorage.setItem("rml_pdf_preview_data",JSON.stringify(payload));

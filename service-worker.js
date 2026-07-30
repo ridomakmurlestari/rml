@@ -1,4 +1,4 @@
-const CACHE_NAME="rml-sales-visit-v1-1-0-mobile-preview-edit-time";
+const CACHE_NAME="rml-sales-visit-v1-2-0-pending-delivery-payment";
 const APP_SHELL=[
  "./",
  "./index.html",

@@ -340,6 +340,11 @@
 
       <img id="activeCheckInPhoto" class="saved-checkin-photo" alt="Foto check in">
 
+      <div id="pendingDeliveryReminder" class="pending-delivery-reminder hidden">
+        <strong>⚠ Barang Belum Terkirim</strong>
+        <div id="pendingDeliveryReminderList"></div>
+      </div>
+
       <div class="activity-box">
         <strong>Aktivitas Sales</strong>
         <span>Menawarkan barang</span>
@@ -358,6 +363,12 @@
       <div id="visitNoteContainer" class="hidden">
         <label id="visitNoteLabel" for="visitNote">Catatan *</label>
         <textarea id="visitNote" rows="4" placeholder="Tuliskan catatan..." required></textarea>
+      </div>
+
+      <div class="payment-status-box">
+        <strong>Status Pembayaran *</strong>
+        <label><input type="radio" name="visitPaymentStatus" value="Bayar"> Bayar</label>
+        <label><input type="radio" name="visitPaymentStatus" value="Tidak Bayar"> Tidak Bayar</label>
       </div>
 
       <button class="primary" onclick="confirmCheckOut()">Check Out & Simpan</button>

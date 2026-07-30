@@ -486,3 +486,19 @@
 .order-bullet-list{margin:4px 0 0;padding-left:18px}.order-bullet-list li{margin:0 0 3px;line-height:1.35}.visit-note-content{white-space:normal}.visit-note-content .order-bullet-list{margin-top:2px}
 
 .history-last-edited{font-weight:700;color:#8a5a00;background:#fff7df;border-radius:8px;padding:5px 8px;margin-top:4px}
+
+/* v1.2 pending delivery + payment */
+.pending-delivery-reminder{margin:14px 0;padding:14px;border:1px solid #f0b429;border-radius:12px;background:#fff8e6}
+.pending-delivery-reminder strong{display:block;margin-bottom:8px;color:#8a5a00}
+.pending-delivery-reminder ul{margin:0;padding-left:20px}
+.pending-delivery-reminder li{margin:5px 0}
+.payment-status-box{margin:14px 0;padding:12px;border:1px solid var(--border,#d9dee7);border-radius:12px}
+.payment-status-box strong{display:block;margin-bottom:8px}
+.payment-status-box label{display:inline-flex;align-items:center;gap:6px;margin-right:18px}
+.delivery-admin-box{margin-top:12px;padding:12px;border:1px solid #d9dee7;border-radius:12px;background:#f8fafc}
+.delivery-admin-box>strong{display:block;margin-bottom:8px}
+.delivery-item-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid #e8ebf0}
+.delivery-item-row:last-child{border-bottom:0}
+.delivery-status-readonly{margin-top:10px;padding:10px;border-radius:10px;background:#f6f7f9}
+.delivery-status-readonly ul{margin:6px 0 0;padding-left:20px}
+.payment-pill{font-weight:600}
