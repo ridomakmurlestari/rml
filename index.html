@@ -356,13 +356,15 @@
       </select>
 
       <div id="visitOrderContainer" class="hidden order-entry-section">
-        <div class="order-entry-heading">
-          <label>Daftar Order *</label>
-          <button class="secondary compact" type="button" onclick="addVisitOrderRow()">+ Tambah Barang</button>
+        <label>Input Order *</label>
+        <div class="order-quick-input">
+          <div><label for="visitOrderName">Nama Barang</label><input id="visitOrderName" type="text" placeholder="Contoh: Paramex" autocomplete="off"></div>
+          <div><label for="visitOrderQty">Jumlah</label><input id="visitOrderQty" type="text" placeholder="Contoh: 2 box" autocomplete="off" onkeydown="handleOrderInputKey(event,'visitOrderRows')"></div>
         </div>
-        <div class="order-entry-table-wrap">
-          <table class="order-entry-table">
-            <thead><tr><th>Barang</th><th>Jumlah</th><th class="order-action-col"></th></tr></thead>
+        <small class="order-input-hint">Setelah mengisi jumlah, tekan Enter. Barang otomatis masuk ke tabel di bawah.</small>
+        <div class="order-entry-table-wrap order-result-wrap hidden">
+          <table class="order-entry-table order-result-table">
+            <thead><tr><th>No</th><th>Barang</th><th>Jumlah</th><th class="order-action-col"></th></tr></thead>
             <tbody id="visitOrderRows"></tbody>
           </table>
         </div>
@@ -397,13 +399,15 @@
     <select id="outsideOrderArea" onchange="fillOutsideOrderCustomers()"></select>
     <label>Pelanggan *</label>
     <select id="outsideOrderCustomer"></select>
-    <div class="order-entry-heading outside-order-heading">
-      <label>Daftar Order *</label>
-      <button class="secondary compact" type="button" onclick="addOutsideOrderRow()">+ Tambah Barang</button>
+    <div class="outside-order-heading"><label>Input Order *</label></div>
+    <div class="order-quick-input">
+      <div><label for="outsideOrderName">Nama Barang</label><input id="outsideOrderName" type="text" placeholder="Contoh: Paramex" autocomplete="off"></div>
+      <div><label for="outsideOrderQty">Jumlah</label><input id="outsideOrderQty" type="text" placeholder="Contoh: 2 box" autocomplete="off" onkeydown="handleOrderInputKey(event,'outsideOrderRows')"></div>
     </div>
-    <div class="order-entry-table-wrap">
-      <table class="order-entry-table">
-        <thead><tr><th>Barang</th><th>Jumlah</th><th class="order-action-col"></th></tr></thead>
+    <small class="order-input-hint">Setelah mengisi jumlah, tekan Enter. Barang otomatis masuk ke tabel di bawah.</small>
+    <div class="order-entry-table-wrap order-result-wrap hidden">
+      <table class="order-entry-table order-result-table">
+        <thead><tr><th>No</th><th>Barang</th><th>Jumlah</th><th class="order-action-col"></th></tr></thead>
         <tbody id="outsideOrderRows"></tbody>
       </table>
     </div>
@@ -534,6 +538,6 @@
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.4/dist/jspdf.plugin.autotable.min.js"></script>
 <script src="customers-v0-10-3.js"></script>
-<script src="app-v1-2-0-stage1.js"></script>
+<script src="app-v1-2-0-auto-order.js"></script>
 </body>
 </html>

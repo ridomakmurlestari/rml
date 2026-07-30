@@ -1,9 +1,9 @@
-const CACHE_NAME="rml-sales-visit-v1-2-0-stage1-order-payment";
+const CACHE_NAME="rml-sales-visit-v1-2-0-auto-order-input";
 const APP_SHELL=[
  "./",
  "./index.html",
  "./style.css","./pdf-preview.html","./pdf-preview.css","./pdf-preview.js",
- "./app-v1-2-0-stage1.js",
+ "./app-v1-2-0-auto-order.js",
  "./customers-v0-10-3.js",
  "./manifest.webmanifest",
  "./icon-192.svg",
