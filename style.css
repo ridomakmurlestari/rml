@@ -502,3 +502,15 @@
 .delivery-status-readonly{margin-top:10px;padding:10px;border-radius:10px;background:#f6f7f9}
 .delivery-status-readonly ul{margin:6px 0 0;padding-left:20px}
 .payment-pill{font-weight:600}
+
+/* v1.2.1: status kirim digabung langsung dengan setiap item order */
+.order-delivery-list{margin-top:4px;border-top:1px solid #e7ebef}
+.order-delivery-row{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid #edf0f3}
+.order-delivery-row:last-child{border-bottom:0}
+.order-delivery-item{min-width:0;line-height:1.35;overflow-wrap:anywhere}
+.order-delivery-control{display:inline-flex;align-items:center;gap:5px;white-space:nowrap;font-weight:700;font-size:12px}
+.order-delivery-control input{width:18px;height:18px;margin:0}
+.order-delivery-state{white-space:nowrap;font-size:11px;font-weight:700;padding:3px 7px;border-radius:999px}
+.order-delivery-state.delivered{background:#e7f7ef;color:#147a4b}
+.order-delivery-state.pending{background:#fff2df;color:#9b5c00}
+@media(max-width:480px){.order-delivery-row{gap:7px}.order-delivery-item{font-size:13px}.order-delivery-state{font-size:10px;padding:3px 6px}}

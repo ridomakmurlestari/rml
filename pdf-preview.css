@@ -14,3 +14,5 @@
 }
 @media print{body{background:#fff}.preview-toolbar{display:none}.page-wrap{padding:0}.report-sheet{box-shadow:none;border-radius:0;max-width:none;padding:8mm}.table-scroll{overflow:visible}table{min-width:0;font-size:8pt}th{position:static}.summary-grid article{break-inside:avoid}footer{position:fixed;bottom:4mm;right:8mm}}
 .order-bullet-list{margin:4px 0 0;padding-left:17px}.order-bullet-list li{margin:0 0 2px;line-height:1.25}
+
+.pdf-order-list{margin-top:4px}.pdf-order-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;padding:3px 0;border-bottom:1px solid #e8ecef}.pdf-order-row:last-child{border-bottom:0}.pdf-order-row strong{white-space:nowrap;font-size:10px}.pdf-payment{margin-top:6px;font-weight:700;font-size:10px}

@@ -646,32 +646,50 @@ function renderPendingDeliveryReminder(customerNo){
  box.classList.toggle("hidden",pending.length===0);
  list.innerHTML=pending.length?`<ul>${pending.map(item=>`<li>${esc(item.text)} <small>(${esc(formatOnlyDate(item.date))})</small></li>`).join("")}</ul>`:"";
 }
-function deliveryStatusHtml(visit,editable=false){
- if(visit.status!=="Ada Order")return "";
+function orderWithDeliveryHtml(visit,editable=false){
+ if(!visit||visit.status!=="Ada Order")return "";
  const items=getDeliveryItems(visit);
  if(!items.length)return "";
- if(editable){
-   return `<div class="delivery-admin-box"><strong>Status Pengiriman</strong>${items.map((item,index)=>`<label class="delivery-item-row"><span>${esc(item.text)}</span><span><input type="checkbox" ${item.delivered?"checked":""} onchange="setDeliveryItemStatus('${esc(visit.id)}',${index},this.checked)"> Kirim</span></label>`).join("")}</div>`;
- }
- return `<div class="delivery-status-readonly"><strong>Status Pengiriman</strong><ul>${items.map(item=>`<li>${esc(item.text)} — ${item.delivered?"✓ Sudah dikirim":"✕ Belum dikirim"}</li>`).join("")}</ul></div>`;
+ return `<div class="order-delivery-list">${items.map((item,index)=>{
+   const control=editable
+     ? `<label class="order-delivery-control"><input type="checkbox" ${item.delivered?"checked":""} onchange="setDeliveryItemStatus('${esc(visit.id)}',${index},this.checked,this)"><span>Kirim</span></label>`
+     : `<span class="order-delivery-state ${item.delivered?"delivered":"pending"}">${item.delivered?"✓ Dikirim":"Belum dikirim"}</span>`;
+   return `<div class="order-delivery-row"><span class="order-delivery-item">• ${esc(item.text)}</span>${control}</div>`;
+ }).join("")}</div>`;
 }
-async function setDeliveryItemStatus(visitId,index,checked){
+async function setDeliveryItemStatus(visitId,index,checked,inputEl){
  if(!currentUser||currentUser.role!=="admin")return toast("Hanya admin yang dapat mengubah status pengiriman");
+ if(inputEl)inputEl.disabled=true;
  await refreshVisitCache();
  const visit=visitCache.find(v=>String(v.id)===String(visitId));
- if(!visit)return toast("Data kunjungan tidak ditemukan");
+ if(!visit){if(inputEl)inputEl.disabled=false;return toast("Data kunjungan tidak ditemukan");}
  const items=getDeliveryItems(visit);
- if(!items[index])return;
+ if(!items[index]){if(inputEl)inputEl.disabled=false;return;}
  items[index].delivered=Boolean(checked);
  const updated={...visit,deliveryItems:items,lastDeliveryEditedAt:new Date().toISOString(),lastDeliveryEditedBy:currentUser.email};
  try{
    await saveVisitOffline(updated);
-   await refreshVisitCache();
-   toast("Status pengiriman disimpan");
- }catch(e){console.error(e);toast("Gagal menyimpan status pengiriman");}
+   const synced=await syncPendingVisits({silent:true,autoRetry:true});
+   if(synced){
+     await pullRemoteVisits();
+     await refreshVisitCache();
+     toast("Status pengiriman berhasil disinkronkan");
+   }else{
+     await refreshVisitCache();
+     toast("Status tersimpan di perangkat dan akan disinkronkan otomatis");
+   }
+   await renderHistory();
+ }catch(e){
+   console.error(e);
+   if(inputEl){inputEl.checked=!checked;inputEl.disabled=false;}
+   toast("Gagal menyimpan status pengiriman");
+   return;
+ }
+ if(inputEl)inputEl.disabled=false;
 }
-function formatVisitNoteHtml(status,value){
+function formatVisitNoteHtml(status,value,visit=null,editable=false){
  if(status!=="Ada Order")return esc(value||"-").replace(/\n/g,"<br>");
+ if(visit)return orderWithDeliveryHtml(visit,editable);
  const lines=orderLines(value);
  if(!lines.length)return "-";
  return `<ul class="order-bullet-list">${lines.map(line=>`<li>${esc(line)}</li>`).join("")}</ul>`;
@@ -749,10 +767,9 @@ async function openVisitDetailModal(salesEmail,status){
      </div>
      <div class="visit-detail-note">
        <small>${fieldLabel}</small>
-       <div class="visit-note-content">${formatVisitNoteHtml(v.status,v.note)}</div>
+       <div class="visit-note-content">${formatVisitNoteHtml(v.status,v.note,v,currentUser.role==="admin")}</div>
      </div>
      ${v.paymentStatus?`<div class="pills"><span class="pill payment-pill">Pembayaran: ${esc(v.paymentStatus)}</span></div>`:""}
-     ${deliveryStatusHtml(v,true)}
      ${formatAuditHistory(v.editHistory)}
      ${canEditVisitNote(v)?`<button class="secondary compact edit-visit-button" onclick="openEditVisitModal('${esc(v.id)}')">Edit ${esc(fieldLabel)}</button>`:""}
    </div>`;
@@ -1748,9 +1765,8 @@ async function renderHistory(){
    </div>
    <div class="history-note-block">
      <small>${esc(getVisitDetailFieldLabel(v.status))}</small>
-     <div class="visit-note-content">${formatVisitNoteHtml(v.status,v.note||"Tanpa catatan")}</div>
+     <div class="visit-note-content">${formatVisitNoteHtml(v.status,v.note||"Tanpa catatan",v,currentUser.role==="admin")}</div>
    </div>
-   ${deliveryStatusHtml(v,currentUser.role==="admin")}
    ${formatAuditHistory(v.editHistory)}
    <div class="history-card-actions">
      ${canEditVisitNote(v)?`<button class="secondary compact edit-visit-button" onclick="openEditVisitModal('${esc(v.id)}')">Edit ${esc(getVisitDetailFieldLabel(v.status))}</button>`:""}
