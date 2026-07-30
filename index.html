@@ -355,9 +355,30 @@
         <option value="Tidak Order">Tidak Order</option>
       </select>
 
+      <div id="visitOrderContainer" class="hidden order-entry-section">
+        <div class="order-entry-heading">
+          <label>Daftar Order *</label>
+          <button class="secondary compact" type="button" onclick="addVisitOrderRow()">+ Tambah Barang</button>
+        </div>
+        <div class="order-entry-table-wrap">
+          <table class="order-entry-table">
+            <thead><tr><th>Barang</th><th>Jumlah</th><th class="order-action-col"></th></tr></thead>
+            <tbody id="visitOrderRows"></tbody>
+          </table>
+        </div>
+      </div>
+
       <div id="visitNoteContainer" class="hidden">
         <label id="visitNoteLabel" for="visitNote">Catatan *</label>
         <textarea id="visitNote" rows="4" placeholder="Tuliskan catatan..." required></textarea>
+      </div>
+
+      <div id="paymentStatusContainer" class="payment-status-section">
+        <label>Status Pembayaran *</label>
+        <div class="payment-radio-grid">
+          <label class="payment-radio"><input type="radio" name="visitPaymentStatus" value="Bayar"><span>Bayar</span></label>
+          <label class="payment-radio"><input type="radio" name="visitPaymentStatus" value="Tidak Bayar"><span>Tidak Bayar</span></label>
+        </div>
       </div>
 
       <button class="primary" onclick="confirmCheckOut()">Check Out & Simpan</button>
@@ -376,8 +397,16 @@
     <select id="outsideOrderArea" onchange="fillOutsideOrderCustomers()"></select>
     <label>Pelanggan *</label>
     <select id="outsideOrderCustomer"></select>
-    <label>Orderan *</label>
-    <textarea id="outsideOrderNote" rows="7" placeholder="Masukkan orderan pelanggan..."></textarea>
+    <div class="order-entry-heading outside-order-heading">
+      <label>Daftar Order *</label>
+      <button class="secondary compact" type="button" onclick="addOutsideOrderRow()">+ Tambah Barang</button>
+    </div>
+    <div class="order-entry-table-wrap">
+      <table class="order-entry-table">
+        <thead><tr><th>Barang</th><th>Jumlah</th><th class="order-action-col"></th></tr></thead>
+        <tbody id="outsideOrderRows"></tbody>
+      </table>
+    </div>
     <div class="page-actions">
       <button class="secondary" type="button" onclick="closeOutsideAreaOrder()">Batal</button>
       <button class="primary" type="button" onclick="saveOutsideAreaOrder()">Simpan Order</button>
@@ -505,6 +534,6 @@
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.4/dist/jspdf.plugin.autotable.min.js"></script>
 <script src="customers-v0-10-3.js"></script>
-<script src="app-v1-1-0.js"></script>
+<script src="app-v1-2-0-stage1.js"></script>
 </body>
 </html>
