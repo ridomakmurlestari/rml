@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#0f766e">
 <title>RML Sales Visit</title>
-<link rel="stylesheet" href="style-v1-3-8.css">
+<link rel="stylesheet" href="style-v1-3-9.css">
   <meta name="theme-color" content="#0f766e">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -588,13 +588,13 @@
 </section>
 </main>
 
-<nav class="bottom-nav">
-  <button onclick="showDashboard()">⌂<span>Dashboard</span></button>
-  <button onclick="showCustomers()">▦<span id="customersNavLabel">Pelanggan</span></button>
-  <button id="priceListNavBtn" onclick="showPriceList()">₨<span>Daftar Harga</span></button>
-  <button onclick="showHistory()">◷<span>Riwayat</span></button>
-  <button id="assignmentNavBtn" class="hidden" onclick="showAreaAssignments()">⚙<span>Pengaturan</span></button>
-  <button id="accountNavBtn" class="hidden" onclick="showAccount()">♙<span>Akun</span></button>
+<nav class="bottom-nav" aria-label="Navigasi utama">
+  <button onclick="showDashboard()"><span class="nav-icon" aria-hidden="true">⌂</span><span class="nav-label">Dashboard</span></button>
+  <button onclick="showCustomers()"><span class="nav-icon" aria-hidden="true">▦</span><span id="customersNavLabel" class="nav-label">Pelanggan</span></button>
+  <button id="priceListNavBtn" onclick="showPriceList()"><span class="nav-icon" aria-hidden="true">📖</span><span class="nav-label">Daftar Harga</span></button>
+  <button onclick="showHistory()"><span class="nav-icon" aria-hidden="true">◷</span><span class="nav-label">Riwayat</span></button>
+  <button id="assignmentNavBtn" class="hidden" onclick="showAreaAssignments()"><span class="nav-icon" aria-hidden="true">⚙</span><span class="nav-label">Pengaturan</span></button>
+  <button id="accountNavBtn" class="hidden" onclick="showAccount()"><span class="nav-icon" aria-hidden="true">♙</span><span class="nav-label">Akun</span></button>
 </nav>
 </section>
 
@@ -603,6 +603,6 @@
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.4/dist/jspdf.plugin.autotable.min.js"></script>
 <script src="customers-v0-10-3.js"></script>
-<script src="app-v1-3-8.js"></script>
+<script src="app-v1-3-9.js"></script>
 </body>
 </html>
