@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#0f766e">
 <title>RML Sales Visit</title>
-<link rel="stylesheet" href="style-v1-3-0.css">
+<link rel="stylesheet" href="style-v1-3-2.css">
   <meta name="theme-color" content="#0f766e">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -471,18 +471,22 @@
     <div class="product-assignment-controls">
       <select id="productSalesFilter" onchange="renderProductAssignments()"></select>
       <select id="productAssignCategoryFilter" onchange="renderProductAssignments()"><option value="">Semua Kategori</option></select>
+      <input id="productAssignSearchInput" placeholder="Cari barang untuk dibagikan..." oninput="renderProductAssignments()">
       <button class="secondary compact" type="button" onclick="setAllVisibleProductAssignments(true)">Pilih Semua</button>
       <button class="secondary compact" type="button" onclick="setAllVisibleProductAssignments(false)">Hapus Semua</button>
     </div>
+    <div id="productAssignmentSummary" class="product-list-summary"></div>
     <div id="productAssignmentList" class="product-assignment-list"></div>
   </div>
 
   <div class="filters product-price-filters">
-    <input id="productSearchInput" placeholder="Cari kode atau nama barang..." oninput="renderPriceList()">
-    <select id="productCategoryFilter" onchange="renderPriceList()"><option value="">Semua Kategori</option></select>
+    <input id="productSearchInput" placeholder="Cari kode atau nama barang..." oninput="handleProductFilterChange()">
+    <select id="productCategoryFilter" onchange="handleProductFilterChange()"><option value="">Semua Kategori</option></select>
   </div>
+  <div id="productPriceSummary" class="product-list-summary"></div>
   <div id="productPriceList" class="product-price-list"></div>
   <div id="productPriceEmpty" class="empty hidden">Barang tidak ditemukan.</div>
+  <button id="productLoadMoreBtn" class="secondary product-load-more hidden" type="button" onclick="loadMoreProducts()">Muat lebih banyak</button>
 </section>
 
 <section id="historyView" class="view hidden">
@@ -560,6 +564,6 @@
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.4/dist/jspdf.plugin.autotable.min.js"></script>
 <script src="customers-v0-10-3.js"></script>
-<script src="app-v1-3-0.js"></script>
+<script src="app-v1-3-2.js"></script>
 </body>
 </html>
