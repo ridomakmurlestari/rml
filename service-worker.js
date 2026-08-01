@@ -1,6 +1,6 @@
-const CACHE_NAME="rml-sales-visit-v1-5-0-bulk-history";
+const CACHE_NAME="rml-sales-visit-v1-5-1-navigation-icons";
 const APP_SHELL=[
- "./","./index.html","./style-v1-5-0.css",
+ "./","./index.html","./style-v1-5-1.css",
  "./pdf-preview.html","./pdf-preview.css","./pdf-preview.js",
  "./app-v1-5-0.js","./customers-v0-10-3.js",
  "./manifest.webmanifest","./icon-192.svg","./icon-512.svg"

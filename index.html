@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#0f766e">
 <title>RML Sales Visit</title>
-<link rel="stylesheet" href="style-v1-5-0.css">
+<link rel="stylesheet" href="style-v1-5-1.css">
   <meta name="theme-color" content="#0f766e">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -574,12 +574,30 @@
 </main>
 
 <nav class="bottom-nav" aria-label="Navigasi utama">
-  <button onclick="showDashboard()"><span class="nav-icon" aria-hidden="true">⌂</span><span class="nav-label">Dashboard</span></button>
-  <button onclick="showCustomers()"><span class="nav-icon" aria-hidden="true">▦</span><span id="customersNavLabel" class="nav-label">Pelanggan</span></button>
-  <button id="priceListNavBtn" onclick="showPriceList()"><span class="nav-icon" aria-hidden="true">📖</span><span class="nav-label">Daftar Harga</span></button>
-  <button onclick="showHistory()"><span class="nav-icon" aria-hidden="true">◷</span><span class="nav-label">Riwayat</span></button>
-  <button id="assignmentNavBtn" class="hidden" onclick="showAreaAssignments()"><span class="nav-icon" aria-hidden="true">⚙</span><span class="nav-label">Pengaturan</span></button>
-  <button id="accountNavBtn" class="hidden" onclick="showAccount()"><span class="nav-icon" aria-hidden="true">♙</span><span class="nav-label">Akun</span></button>
+  <button onclick="showDashboard()" aria-label="Dashboard">
+    <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg></span>
+    <span class="nav-label">Dashboard</span>
+  </button>
+  <button onclick="showCustomers()" aria-label="Pelanggan">
+    <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5.5 20c.5-4 2.7-6 6.5-6s6 2 6.5 6"/><path d="M17.5 6.5a3 3 0 0 1 0 5.5M19 14.5c2 .9 3 2.7 3 5.5"/></svg></span>
+    <span id="customersNavLabel" class="nav-label">Pelanggan</span>
+  </button>
+  <button id="priceListNavBtn" onclick="showPriceList()" aria-label="Daftar Harga">
+    <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H11v17H6.5A2.5 2.5 0 0 0 4 22z"/><path d="M20 5.5A2.5 2.5 0 0 0 17.5 3H13v17h4.5A2.5 2.5 0 0 1 20 22z"/><path d="M7 7h2M15 7h2M7 11h2M15 11h2"/></svg></span>
+    <span class="nav-label">Daftar Harga</span>
+  </button>
+  <button onclick="showHistory()" aria-label="Riwayat">
+    <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/><path d="M7 3.8 4.5 6.2"/></svg></span>
+    <span class="nav-label">Riwayat</span>
+  </button>
+  <button id="assignmentNavBtn" class="hidden" onclick="showAreaAssignments()" aria-label="Pengaturan">
+    <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2.8 2.8-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6v.2h-4V21a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1L4.2 17l.1-.1a1.7 1.7 0 0 0 .3-1.9A1.7 1.7 0 0 0 3 14H2.8v-4H3a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9L4.2 7 7 4.2l.1.1a1.7 1.7 0 0 0 1.9.3A1.7 1.7 0 0 0 10 3V2.8h4V3a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1L19.8 7l-.1.1a1.7 1.7 0 0 0-.3 1.9A1.7 1.7 0 0 0 21 10h.2v4H21a1.7 1.7 0 0 0-1.6 1z"/></svg></span>
+    <span class="nav-label">Pengaturan</span>
+  </button>
+  <button id="accountNavBtn" class="hidden" onclick="showAccount()" aria-label="Akun">
+    <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="9" r="3"/><path d="M6.8 19c.8-3 2.5-4.5 5.2-4.5s4.4 1.5 5.2 4.5"/></svg></span>
+    <span class="nav-label">Akun</span>
+  </button>
 </nav>
 </section>
 
