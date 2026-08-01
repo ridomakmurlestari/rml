@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#0f766e">
 <title>RML Sales Visit</title>
-<link rel="stylesheet" href="style-v1-2-5.css">
+<link rel="stylesheet" href="style-v1-3-0.css">
   <meta name="theme-color" content="#0f766e">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -444,6 +444,47 @@
   </div>
 </section>
 
+
+<section id="priceListView" class="view hidden">
+  <div class="title-row">
+    <div><h3>Daftar Harga</h3><p id="priceListSubtitle">Cari harga barang berdasarkan kategori.</p></div>
+    <button id="addProductBtn" class="primary compact hidden" type="button" onclick="resetProductForm()">+ Tambah Barang</button>
+  </div>
+
+  <div id="adminProductPanel" class="dashboard-card product-admin-panel hidden">
+    <div class="product-form-grid">
+      <div><label>Kode Barang</label><input id="productCodeInput" placeholder="Contoh: PRX001"></div>
+      <div><label>Nama Barang *</label><input id="productNameInput" placeholder="Nama barang"></div>
+      <div><label>Kategori *</label><input id="productCategoryInput" list="productCategoryList" placeholder="Contoh: Obat"><datalist id="productCategoryList"></datalist></div>
+      <div><label>Harga *</label><input id="productPriceInput" type="number" min="0" step="1" placeholder="0"></div>
+      <label class="product-active-check"><input id="productActiveInput" type="checkbox" checked> Aktif</label>
+      <input id="productEditId" type="hidden">
+    </div>
+    <div class="page-actions product-form-actions">
+      <button class="secondary" type="button" onclick="clearProductForm()">Batal</button>
+      <button class="primary" type="button" onclick="saveProductFromForm()">Simpan Barang</button>
+    </div>
+  </div>
+
+  <div id="productAssignmentPanel" class="dashboard-card product-assignment-panel hidden">
+    <div class="title-row inner-title"><div><h3>Pembagian Barang per Sales</h3><p>Pilih sales, lalu centang barang yang boleh dilihat.</p></div></div>
+    <div class="product-assignment-controls">
+      <select id="productSalesFilter" onchange="renderProductAssignments()"></select>
+      <select id="productAssignCategoryFilter" onchange="renderProductAssignments()"><option value="">Semua Kategori</option></select>
+      <button class="secondary compact" type="button" onclick="setAllVisibleProductAssignments(true)">Pilih Semua</button>
+      <button class="secondary compact" type="button" onclick="setAllVisibleProductAssignments(false)">Hapus Semua</button>
+    </div>
+    <div id="productAssignmentList" class="product-assignment-list"></div>
+  </div>
+
+  <div class="filters product-price-filters">
+    <input id="productSearchInput" placeholder="Cari kode atau nama barang..." oninput="renderPriceList()">
+    <select id="productCategoryFilter" onchange="renderPriceList()"><option value="">Semua Kategori</option></select>
+  </div>
+  <div id="productPriceList" class="product-price-list"></div>
+  <div id="productPriceEmpty" class="empty hidden">Barang tidak ditemukan.</div>
+</section>
+
 <section id="historyView" class="view hidden">
   <div class="title-row">
     <div><h3>Riwayat Kunjungan</h3><p>Daftar aktivitas sales</p></div>
@@ -507,6 +548,7 @@
 <nav class="bottom-nav">
   <button onclick="showDashboard()">⌂<span>Dashboard</span></button>
   <button onclick="showCustomers()">▦<span id="customersNavLabel">Pelanggan</span></button>
+  <button id="priceListNavBtn" onclick="showPriceList()">₨<span>Daftar Harga</span></button>
   <button onclick="showHistory()">◷<span>Riwayat</span></button>
   <button id="assignmentNavBtn" class="hidden" onclick="showAreaAssignments()">⚙<span>Pengaturan</span></button>
   <button id="accountNavBtn" class="hidden" onclick="showAccount()">♙<span>Akun</span></button>
@@ -518,6 +560,6 @@
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.4/dist/jspdf.plugin.autotable.min.js"></script>
 <script src="customers-v0-10-3.js"></script>
-<script src="app-v1-2-6.js"></script>
+<script src="app-v1-3-0.js"></script>
 </body>
 </html>
