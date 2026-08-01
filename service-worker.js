@@ -1,10 +1,10 @@
-const CACHE_NAME="rml-sales-visit-v1-3-7-import-update-price";
+const CACHE_NAME="rml-sales-visit-v1-3-8-collapse-assignment";
 const APP_SHELL=[
  "./",
  "./index.html",
- "./style-v1-3-7.css",
+ "./style-v1-3-8.css",
  "./pdf-preview.html","./pdf-preview.css","./pdf-preview.js",
- "./app-v1-3-7.js",
+ "./app-v1-3-8.js",
  "./customers-v0-10-3.js",
  "./manifest.webmanifest",
  "./icon-192.svg",
