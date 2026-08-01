@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#0f766e">
 <title>RML Sales Visit</title>
-<link rel="stylesheet" href="style-v1-3-5.css">
+<link rel="stylesheet" href="style-v1-3-6.css">
   <meta name="theme-color" content="#0f766e">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -452,10 +452,11 @@
   </div>
 
   <div id="productAssignmentPanel" class="dashboard-card product-assignment-panel hidden">
-    <div class="title-row inner-title"><div><h3>Pembagian Barang per Sales</h3><p>Pilih sales, lalu centang barang yang boleh dilihat.</p></div></div>
+    <div class="title-row inner-title"><div><h3>Pembagian Barang per Sales</h3><p>Pilih Sales, Area, dan Toko. Aturan Toko akan menggantikan aturan Area.</p></div></div>
     <div class="product-assignment-controls">
       <select id="productSalesFilter" onchange="handleProductSalesChange()"></select>
       <select id="productAreaFilter" onchange="handleProductAreaChange()"></select>
+      <select id="productShopFilter" onchange="handleProductShopChange()"><option value="">Semua Toko (Default Area)</option></select>
       <select id="productAssignCategoryFilter" onchange="renderProductAssignments()"><option value="">Semua Kategori</option></select>
       <input id="productAssignSearchInput" placeholder="Cari barang untuk dibagikan..." oninput="renderProductAssignments()">
       <button class="secondary compact" type="button" onclick="setAllVisibleProductAssignments(true)">Pilih Semua</button>
@@ -589,6 +590,6 @@
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.4/dist/jspdf.plugin.autotable.min.js"></script>
 <script src="customers-v0-10-3.js"></script>
-<script src="app-v1-3-5.js"></script>
+<script src="app-v1-3-6.js"></script>
 </body>
 </html>
