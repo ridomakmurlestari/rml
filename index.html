@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#0f766e">
 <title>RML Sales Visit</title>
-<link rel="stylesheet" href="style-v1-5-3.css">
+<link rel="stylesheet" href="style-v1-5-5.css">
   <meta name="theme-color" content="#0f766e">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -129,31 +129,47 @@
     <div class="sales-promo-head">
       <div><small>Promo Produk</small><strong id="salesPromoTitle">Promo Terbaru</strong></div>
     </div>
-    <div class="sales-promo-image-wrap">
-      <img id="salesPromoImage" alt="Promo produk" loading="lazy">
-      <div id="salesPromoEmpty" class="sales-promo-empty">Belum ada promo aktif.</div>
+    <div class="promo-carousel" aria-live="polite">
+      <button id="promoPrevBtn" class="promo-nav-btn promo-prev" type="button" onclick="changePromoSlide(-1)" aria-label="Promo sebelumnya">‹</button>
+      <div class="sales-promo-image-wrap">
+        <img id="salesPromoImage" alt="Promo produk" loading="lazy">
+      </div>
+      <button id="promoNextBtn" class="promo-nav-btn promo-next" type="button" onclick="changePromoSlide(1)" aria-label="Promo berikutnya">›</button>
     </div>
+    <div id="promoDots" class="promo-dots"></div>
   </div>
 
   <div id="adminPromoCard" class="dashboard-card hidden">
     <div class="dashboard-card-head">
-      <div><h3>Banner Promo Sales</h3><p class="muted">Gambar ini menggantikan ringkasan angka pada Dashboard Sales.</p></div>
+      <div><h3>Banner Promo Sales</h3><p class="muted">Banner tampil sesuai tanggal mulai dan tanggal berakhir.</p></div>
+      <button class="secondary compact" type="button" onclick="resetPromoForm()">+ Tambah Banner</button>
     </div>
     <div class="admin-promo-grid">
       <div class="admin-promo-preview">
         <img id="adminPromoPreview" alt="Preview banner promo">
-        <div id="adminPromoEmpty" class="sales-promo-empty">Belum ada gambar promo.</div>
+        <div id="adminPromoEmpty" class="sales-promo-empty">Pilih gambar promo.</div>
       </div>
       <div class="admin-promo-form">
+        <input id="promoEditId" type="hidden">
         <label>Judul Promo<input id="promoTitleInput" maxlength="80" placeholder="Contoh: Promo Agustus"></label>
-        <label>Gambar Promo<input id="promoImageInput" type="file" accept="image/png,image/jpeg,image/webp"></label>
-        <small class="muted">Disarankan rasio 2:1. Gambar otomatis diperkecil agar aplikasi tetap ringan.</small>
+        <label>Gambar Promo<input id="promoImageInput" type="file" accept="image/png,image/jpeg,image/webp" onchange="previewPromoImageInput()"></label>
+        <div class="promo-date-grid">
+          <label>Tanggal Mulai<input id="promoStartDateInput" type="date"></label>
+          <label>Tanggal Berakhir<input id="promoEndDateInput" type="date"></label>
+        </div>
+        <div class="promo-date-grid">
+          <label>Urutan<input id="promoSortInput" type="number" min="0" step="1" value="0"></label>
+          <label class="check-label"><input id="promoActiveInput" type="checkbox" checked> Aktif</label>
+        </div>
+        <small class="muted">Disarankan rasio 2:1. Gambar otomatis dikompres agar aplikasi tetap ringan.</small>
         <div class="promo-actions">
-          <button id="savePromoBtn" class="primary" onclick="savePromoBanner()">Simpan Promo</button>
-          <button class="danger-soft" onclick="deletePromoBanner()">Hapus Promo</button>
+          <button id="savePromoBtn" class="primary" onclick="savePromoBanner()">Simpan Banner</button>
+          <button class="secondary" type="button" onclick="resetPromoForm()">Batal</button>
         </div>
       </div>
     </div>
+    <div class="promo-gallery-head"><strong>Daftar Banner</strong><span id="promoBannerCount" class="badge">0 banner</span></div>
+    <div id="adminPromoGallery" class="admin-promo-gallery"><div class="empty">Belum ada banner.</div></div>
   </div>
 
   <div id="allSalesStatsCard" class="dashboard-card">
@@ -637,6 +653,6 @@
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.4/dist/jspdf.plugin.autotable.min.js"></script>
 <script src="customers-v0-10-3.js"></script>
-<script src="app-v1-5-3.js"></script>
+<script src="app-v1-5-5.js"></script>
 </body>
 </html>
