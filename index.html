@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#0f766e">
 <title>RML Sales Visit</title>
-<link rel="stylesheet" href="style-v1-3-6.css">
+<link rel="stylesheet" href="style-v1-3-7.css">
   <meta name="theme-color" content="#0f766e">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -448,7 +448,11 @@
 <section id="priceListView" class="view hidden">
   <div class="title-row">
     <div><h3>Daftar Harga</h3><p id="priceListSubtitle">Cari harga barang berdasarkan kategori.</p></div>
-    <button id="addProductBtn" class="primary compact hidden" type="button" onclick="openProductCreateModal()">+ Tambah Barang</button>
+    <div id="productAdminTitleActions" class="title-actions hidden">
+      <button id="importProductPriceBtn" class="secondary compact" type="button" onclick="document.getElementById('productPriceImportFile').click()">Import / Update Harga</button>
+      <button id="addProductBtn" class="primary compact" type="button" onclick="openProductCreateModal()">+ Tambah Barang</button>
+      <input id="productPriceImportFile" class="hidden" type="file" accept=".xlsx,.xls,.csv" onchange="importProductPricesExcel(event)">
+    </div>
   </div>
 
   <div id="productAssignmentPanel" class="dashboard-card product-assignment-panel hidden">
@@ -590,6 +594,6 @@
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.4/dist/jspdf.plugin.autotable.min.js"></script>
 <script src="customers-v0-10-3.js"></script>
-<script src="app-v1-3-6.js"></script>
+<script src="app-v1-3-7.js"></script>
 </body>
 </html>
