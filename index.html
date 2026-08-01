@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#0f766e">
 <title>RML Sales Visit</title>
-<link rel="stylesheet" href="style-v1-3-2.css">
+<link rel="stylesheet" href="style-v1-3-3.css">
   <meta name="theme-color" content="#0f766e">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -489,6 +489,43 @@
   <button id="productLoadMoreBtn" class="secondary product-load-more hidden" type="button" onclick="loadMoreProducts()">Muat lebih banyak</button>
 </section>
 
+
+<div id="productEditModal" class="product-edit-modal hidden" role="dialog" aria-modal="true" aria-labelledby="productEditModalTitle" onclick="handleProductEditBackdrop(event)">
+  <div class="product-edit-modal-card" onclick="event.stopPropagation()">
+    <div class="product-edit-modal-head">
+      <div>
+        <small>MASTER PRODUK</small>
+        <h3 id="productEditModalTitle">Edit Produk</h3>
+      </div>
+      <button class="product-edit-close" type="button" aria-label="Tutup" onclick="closeProductEditModal()">×</button>
+    </div>
+    <input id="productModalEditId" type="hidden">
+    <div class="product-edit-form">
+      <div>
+        <label for="productModalCodeInput">Kode Barang</label>
+        <input id="productModalCodeInput" autocomplete="off">
+      </div>
+      <div>
+        <label for="productModalNameInput">Nama Barang *</label>
+        <input id="productModalNameInput" autocomplete="off">
+      </div>
+      <div>
+        <label for="productModalCategoryInput">Kategori *</label>
+        <input id="productModalCategoryInput" list="productCategoryList" autocomplete="off">
+      </div>
+      <div>
+        <label for="productModalPriceInput">Harga *</label>
+        <input id="productModalPriceInput" type="number" min="0" step="1" inputmode="numeric">
+      </div>
+      <label class="product-active-check product-edit-active"><input id="productModalActiveInput" type="checkbox"> Aktif</label>
+    </div>
+    <div class="product-edit-modal-actions">
+      <button class="secondary" type="button" onclick="closeProductEditModal()">Batal</button>
+      <button id="productModalSaveBtn" class="primary" type="button" onclick="saveProductFromModal()">Simpan Perubahan</button>
+    </div>
+  </div>
+</div>
+
 <section id="historyView" class="view hidden">
   <div class="title-row">
     <div><h3>Riwayat Kunjungan</h3><p>Daftar aktivitas sales</p></div>
@@ -564,6 +601,6 @@
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.4/dist/jspdf.plugin.autotable.min.js"></script>
 <script src="customers-v0-10-3.js"></script>
-<script src="app-v1-3-2.js"></script>
+<script src="app-v1-3-3.js"></script>
 </body>
 </html>
