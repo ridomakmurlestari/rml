@@ -1,8 +1,8 @@
-const CACHE_NAME="rml-sales-visit-v1-4-3-product-save-fix";
+const CACHE_NAME="rml-sales-visit-v1-5-0-bulk-history";
 const APP_SHELL=[
- "./","./index.html","./style-v1-4-2.css",
+ "./","./index.html","./style-v1-5-0.css",
  "./pdf-preview.html","./pdf-preview.css","./pdf-preview.js",
- "./app-v1-4-4.js","./customers-v0-10-3.js",
+ "./app-v1-5-0.js","./customers-v0-10-3.js",
  "./manifest.webmanifest","./icon-192.svg","./icon-512.svg"
 ];
 self.addEventListener("install",event=>{
