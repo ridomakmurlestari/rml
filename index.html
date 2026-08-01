@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#0f766e">
 <title>RML Sales Visit</title>
-<link rel="stylesheet" href="style-v1-5-1.css">
+<link rel="stylesheet" href="style-v1-5-3.css">
   <meta name="theme-color" content="#0f766e">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -124,6 +124,37 @@
   </div>
 
   <div id="dashboardSummary" class="dashboard-grid"></div>
+
+  <div id="salesPromoCard" class="sales-promo-card hidden">
+    <div class="sales-promo-head">
+      <div><small>Promo Produk</small><strong id="salesPromoTitle">Promo Terbaru</strong></div>
+    </div>
+    <div class="sales-promo-image-wrap">
+      <img id="salesPromoImage" alt="Promo produk" loading="lazy">
+      <div id="salesPromoEmpty" class="sales-promo-empty">Belum ada promo aktif.</div>
+    </div>
+  </div>
+
+  <div id="adminPromoCard" class="dashboard-card hidden">
+    <div class="dashboard-card-head">
+      <div><h3>Banner Promo Sales</h3><p class="muted">Gambar ini menggantikan ringkasan angka pada Dashboard Sales.</p></div>
+    </div>
+    <div class="admin-promo-grid">
+      <div class="admin-promo-preview">
+        <img id="adminPromoPreview" alt="Preview banner promo">
+        <div id="adminPromoEmpty" class="sales-promo-empty">Belum ada gambar promo.</div>
+      </div>
+      <div class="admin-promo-form">
+        <label>Judul Promo<input id="promoTitleInput" maxlength="80" placeholder="Contoh: Promo Agustus"></label>
+        <label>Gambar Promo<input id="promoImageInput" type="file" accept="image/png,image/jpeg,image/webp"></label>
+        <small class="muted">Disarankan rasio 2:1. Gambar otomatis diperkecil agar aplikasi tetap ringan.</small>
+        <div class="promo-actions">
+          <button id="savePromoBtn" class="primary" onclick="savePromoBanner()">Simpan Promo</button>
+          <button class="danger-soft" onclick="deletePromoBanner()">Hapus Promo</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <div id="allSalesStatsCard" class="dashboard-card">
     <div class="dashboard-card-head">
@@ -606,6 +637,6 @@
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.4/dist/jspdf.plugin.autotable.min.js"></script>
 <script src="customers-v0-10-3.js"></script>
-<script src="app-v1-5-0.js"></script>
+<script src="app-v1-5-3.js"></script>
 </body>
 </html>
