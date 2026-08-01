@@ -1,10 +1,10 @@
-const CACHE_NAME="rml-sales-visit-v1-3-3-product-modal";
+const CACHE_NAME="rml-sales-visit-v1-3-4-product-create-modal";
 const APP_SHELL=[
  "./",
  "./index.html",
- "./style-v1-3-3.css",
+ "./style-v1-3-4.css",
  "./pdf-preview.html","./pdf-preview.css","./pdf-preview.js",
- "./app-v1-3-3.js",
+ "./app-v1-3-4.js",
  "./customers-v0-10-3.js",
  "./manifest.webmanifest",
  "./icon-192.svg",
