@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#0f766e">
 <title>RML Sales Visit</title>
-<link rel="stylesheet" href="style-v1-5-5.css">
+<link rel="stylesheet" href="style-v1-5-7.css">
   <meta name="theme-color" content="#0f766e">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -132,7 +132,7 @@
     <div class="promo-carousel" aria-live="polite">
       <button id="promoPrevBtn" class="promo-nav-btn promo-prev" type="button" onclick="changePromoSlide(-1)" aria-label="Promo sebelumnya">‹</button>
       <div class="sales-promo-image-wrap">
-        <img id="salesPromoImage" alt="Promo produk" loading="lazy">
+        <img id="salesPromoImage" alt="Promo produk" loading="lazy" role="button" tabindex="0" aria-label="Buka gambar promo layar penuh" onclick="openPromoFullscreen()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openPromoFullscreen()}">
       </div>
       <button id="promoNextBtn" class="promo-nav-btn promo-next" type="button" onclick="changePromoSlide(1)" aria-label="Promo berikutnya">›</button>
     </div>
@@ -620,6 +620,19 @@
 </section>
 </main>
 
+
+<div id="promoFullscreen" class="promo-fullscreen hidden" role="dialog" aria-modal="true" aria-label="Gambar promo layar penuh">
+  <button id="promoFullscreenClose" class="promo-fullscreen-close" type="button" onclick="closePromoFullscreen()" aria-label="Tutup">×</button>
+  <div id="promoFullscreenStage" class="promo-fullscreen-stage">
+    <img id="promoFullscreenImage" alt="Promo produk layar penuh" draggable="false">
+  </div>
+  <div class="promo-fullscreen-controls" aria-label="Kontrol zoom">
+    <button type="button" onclick="zoomPromoFullscreen(-0.5)" aria-label="Perkecil">−</button>
+    <button id="promoZoomResetBtn" type="button" onclick="resetPromoFullscreenZoom()" aria-label="Atur ulang zoom">100%</button>
+    <button type="button" onclick="zoomPromoFullscreen(0.5)" aria-label="Perbesar">+</button>
+  </div>
+</div>
+
 <nav class="bottom-nav" aria-label="Navigasi utama">
   <button onclick="showDashboard()" aria-label="Dashboard">
     <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg></span>
@@ -653,6 +666,6 @@
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.4/dist/jspdf.plugin.autotable.min.js"></script>
 <script src="customers-v0-10-3.js"></script>
-<script src="app-v1-5-5.js"></script>
+<script src="app-v1-5-7.js"></script>
 </body>
 </html>
