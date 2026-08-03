@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#0f766e">
 <title>RML Sales Visit</title>
-<link rel="stylesheet" href="style-v1-5-8.css">
+<link rel="stylesheet" href="style-v1-5-9.css">
   <meta name="theme-color" content="#0f766e">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -44,19 +44,19 @@
     </div>
 
     <div class="edit-visit-modal-body">
+      <label for="editVisitStatus">Status Kunjungan *</label>
+      <select id="editVisitStatus" onchange="updateEditVisitFields()">
+        <option value="Ada Order">Ada Order</option><option value="Tidak Order">Tidak Order</option><option value="Tidak Bertemu">Tidak Bertemu</option>
+      </select>
       <label id="editVisitNoteLabel" for="editVisitNoteInput">Catatan *</label>
       <textarea id="editVisitNoteInput" rows="6" placeholder="Masukkan catatan..." required></textarea>
-      <small class="edit-visit-hint">Data sebelumnya tetap tampil. Tambahkan order atau catatan baru di bagian akhir.</small>
-
-      <div id="editVisitAuditSection" class="edit-audit-section hidden">
-        <strong>Riwayat Perubahan</strong>
-        <div id="editVisitAuditList" class="edit-audit-list"></div>
+      <label>Status Pembayaran *</label>
+      <div class="payment-status-options edit-payment-options">
+        <label class="payment-status-option"><input type="radio" name="editVisitPaymentStatus" value="Bayar"><span>Bayar</span></label>
+        <label class="payment-status-option"><input type="radio" name="editVisitPaymentStatus" value="Tidak Bayar"><span>Tidak Bayar</span></label>
       </div>
-
-      <div class="edit-visit-actions">
-        <button class="secondary" onclick="closeEditVisitModal()">Batal</button>
-        <button class="primary" onclick="saveEditedVisitNote()">Simpan Perubahan</button>
-      </div>
+      <div id="editVisitAuditSection" class="edit-audit-section hidden"><strong>Riwayat Perubahan</strong><div id="editVisitAuditList" class="edit-audit-list"></div></div>
+      <div class="edit-visit-actions"><button class="secondary" onclick="closeEditVisitModal()">Batal</button><button id="saveEditVisitButton" class="primary" onclick="saveEditedVisitNote()">Simpan Perubahan</button></div>
     </div>
   </div>
 </div>
@@ -607,6 +607,6 @@
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.4/dist/jspdf.plugin.autotable.min.js"></script>
 <script src="customers-v0-10-3.js"></script>
-<script src="app-v1-5-8.js"></script>
+<script src="app-v1-5-9.js"></script>
 </body>
 </html>

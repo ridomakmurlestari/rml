@@ -1,8 +1,8 @@
 const CACHE_NAME="rml-sales-visit-1.5.8-no-promo";
 const APP_SHELL=[
- "./","./index.html","./style-v1-5-8.css",
+ "./","./index.html","./style-v1-5-9.css",
  "./pdf-preview.html","./pdf-preview.css","./pdf-preview.js",
- "./app-v1-5-8.js","./customers-v0-10-3.js",
+ "./app-v1-5-9.js","./customers-v0-10-3.js",
  "./manifest.webmanifest","./icon-192.svg","./icon-512.svg"
 ];
 self.addEventListener("install",event=>{
