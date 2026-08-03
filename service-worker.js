@@ -1,8 +1,8 @@
-const CACHE_NAME="rml-sales-visit-1.6.1-history-30-days";
+const CACHE_NAME="rml-sales-visit-1.6.3-edit-area-outlet";
 const APP_SHELL=[
- "./","./index.html","./style-v1-6-2.css",
+ "./","./index.html","./style-v1-6-3.css",
  "./pdf-preview.html","./pdf-preview.css","./pdf-preview.js",
- "./app-v1-6-2.js","./customers-v0-10-3.js",
+ "./app-v1-6-3.js","./customers-v0-10-3.js",
  "./manifest.webmanifest","./icon-192.svg","./icon-512.svg"
 ];
 self.addEventListener("install",event=>{
