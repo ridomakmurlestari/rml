@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#0f766e">
 <title>RML Sales Visit</title>
-<link rel="stylesheet" href="style-v1-6-5.css">
+<link rel="stylesheet" href="style-v1-7-1.css">
   <meta name="theme-color" content="#0f766e">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -420,8 +420,26 @@
 </section>
 
 <section id="assignmentView" class="view hidden">
-  <div class="title-row"><div><h3>Pengaturan Admin</h3><p>Atur penugasan area serta akun admin dan sales.</p></div><button class="secondary compact" onclick="resetAreaAssignments()">Reset Penugasan</button></div>
-  <div class="dashboard-card"><h3>Penugasan Area Sales</h3><div class="assignment-help">Centang area untuk sales yang bertugas. Perubahan tersimpan otomatis.</div><div id="areaAssignmentMatrix" class="assignment-matrix-wrap"></div></div>
+  <div class="title-row"><div><h3>Pengaturan Admin</h3><p>Atur master produk, penugasan area, akun pengguna, serta backup data.</p></div><button class="secondary compact" onclick="resetAreaAssignments()">Reset Penugasan</button></div>
+  <div class="dashboard-card settings-master-product-card">
+    <div class="title-row inner-title">
+      <div><h3>Master Produk</h3><p>Kelola data barang, kategori, harga, diskon, status produk, serta import produk.</p></div>
+      <button class="primary compact" type="button" onclick="showPriceList()">Buka Master Produk</button>
+    </div>
+  </div>
+  <div class="dashboard-card area-assignment-card">
+    <button id="areaAssignmentHeader" class="area-assignment-header" type="button" onclick="toggleAreaAssignmentPanel()" aria-expanded="true" aria-controls="areaAssignmentBody">
+      <span class="area-assignment-heading">
+        <span class="area-assignment-icon">📍</span>
+        <span><strong>Penugasan Area Sales</strong><small id="areaAssignmentCollapseSummary" class="area-collapse-summary">Memuat data penugasan...</small></span>
+      </span>
+      <span class="area-assignment-toggle"><span id="areaAssignmentToggleText">Tutup</span><span id="areaAssignmentChevron" class="area-assignment-chevron">⌄</span></span>
+    </button>
+    <div id="areaAssignmentBody" class="area-assignment-body">
+      <div class="assignment-help"><strong>Atur area kerja sales</strong><span>Centang area yang ditugaskan. Tekan <b>Edit</b> untuk mengubah nama area. Semua perubahan tersimpan otomatis.</span></div>
+      <div id="areaAssignmentMatrix" class="assignment-matrix-wrap"></div>
+    </div>
+  </div>
   <div class="dashboard-card user-management-card"><div class="title-row inner-title"><div><h3>Data Akun</h3><p>Admin dapat mengubah nama dan nomor handphone tanpa melihat password pengguna.</p></div></div><div class="account-warning">Tombol Reset Password akan mengembalikan password menjadi nomor handphone dan mewajibkan pengguna menggantinya saat login berikutnya.</div><div id="userManagementList" class="user-management-list"></div></div>
   <div class="dashboard-card backup-restore-card">
     <div class="title-row inner-title"><div><h3>Backup & Restore Data</h3><p>Simpan salinan data aplikasi atau pulihkan data dari file backup.</p></div></div>
@@ -448,8 +466,9 @@
 
 
 <section id="priceListView" class="view hidden">
+  <button id="productBackToSettingsBtn" class="back hidden" type="button" onclick="showAreaAssignments()">← Kembali ke Pengaturan</button>
   <div class="title-row">
-    <div><h3>Daftar Harga</h3><p id="priceListSubtitle">Cari harga barang berdasarkan kategori.</p></div>
+    <div><h3 id="priceListTitle">Daftar Harga</h3><p id="priceListSubtitle">Cari harga barang berdasarkan kategori.</p></div>
     <div id="productAdminTitleActions" class="title-actions hidden">
       <button id="productSelectModeBtn" class="secondary compact" type="button" onclick="toggleProductSelectMode()">Pilih Produk</button>
       <button class="secondary compact" type="button" onclick="openProductHistoryModal()">Riwayat Harga</button>
@@ -613,6 +632,6 @@
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.4/dist/jspdf.plugin.autotable.min.js"></script>
 <script src="customers-v0-10-3.js"></script>
-<script src="app-v1-6-7.js"></script>
+<script src="app-v1-7-1.js"></script>
 </body>
 </html>

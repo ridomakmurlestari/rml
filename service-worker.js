@@ -1,8 +1,8 @@
-const CACHE_NAME="rml-sales-visit-1.6.7-supervisor";
+const CACHE_NAME="rml-sales-visit-1.7.0-area-edit-collapse";
 const APP_SHELL=[
- "./","./index.html","./style-v1-6-5.css",
+ "./","./index.html","./style-v1-7-0.css",
  "./pdf-preview.html","./pdf-preview.css","./pdf-preview.js",
- "./app-v1-6-7.js","./customers-v0-10-3.js",
+ "./app-v1-7-0.js","./customers-v0-10-3.js",
  "./manifest.webmanifest","./icon-192.svg","./icon-512.svg"
 ];
 self.addEventListener("install",event=>{
