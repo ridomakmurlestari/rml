@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#0f766e">
 <title>RML Sales Visit</title>
-<link rel="stylesheet" href="style-v1-7-2.css">
+<link rel="stylesheet" href="style-v1-7-6.css">
   <meta name="theme-color" content="#0f766e">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -142,6 +142,12 @@
   </div>
 
   <div id="dashboardSummary" class="dashboard-grid"></div>
+
+  <button id="dashboardPriceCard" class="dashboard-price-card hidden" type="button" onclick="showPriceList()">
+    <span class="dashboard-price-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H11v17H6.5A2.5 2.5 0 0 0 4 22z"/><path d="M20 5.5A2.5 2.5 0 0 0 17.5 3H13v17h4.5A2.5 2.5 0 0 1 20 22z"/><path d="M7 7h2M15 7h2M7 11h2M15 11h2"/></svg></span>
+    <span><strong>Daftar Harga</strong><small>Cari nama, kode, kategori, harga, dan diskon produk</small></span>
+    <span class="dashboard-price-arrow" aria-hidden="true">›</span>
+  </button>
 
 <div id="allSalesStatsCard" class="dashboard-card">
     <div class="dashboard-card-head">
@@ -345,29 +351,15 @@
     <div id="checkOutPanel" class="hidden">
       <div class="visit-state state-visiting">Sedang Dikunjungi</div>
 
-      <div class="visit-time-grid">
-        <div class="visit-time-box">
-          <small>Tanggal Check In</small>
-          <strong id="visitCheckInDate">-</strong>
-        </div>
-        <div class="visit-time-box">
-          <small>Jam Check In</small>
-          <strong id="visitCheckIn">-</strong>
-        </div>
+      <div class="hidden" aria-hidden="true">
+        <strong id="visitCheckInDate">-</strong>
+        <strong id="visitCheckIn">-</strong>
+        <img id="activeCheckInPhoto" alt="Foto check in">
       </div>
-
-      <img id="activeCheckInPhoto" class="saved-checkin-photo" alt="Foto check in">
 
       <div id="pendingDeliveryReminder" class="pending-delivery-reminder hidden">
         <strong>⚠ Barang Belum Terkirim</strong>
         <div id="pendingDeliveryReminderList"></div>
-      </div>
-
-      <div class="activity-box">
-        <strong>Aktivitas Sales</strong>
-        <span>Menawarkan barang</span>
-        <span>Menagih</span>
-        <span>Mencatat orderan</span>
       </div>
 
       <label>Status Kunjungan Outlet</label>
@@ -392,6 +384,18 @@
       </div>
 
       <button class="primary" onclick="confirmCheckOut()">Check Out & Simpan</button>
+
+      <details id="visitPriceSearchCard" class="visit-price-search-card" ontoggle="handleVisitPriceSearchToggle(this)">
+        <summary>
+          <span><b>🔎 Cari Daftar Harga</b><small>Cek harga tanpa meninggalkan halaman kunjungan</small></span>
+          <span class="visit-price-chevron">⌄</span>
+        </summary>
+        <div class="visit-price-search-body">
+          <input id="visitPriceSearchInput" type="search" placeholder="Cari nama, kode, atau kategori barang..." oninput="renderVisitPriceSearch()">
+          <div id="visitPriceSearchSummary" class="visit-price-search-summary">Ketik nama atau kode barang.</div>
+          <div id="visitPriceSearchResults" class="visit-price-search-results"></div>
+        </div>
+      </details>
     </div>
   </div>
 </section>
@@ -626,10 +630,6 @@
     <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5.5 20c.5-4 2.7-6 6.5-6s6 2 6.5 6"/><path d="M17.5 6.5a3 3 0 0 1 0 5.5M19 14.5c2 .9 3 2.7 3 5.5"/></svg></span>
     <span id="customersNavLabel" class="nav-label">Pelanggan</span>
   </button>
-  <button id="priceListNavBtn" onclick="showPriceList()" aria-label="Daftar Harga">
-    <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H11v17H6.5A2.5 2.5 0 0 0 4 22z"/><path d="M20 5.5A2.5 2.5 0 0 0 17.5 3H13v17h4.5A2.5 2.5 0 0 1 20 22z"/><path d="M7 7h2M15 7h2M7 11h2M15 11h2"/></svg></span>
-    <span class="nav-label">Daftar Harga</span>
-  </button>
   <button onclick="showHistory()" aria-label="Riwayat">
     <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/><path d="M7 3.8 4.5 6.2"/></svg></span>
     <span class="nav-label">Riwayat</span>
@@ -650,6 +650,6 @@
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.4/dist/jspdf.plugin.autotable.min.js"></script>
 <script src="customers-v0-10-3.js"></script>
-<script src="app-v1-7-4.js"></script>
+<script src="app-v1-7-6.js"></script>
 </body>
 </html>
