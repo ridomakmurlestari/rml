@@ -16,7 +16,7 @@ let selectedCustomerNos=new Set();
 let historySelectMode=false;
 let selectedVisitIds=new Set();
 const REMOTE_VISIT_INITIAL_LIMIT=100;
-const HISTORY_PAGE_SIZE=30;
+const HISTORY_PAGE_SIZE=999999;
 let historyRenderLimit=HISTORY_PAGE_SIZE;
 let expandedHistoryOutletKey="";
 
@@ -169,7 +169,7 @@ async function pullCustomersFromSupabase({silent=true}={}){
 
 const PRODUCT_CACHE_KEY="rml_product_catalog_v1";
 const PRODUCT_ASSIGNMENT_KEY="rml_product_assignments_v2";
-const PRODUCT_PAGE_SIZE=100;
+const PRODUCT_PAGE_SIZE=999999;
 let productVisibleLimit=PRODUCT_PAGE_SIZE;
 let productSyncTimer=null;
 let productBulkSelectMode=false;
