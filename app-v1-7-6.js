@@ -65,22 +65,41 @@ async function sbSignIn(name,password){const data=await rpc('app_login',{p_login
 async function sbProfile(){const session=getSbSession();if(!session?.session_token)return null;const data=await rpc('app_get_profile',{p_token:session.session_token});return Array.isArray(data)?data[0]:data}
 async function sbUpdatePassword(oldPassword,newPassword){const session=getSbSession();if(!session?.session_token)throw new Error('Sesi login tidak tersedia');return rpc('app_change_password',{p_token:session.session_token,p_old_password:oldPassword,p_new_password:newPassword})}
 function visitToRemote(v){return {id:v.id,sales_email:v.salesEmail||currentUser?.email||'',sales_name:v.salesName||currentUser?.name||'',customer_no:String(v.customerNo||''),customer_code:v.code||'',customer_name:v.name||'',area:v.area||'',status:v.status||'',visit_type:v.visitType||'Kunjungan Area',check_in_at:v.checkInAt||null,check_out_at:v.checkOutAt||null,updated_at:v.updatedAt||new Date().toISOString(),payload:v}}
-async function pullRemoteVisits({reconcile=false}={}){
+const REMOTE_VISITS_SYNC_KEY="rml_remote_visits_updated_at_v1";
+function getRemoteVisitsUpdatedAt(){return localStorage.getItem(REMOTE_VISITS_SYNC_KEY)||""}
+function setRemoteVisitsUpdatedAt(value){if(value)localStorage.setItem(REMOTE_VISITS_SYNC_KEY,value)}
+function syncSinceWithOverlap(value){
+ if(!value)return null;
+ const t=Date.parse(value);
+ return Number.isFinite(t)?new Date(t-1000).toISOString():value;
+}
+async function pullRemoteVisits({reconcile=false,force=false}={}){
  const session=getSbSession();
  if(!navigator.onLine||!session?.session_token)return [];
- const rows=await rpc('app_pull_visits',{p_token:session.session_token,p_limit:REMOTE_VISIT_INITIAL_LIMIT});
  if(reconcile){
+  const rows=await rpc('app_pull_visits',{p_token:session.session_token,p_limit:REMOTE_VISIT_INITIAL_LIMIT});
   const remoteIds=new Set((rows||[]).map(r=>String(r.id)));
   const localRows=await idbGetAll(STORE_VISITS);
   for(const local of localRows){
    const belongsToCurrentUser=currentUser?.role==='admin'||local.salesEmail===currentUser?.email;
    if(belongsToCurrentUser&&local.syncStatus==='synced'&&!remoteIds.has(String(local.id)))await idbDelete(STORE_VISITS,local.id);
   }
+  for(const r of rows||[]){
+   const local={...(r.payload||{}),id:r.id,syncStatus:'synced',updatedAt:r.updated_at};
+   await idbPut(STORE_VISITS,local);
+  }
+  const max=rows?.reduce((m,r)=>!m||new Date(r.updated_at)>new Date(m)?r.updated_at:m,getRemoteVisitsUpdatedAt()||null);
+  if(max)setRemoteVisitsUpdatedAt(max);
+  return rows||[];
  }
+ const since=force?null:syncSinceWithOverlap(getRemoteVisitsUpdatedAt());
+ const rows=await rpc('app_pull_visits_delta',{p_token:session.session_token,p_since:since,p_limit:500});
  for(const r of rows||[]){
   const local={...(r.payload||{}),id:r.id,syncStatus:'synced',updatedAt:r.updated_at};
   await idbPut(STORE_VISITS,local);
  }
+ const max=rows?.reduce((m,r)=>!m||new Date(r.updated_at)>new Date(m)?r.updated_at:m,getRemoteVisitsUpdatedAt()||null);
+ if(max)setRemoteVisitsUpdatedAt(max);
  return rows||[];
 }
 async function deleteVisitsRemote(ids){const session=getSbSession();if(currentUser?.role!=='admin')throw new Error('Hanya admin yang dapat menghapus riwayat');if(!navigator.onLine)throw new Error('Penghapusan riwayat memerlukan koneksi internet');if(!session?.session_token)throw new Error('Sesi login tidak tersedia');return rpc('app_admin_delete_visits',{p_token:session.session_token,p_visit_ids:ids})}
@@ -138,14 +157,18 @@ function scheduleCustomerSync(delay=250){
  clearTimeout(customerSyncTimer);
  customerSyncTimer=setTimeout(()=>syncCustomersToSupabase({silent:true}),delay);
 }
-async function pullCustomersFromSupabase({silent=true}={}){
+const CUSTOMER_REMOTE_UPDATED_AT_KEY="rml_customer_remote_updated_at_v1";
+function getCustomerRemoteUpdatedAt(){return localStorage.getItem(CUSTOMER_REMOTE_UPDATED_AT_KEY)||""}
+function setCustomerRemoteUpdatedAt(value){if(value)localStorage.setItem(CUSTOMER_REMOTE_UPDATED_AT_KEY,value)}
+async function pullCustomersFromSupabase({silent=true,force=false}={}){
  const session=getSbSession();
  if(!navigator.onLine||!session?.session_token)return false;
  try{
-  const data=await rpc('app_pull_customers',{p_token:session.session_token});
+  const data=await rpc('app_pull_customers_delta',{p_token:session.session_token,p_since:force?null:(getCustomerRemoteUpdatedAt()||null)});
   const row=Array.isArray(data)?data[0]:data;
-  const remote=Array.isArray(row?.customers)?row.customers:(Array.isArray(row)?row:null);
-  if(Array.isArray(remote)&&remote.length){
+  if(row?.updated_at)setCustomerRemoteUpdatedAt(row.updated_at);
+  const remote=Array.isArray(row?.customers)?row.customers:null;
+  if(Array.isArray(remote)){
    const migrated=applyKm2Km14AreaMigration(remote);
    localStorage.setItem('rml_customers',JSON.stringify(migrated.rows));
    fillAreas();
@@ -153,10 +176,6 @@ async function pullCustomersFromSupabase({silent=true}={}){
     fillCustomerSalesFilter();
     if(migrated.changed)await syncCustomersToSupabase({silent:true});
    }
-   return true;
-  }
-  if(currentUser?.role==='admin'&&customers().length){
-   await syncCustomersToSupabase({silent:true});
    return true;
   }
   return false;
@@ -231,14 +250,18 @@ function productNetPrice(product){
  const discount=normalizeProductDiscount(product?.discount);
  return Math.round(price*(1-discount/100));
 }
-async function pullProductsFromSupabase({silent=true}={}){
+const PRODUCT_REMOTE_UPDATED_AT_KEY="rml_product_remote_updated_at_v1";
+function getProductRemoteUpdatedAt(){return localStorage.getItem(PRODUCT_REMOTE_UPDATED_AT_KEY)||""}
+function setProductRemoteUpdatedAt(value){if(value)localStorage.setItem(PRODUCT_REMOTE_UPDATED_AT_KEY,value)}
+async function pullProductsFromSupabase({silent=true,force=false}={}){
  const session=getSbSession();if(!navigator.onLine||!session?.session_token)return false;
  try{
-  const data=await rpc('app_pull_products',{p_token:session.session_token});
+  const data=await rpc('app_pull_products_delta',{p_token:session.session_token,p_since:force?null:(getProductRemoteUpdatedAt()||null)});
   const row=Array.isArray(data)?data[0]:data;
+  if(row?.updated_at)setProductRemoteUpdatedAt(row.updated_at);
   if(Array.isArray(row?.products))saveProductCatalogLocal(row.products);
   if(row?.assignments&&typeof row.assignments==='object')saveProductAssignmentsLocal(row.assignments);
-  return true;
+  return !!row?.changed;
  }catch(e){console.error('Tarik daftar harga gagal',e);if(!silent)toast(`Gagal memuat daftar harga: ${e.message}`);return false}
 }
 async function syncProductsToSupabase({silent=false}={}){
@@ -1132,10 +1155,10 @@ async function login(){
   currentUser={...local,email:p.account_key,phone:p.phone||local.phone||"",name:p.display_name,role:p.role,mustChangePassword:!!p.must_change_password,canSwitchAreaFreely:permissions?.can_switch_area_freely??local.canSwitchAreaFreely??false};
   sessionStorage.setItem("rml_user",JSON.stringify(currentUser));localStorage.setItem("rml_cached_user",JSON.stringify(currentUser));
   if(currentUser.mustChangePassword)return showForcedPasswordPage();
-  await pullCustomersFromSupabase({silent:true});
-  await pullProductsFromSupabase({silent:true});
+  await pullCustomersFromSupabase({silent:true,force:true});
+  await pullProductsFromSupabase({silent:true,force:true});
   await cleanupVisitsOlderThan30Days({remote:true,silent:true});
-  await pullRemoteVisits();openApp();
+  await pullRemoteVisits({force:true});openApp();
  }catch(e){toast(e.message||"Nama atau password salah")}
 }
 
@@ -2964,8 +2987,8 @@ window.addEventListener("beforeinstallprompt",e=>{
  if(btn)btn.classList.remove("hidden");
 });
 window.addEventListener("online",()=>{updateNetworkStatus();updatePendingSyncCount();scheduleAutoSync(100);pullCustomersFromSupabase({silent:true}).then(()=>{if(currentUser)renderCustomers()}).catch(()=>{});});
-window.addEventListener("focus",()=>{scheduleAutoSync(150);if(currentUser&&navigator.onLine)pullCustomersFromSupabase({silent:true}).then(()=>{if(!document.getElementById("customersView")?.classList.contains("hidden"))renderCustomers()}).catch(()=>{});pullProductsFromSupabase({silent:true}).then(()=>{if(!document.getElementById('priceListView')?.classList.contains('hidden')){fillProductFilters();renderPriceList();if(currentUser?.role==='admin')renderProductAssignments()}}).catch(()=>{})});
-document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"){scheduleAutoSync(150);if(currentUser&&navigator.onLine)pullCustomersFromSupabase({silent:true}).then(()=>{if(!document.getElementById("customersView")?.classList.contains("hidden"))renderCustomers()}).catch(()=>{});pullProductsFromSupabase({silent:true}).then(()=>{if(!document.getElementById('priceListView')?.classList.contains('hidden')){fillProductFilters();renderPriceList();if(currentUser?.role==='admin')renderProductAssignments()}}).catch(()=>{})}});
+window.addEventListener("focus",()=>{scheduleAutoSync(150)});
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")scheduleAutoSync(150)});
 setInterval(()=>{if(document.visibilityState==="visible"&&navigator.onLine)scheduleAutoSync(0)},30000);
 window.addEventListener("offline",updateNetworkStatus);
 
