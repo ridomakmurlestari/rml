@@ -1,4 +1,4 @@
-/* RML v1.8.0 - Delta sync / complete 30-day visit reconciliation fix */
+/* RML v1.8.0 - Supabase area-assignment sync / egress optimization */
 function androidSaveBase64File(filename,mimeType,base64Data){
  if(window.AndroidBridge&&typeof window.AndroidBridge.saveBase64File==="function"){
   window.AndroidBridge.saveBase64File(filename,mimeType||"application/octet-stream",base64Data);
@@ -74,87 +74,39 @@ function visitToRemote(v){return {id:v.id,sales_email:v.salesEmail||currentUser?
 async function pullRemoteVisits({reconcile=false}={}){
  const session=getSbSession();
  if(!navigator.onLine||!session?.session_token)return [];
- const BATCH_SIZE=500;
- let allRows=[];
-
- // IMPORTANT:
- // Never reconcile against only the newest 100 rows. That made one device
- // delete older synced visits that were still valid on Supabase.
- //
- // The app keeps remote visits for 30 days, so a manual reconcile/first
- // install loads the complete 30-day window through the delta RPC in batches.
- // Normal background sync still uses the local updated_at cursor.
-
- const fetchDeltaBatches=async(since)=>{
-  let cursor=since||null;
-  let guard=0;
-  while(guard++<20){
-   const batch=await rpc('app_pull_visits_delta',{
-    p_token:session.session_token,
-    p_since:cursor,
-    p_limit:BATCH_SIZE
-   });
-   const rows=Array.isArray(batch)?batch:[];
-   if(!rows.length)break;
-   allRows.push(...rows);
-   const newest=maxVisitUpdatedAt(rows);
-   if(!newest||newest===cursor)break;
-   cursor=newest;
-   if(rows.length<BATCH_SIZE)break;
-  }
- };
-
+ let rows=[];
  if(reconcile){
-  // Reconcile the complete 30-day server window, not just newest 100.
-  const cutoff=new Date();
-  cutoff.setHours(0,0,0,0);
-  cutoff.setDate(cutoff.getDate()-VISIT_RETENTION_DAYS);
-  await fetchDeltaBatches(cutoff.toISOString());
-
-  // Remove only synced local rows that are inside the retained remote
-  // window and no longer exist remotely. Pending/failed local rows are kept.
-  const remoteIds=new Set(allRows.map(r=>String(r.id)));
+  // Manual refresh/reconcile keeps the old newest-100 behavior so we can safely compare IDs.
+  rows=await rpc('app_pull_visits',{p_token:session.session_token,p_limit:REMOTE_VISIT_INITIAL_LIMIT});
+  const remoteIds=new Set((rows||[]).map(r=>String(r.id)));
   const localRows=await idbGetAll(STORE_VISITS);
   for(const local of localRows){
-   const belongsToCurrentUser=currentUser?.role==='admin'
-     || local.salesEmail===currentUser?.email;
-   const localDate=visitDateValue(local);
-   const inRetentionWindow=!localDate||localDate>=cutoff;
-   if(belongsToCurrentUser&&inRetentionWindow&&local.syncStatus==='synced'&&!remoteIds.has(String(local.id))){
-    await idbDelete(STORE_VISITS,local.id);
-   }
+   const belongsToCurrentUser=currentUser?.role==='admin'||local.salesEmail===currentUser?.email;
+   if(belongsToCurrentUser&&local.syncStatus==='synced'&&!remoteIds.has(String(local.id)))await idbDelete(STORE_VISITS,local.id);
   }
  }else{
   const meta=getRemoteSyncMeta();
   let since=meta.visits_updated_at||null;
-
   if(!since){
    const localRows=await idbGetAll(STORE_VISITS);
    since=maxVisitUpdatedAt(localRows);
-
    if(!since){
-    // First install / cleared cache: load the complete retained history,
-    // not only the newest 100 rows.
-    const cutoff=new Date();
-    cutoff.setHours(0,0,0,0);
-    cutoff.setDate(cutoff.getDate()-VISIT_RETENTION_DAYS);
-    await fetchDeltaBatches(cutoff.toISOString());
+    // First install: preserve the previous behavior and fetch only the newest 100 rows.
+    rows=await rpc('app_pull_visits',{p_token:session.session_token,p_limit:REMOTE_VISIT_INITIAL_LIMIT});
    }else{
-    await fetchDeltaBatches(since);
+    rows=await rpc('app_pull_visits_delta',{p_token:session.session_token,p_since:since,p_limit:500});
    }
   }else{
-   await fetchDeltaBatches(since);
+   rows=await rpc('app_pull_visits_delta',{p_token:session.session_token,p_since:since,p_limit:500});
   }
  }
-
- for(const r of allRows){
+ for(const r of rows||[]){
   const local={...(r.payload||{}),id:r.id,syncStatus:'synced',updatedAt:r.updated_at};
   await idbPut(STORE_VISITS,local);
  }
-
- const newest=maxVisitUpdatedAt(allRows);
+ const newest=maxVisitUpdatedAt(rows);
  if(newest)setRemoteSyncMeta({visits_updated_at:newest});
- return allRows;
+ return rows||[];
 }
 
 async function deleteVisitsRemote(ids){const session=getSbSession();if(currentUser?.role!=='admin')throw new Error('Hanya admin yang dapat menghapus riwayat');if(!navigator.onLine)throw new Error('Penghapusan riwayat memerlukan koneksi internet');if(!session?.session_token)throw new Error('Sesi login tidak tersedia');return rpc('app_admin_delete_visits',{p_token:session.session_token,p_visit_ids:ids})}
@@ -765,7 +717,7 @@ async function copyProductAssignmentsFromArea(){
  const ok=navigator.onLine?await syncProductsToSupabase({silent:true}):false;toast(ok?'Pembagian barang berhasil disalin':'Pembagian tersimpan lokal dan akan disinkronkan saat online');if(!ok)scheduleProductSync();
 }
 
-const APP_VERSION="1.7.7";
+const APP_VERSION="1.8.0";
 const USER_SETTINGS_KEY="rml_user_accounts_v1";
 const DEFAULT_USERS=[
 {email:"rini@rml.app",loginName:"rini",active:true,phone:"085668027045",name:"Rini",role:"sales",password:"085668027045",mustChangePassword:true,canSwitchAreaFreely:false},
@@ -801,6 +753,30 @@ function getAreaAssignments(){try{return JSON.parse(localStorage.getItem(AREA_AS
 function assignedAreasForSales(email){return getAreaAssignments()[email]||[]}
 function isAreaAssigned(email,area){return assignedAreasForSales(email).includes(area)}
 function canSwitchAreaFreely(user=currentUser){return !!(user&&user.role==="sales"&&user.canSwitchAreaFreely===true)}
+async function pullAreaAssignmentsFromSupabase({silent=true}={}){
+ const session=getSbSession();
+ if(!navigator.onLine||!session?.session_token||!currentUser?.email)return false;
+ try{
+  const data=await rpc('app_pull_area_assignments',{p_token:session.session_token});
+  const row=Array.isArray(data)?data[0]:data;
+  const list=Array.isArray(row?.assignments)?row.assignments:[];
+  const email=String(currentUser.email||'').trim().toLowerCase();
+  const remoteAreas=[...new Set(list
+    .filter(x=>String(x?.sales_email||'').trim().toLowerCase()===email)
+    .map(x=>String(x?.area||'').trim())
+    .filter(Boolean))];
+
+  const map=getAreaAssignments();
+  map[email]=remoteAreas;
+  localStorage.setItem(AREA_ASSIGNMENT_KEY,JSON.stringify(map));
+  return true;
+ }catch(e){
+  console.warn('Sinkronisasi penugasan area gagal',e);
+  if(!silent)toast(`Gagal sinkron penugasan area: ${e.message||'Periksa RPC Supabase'}`);
+  return false;
+ }
+}
+
 const AREA_ASSIGNMENT_COLLAPSE_KEY="rml_area_assignment_collapsed_v1";
 function isAreaAssignmentCollapsed(){return localStorage.getItem(AREA_ASSIGNMENT_COLLAPSE_KEY)==="1"}
 function applyAreaAssignmentPanelState(){
@@ -1224,6 +1200,7 @@ async function login(){
   sessionStorage.setItem("rml_user",JSON.stringify(currentUser));localStorage.setItem("rml_cached_user",JSON.stringify(currentUser));
   if(currentUser.mustChangePassword)return showForcedPasswordPage();
   await pullCustomersFromSupabase({silent:true});
+  await pullAreaAssignmentsFromSupabase({silent:true});
   await pullProductsFromSupabase({silent:true});
   await cleanupVisitsOlderThan30Days({remote:true,silent:true});
   await pullRemoteVisits();openApp();
@@ -1345,7 +1322,8 @@ async function manualRefreshDashboard(){
  try{
   await syncPendingVisits({silent:true,autoRetry:false});
   await pullCustomersFromSupabase({silent:true});
-  await pullRemoteVisits({reconcile:true});
+  await pullAreaAssignmentsFromSupabase({silent:true});
+  await pullRemoteVisits();
   await refreshDashboard();
   toast("Data berhasil diperbarui");
  }catch(e){
@@ -1784,7 +1762,7 @@ function todayVisitForOutlet(customerNo){
 }
 function areaProgress(area){
  const outlets=customers().filter(c=>!c.isHidden&&
-   (isSupervisorUser()||isAreaAssigned(currentUser.email,area))&&c.area===area);
+   isAreaAssigned(currentUser.email,area)&&c.area===area);
  const visits=salesVisitsToday().filter(v=>v.area===area);
  const completedOutletNos=new Set(visits.map(v=>String(v.customerNo)));
  const completed=outlets.filter(c=>completedOutletNos.has(String(c.no))).length;
@@ -1806,7 +1784,7 @@ async function showDailyAreaSelection(){
  document.getElementById("areaPickerDate").textContent=
    new Date().toLocaleDateString("id-ID",{weekday:"long",day:"2-digit",month:"long",year:"numeric"});
 
- const areas=(isSupervisorUser()?allAreas():assignedAreasForSales(currentUser.email)).filter(area=>customers().some(c=>!c.isHidden&&c.area===area)).sort((a,b)=>a.localeCompare(b,"id",{numeric:true}));
+ const areas=assignedAreasForSales(currentUser.email).filter(area=>customers().some(c=>!c.isHidden&&c.area===area)).sort((a,b)=>a.localeCompare(b,"id",{numeric:true}));
 
  const current=getDailyArea();
  const rows=areas.map(area=>areaProgress(area));
@@ -1836,7 +1814,7 @@ async function showDailyAreaSelection(){
 }
 async function chooseArea(area){
  await refreshVisitCache();
- if(!isSupervisorUser()&&!isAreaAssigned(currentUser.email,area))return toast("Area ini tidak ditugaskan kepada Anda");
+ if(!isAreaAssigned(currentUser.email,area))return toast("Area ini tidak ditugaskan kepada Anda");
  const currentArea=getDailyArea();
  if(currentUser?.role==="sales"&&currentArea&&currentArea!==area){
    if(getActiveVisit())return toast("Selesaikan Check Out outlet yang sedang dikunjungi terlebih dahulu");
@@ -2657,7 +2635,7 @@ async function refreshHistoryFromServer(){
  if(button){button.disabled=true;button.textContent='Memuat...'}
  try{
   await syncPendingVisits({silent:true,autoRetry:false});
-  await pullRemoteVisits({reconcile:true});
+  await pullRemoteVisits();
   historyRenderLimit=HISTORY_PAGE_SIZE;
   await renderHistory();
   toast('Riwayat berhasil diperbarui');
@@ -3054,7 +3032,7 @@ window.addEventListener("beforeinstallprompt",e=>{
  const btn=document.getElementById("installBtn");
  if(btn)btn.classList.remove("hidden");
 });
-window.addEventListener("online",()=>{updateNetworkStatus();updatePendingSyncCount();scheduleAutoSync(100);if(currentUser){pullCustomersFromSupabase({silent:true}).then(()=>{if(!document.getElementById("customersView")?.classList.contains("hidden"))renderCustomers()}).catch(()=>{});pullProductsFromSupabase({silent:true}).then(()=>{if(!document.getElementById('priceListView')?.classList.contains('hidden')){fillProductFilters();renderPriceList();if(currentUser?.role==='admin')renderProductAssignments()}}).catch(()=>{});pullRemoteVisits().catch(()=>{});}});
+window.addEventListener("online",()=>{updateNetworkStatus();updatePendingSyncCount();scheduleAutoSync(100);if(currentUser){pullAreaAssignmentsFromSupabase({silent:true}).catch(()=>{});pullCustomersFromSupabase({silent:true}).then(()=>{if(!document.getElementById("customersView")?.classList.contains("hidden"))renderCustomers()}).catch(()=>{});pullProductsFromSupabase({silent:true}).then(()=>{if(!document.getElementById('priceListView')?.classList.contains('hidden')){fillProductFilters();renderPriceList();if(currentUser?.role==='admin')renderProductAssignments()}}).catch(()=>{});pullRemoteVisits().catch(()=>{});}});
 window.addEventListener("focus",()=>{scheduleAutoSync(150);});
 document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")scheduleAutoSync(150)});
 setInterval(()=>{if(document.visibilityState==="visible"&&navigator.onLine)scheduleAutoSync(0)},30000);
@@ -3074,7 +3052,7 @@ document.addEventListener("DOMContentLoaded",()=>{
 if("serviceWorker" in navigator&&location.protocol.startsWith("http")){
  window.addEventListener("load",async()=>{
   try{
-   const registration=await navigator.serviceWorker.register("./service-worker.js?v=1.7.7",{updateViaCache:"none"});
+   const registration=await navigator.serviceWorker.register("./service-worker.js?v=1.7.8",{updateViaCache:"none"});
    registration.update().catch(()=>{});
   }catch(e){console.warn("Service worker tidak dapat dipasang",e)}
  });
@@ -3142,7 +3120,7 @@ function getSalesName(email){
 }
 function esc(v){return String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
 function toast(m){const t=document.getElementById("toast");t.textContent=m;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2200)}
-const saved=sessionStorage.getItem("rml_user")||localStorage.getItem("rml_cached_user");if(saved){try{const oldUser=JSON.parse(saved);USERS=loadUsers();const localUser=USERS.find(u=>u.email===oldUser.email)||{};currentUser={...localUser,...oldUser};sessionStorage.setItem("rml_user",JSON.stringify(currentUser));localStorage.setItem("rml_cached_user",JSON.stringify(currentUser));currentUser.mustChangePassword?showForcedPasswordPage():(async()=>{await pullCustomersFromSupabase({silent:true});await cleanupVisitsOlderThan30Days({remote:navigator.onLine,silent:true});if(navigator.onLine)await pullRemoteVisits();openApp()})()}catch(e){sessionStorage.removeItem("rml_user");localStorage.removeItem("rml_cached_user")}}
+const saved=sessionStorage.getItem("rml_user")||localStorage.getItem("rml_cached_user");if(saved){try{const oldUser=JSON.parse(saved);USERS=loadUsers();const localUser=USERS.find(u=>u.email===oldUser.email)||{};currentUser={...localUser,...oldUser};sessionStorage.setItem("rml_user",JSON.stringify(currentUser));localStorage.setItem("rml_cached_user",JSON.stringify(currentUser));currentUser.mustChangePassword?showForcedPasswordPage():(async()=>{await pullCustomersFromSupabase({silent:true});await pullAreaAssignmentsFromSupabase({silent:true});await cleanupVisitsOlderThan30Days({remote:navigator.onLine,silent:true});if(navigator.onLine)await pullRemoteVisits();openApp()})()}catch(e){sessionStorage.removeItem("rml_user");localStorage.removeItem("rml_cached_user")}}
 
 document.addEventListener("DOMContentLoaded",async()=>{
  try{
