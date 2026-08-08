@@ -1762,7 +1762,7 @@ function todayVisitForOutlet(customerNo){
 }
 function areaProgress(area){
  const outlets=customers().filter(c=>!c.isHidden&&
-   isAreaAssigned(currentUser.email,area)&&c.area===area);
+   (isSupervisorUser()||isAreaAssigned(currentUser.email,area))&&c.area===area);
  const visits=salesVisitsToday().filter(v=>v.area===area);
  const completedOutletNos=new Set(visits.map(v=>String(v.customerNo)));
  const completed=outlets.filter(c=>completedOutletNos.has(String(c.no))).length;
@@ -1784,7 +1784,7 @@ async function showDailyAreaSelection(){
  document.getElementById("areaPickerDate").textContent=
    new Date().toLocaleDateString("id-ID",{weekday:"long",day:"2-digit",month:"long",year:"numeric"});
 
- const areas=assignedAreasForSales(currentUser.email).filter(area=>customers().some(c=>!c.isHidden&&c.area===area)).sort((a,b)=>a.localeCompare(b,"id",{numeric:true}));
+ const areas=(isSupervisorUser()?allAreas():assignedAreasForSales(currentUser.email)).filter(area=>customers().some(c=>!c.isHidden&&c.area===area)).sort((a,b)=>a.localeCompare(b,"id",{numeric:true}));
 
  const current=getDailyArea();
  const rows=areas.map(area=>areaProgress(area));
@@ -1814,7 +1814,7 @@ async function showDailyAreaSelection(){
 }
 async function chooseArea(area){
  await refreshVisitCache();
- if(!isAreaAssigned(currentUser.email,area))return toast("Area ini tidak ditugaskan kepada Anda");
+ if(!isSupervisorUser()&&!isAreaAssigned(currentUser.email,area))return toast("Area ini tidak ditugaskan kepada Anda");
  const currentArea=getDailyArea();
  if(currentUser?.role==="sales"&&currentArea&&currentArea!==area){
    if(getActiveVisit())return toast("Selesaikan Check Out outlet yang sedang dikunjungi terlebih dahulu");
