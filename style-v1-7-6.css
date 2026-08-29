@@ -1077,3 +1077,15 @@ body.modal-open{overflow:hidden}
 .promo-catalog-item span{width:24px;height:24px;border-radius:8px;background:#edf8f6;color:#117b73;display:grid;place-items:center;font-size:12px;font-weight:800}
 .promo-catalog-item strong{font-size:15px;color:#3d3030}
 @media(max-width:600px){.promo-catalog-category{padding:13px}.promo-catalog-item{padding:10px}}
+
+/* RML v1.8.41 promo catalog page */
+.promo-catalog-list{display:grid;gap:14px}
+.promo-catalog-category{background:#fff;border:1px solid #d5e7e4;border-radius:18px;padding:16px;box-shadow:0 4px 14px rgba(20,70,65,.04)}
+.promo-catalog-category-head{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.promo-catalog-category-head>span{width:38px;height:38px;border-radius:12px;background:#eaf7f5;display:grid;place-items:center;font-size:20px}
+.promo-catalog-category-head strong{display:block;color:#155e59;font-size:18px}
+.promo-catalog-category-head small{display:block;color:#718096;margin-top:2px}
+.promo-catalog-items{display:grid;gap:8px}
+.promo-catalog-item{display:flex;gap:10px;align-items:center;border:1px solid #e2eceb;border-radius:12px;padding:12px;background:#fbfdfd}
+.promo-catalog-item span{width:26px;height:26px;border-radius:8px;background:#edf8f6;color:#117b73;display:grid;place-items:center;font-size:12px;font-weight:800;flex:0 0 26px}
+.promo-catalog-item strong{font-size:15px;color:#3d3030}

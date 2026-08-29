@@ -1,3 +1,4 @@
+/* RML v1.8.42 - egress fix: reconciliation uses IDs only; no 30s remote reconcile */
 /* RML v1.7.7 - Supabase delta sync / egress optimization */
 function androidSaveBase64File(filename,mimeType,base64Data){
  if(window.AndroidBridge&&typeof window.AndroidBridge.saveBase64File==="function"){
@@ -79,14 +80,16 @@ async function pullRemoteVisits({reconcile=false}={}){
  const meta=getRemoteSyncMeta();
  const fullSyncDone=meta.visits_full_sync_version===VISIT_FULL_SYNC_VERSION;
  if(reconcile){
-  // Reconcile is intentionally bounded to the retained window. This is a manual operation.
-  rows=await rpc('app_pull_visits',{p_token:session.session_token,p_limit:REMOTE_VISIT_INITIAL_LIMIT});
-  const remoteIds=new Set((rows||[]).map(r=>String(r.id)));
+  // IMPORTANT: reconciliation must never download visit payloads/photos.
+  // Only IDs + updated_at are needed to detect deleted remote visits.
+  const remoteRows=await rpc('app_pull_visit_ids',{p_token:session.session_token,p_limit:REMOTE_VISIT_INITIAL_LIMIT});
+  const remoteIds=new Set((remoteRows||[]).map(r=>String(r.id)));
   const localRows=await idbGetAll(STORE_VISITS);
   for(const local of localRows){
    const belongsToCurrentUser=currentUser?.role==='admin'||local.salesEmail===currentUser?.email;
    if(belongsToCurrentUser&&local.syncStatus==='synced'&&!remoteIds.has(String(local.id)))await idbDelete(STORE_VISITS,local.id);
   }
+  return remoteRows||[];
  }else if(!fullSyncDone){
   // One-time repair/full sync for this browser/device. After this, login uses delta only.
   // The server retains 30 days, so this downloads the retained rows once, not on every login.
@@ -1372,7 +1375,7 @@ async function login(){
   }
   await pullProductsFromSupabase({silent:true});
   await cleanupVisitsOlderThan30Days({remote:true,silent:true});
-  await pullRemoteVisits();await reconcileRemoteVisits({force:true});openApp();
+  await pullRemoteVisits();openApp();
  }catch(e){toast(e.message||"Nama atau password salah")}
 }
 
@@ -1496,7 +1499,6 @@ async function manualRefreshDashboard(){
   await syncPendingVisits({silent:true,autoRetry:false});
   await pullCustomersFromSupabase({silent:true});
   await pullRemoteVisits();
-  await reconcileRemoteVisits({force:true});
   await refreshDashboard();
   toast("Data berhasil diperbarui");
  }catch(e){
@@ -3238,11 +3240,11 @@ window.addEventListener("online",()=>{updateNetworkStatus();updatePendingSyncCou
   pullCustomersFromSupabase({silent:true}).then(()=>{if(!document.getElementById("customersView")?.classList.contains("hidden"))renderCustomers()}).catch(()=>{});
   if(currentUser.role==="sales"||currentUser.role==="supervisor")pullAreaAssignmentsFromSupabase({silent:true}).then(ok=>{if(ok&&document.getElementById("dailyAreaView")&&!document.getElementById("dailyAreaView").classList.contains("hidden"))showDailyAreaSelection();}).catch(()=>{});
   pullProductsFromSupabase({silent:true}).then(()=>{if(!document.getElementById('priceListView')?.classList.contains('hidden')){fillProductFilters();renderPriceList();if(currentUser?.role==='admin')renderProductAssignments()}}).catch(()=>{});
-  reconcileRemoteVisits().catch(()=>{});
+
 }});
 window.addEventListener("focus",()=>{scheduleAutoSync(150);if((currentUser?.role==="sales"||currentUser?.role==="supervisor")&&navigator.onLine)pullAreaAssignmentsFromSupabase({silent:true}).then(ok=>{if(ok&&document.getElementById("dailyAreaView")&&!document.getElementById("dailyAreaView").classList.contains("hidden"))showDailyAreaSelection();}).catch(()=>{});});
 document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")scheduleAutoSync(150)});
-setInterval(()=>{if(document.visibilityState==="visible"&&navigator.onLine)scheduleAutoSync(0)},30000);
+
 window.addEventListener("offline",updateNetworkStatus);
 
 
