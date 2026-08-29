@@ -1023,3 +1023,6 @@ body.modal-open{overflow:hidden}
 .target-category-content{max-height:3000px;overflow:hidden;transition:max-height .25s ease,opacity .2s ease}
 .target-category-content.collapsed{max-height:0;opacity:0}
 .target-outlet-category-card{overflow:hidden}
+
+/* v1.8.35 - Target Reward */
+.target-reward-box{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:12px 0 10px;padding:10px;border:1px solid #d8e9e1;border-radius:12px;background:#f7fbf9}.target-reward-box>div{display:flex;flex-direction:column;gap:3px}.target-reward-box small{font-size:10px;color:#718078}.target-reward-box strong{font-size:13px;color:#167b59}.target-reward-full{text-align:right}.target-reward-mini{color:#167b59!important;font-weight:700}.target-form-help{display:block;margin:-5px 0 8px;color:#718078;font-size:11px;line-height:1.35}.target-manager-row small{line-height:1.4}@media(max-width:600px){.target-reward-box{grid-template-columns:1fr 1fr}.target-reward-full{grid-column:1/-1;text-align:left}}

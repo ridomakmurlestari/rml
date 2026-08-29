@@ -3,7 +3,7 @@ const APP_SHELL=[
  "./","./index.html","./style-v1-7-6.css",
  "./pdf-preview.html","./pdf-preview.css","./pdf-preview.js",
  "./app-v1-8-3.js?v=1.8.34","./customers-v0-10-3.js",
- "./dashboard-target-v1-8-5.js?v=1.8.34","./admin-sales-v1-8-9.js?v=1.8.34",
+ "./dashboard-target-v1-8-5.js?v=1.8.35","./admin-sales-v1-8-9.js?v=1.8.35",
  "./app-admin-photo-v1-7-8.js","./app-admin-delete-all-photos-v1-7-9.js"
 ];
 self.addEventListener("install",event=>{
