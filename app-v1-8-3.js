@@ -781,13 +781,13 @@ async function copyProductAssignmentsFromArea(){
  const ok=navigator.onLine?await syncProductsToSupabase({silent:true}):false;toast(ok?'Pembagian barang berhasil disalin':'Pembagian tersimpan lokal dan akan disinkronkan saat online');if(!ok)scheduleProductSync();
 }
 
-const APP_VERSION="1.8.33";
+const APP_VERSION="1.8.34";
 const USER_SETTINGS_KEY="rml_user_accounts_v1";
 const DEFAULT_USERS=[
-{email:"rini@rml.app",loginName:"rini",active:true,phone:"PHONE_RINI",name:"Rini",role:"sales",mustChangePassword:true,canSwitchAreaFreely:false},
-{email:"lisna@rml.app",loginName:"lisna",active:true,phone:"PHONE_LISNA",name:"Lisna",role:"sales",mustChangePassword:true,canSwitchAreaFreely:false},
-{email:"septino@rml.app",loginName:"septino",active:true,phone:"PHONE_SEPTINO",name:"Septino",role:"supervisor",mustChangePassword:true,canSwitchAreaFreely:false},
-{email:"admin@rml.app",loginName:"admin",active:true,phone:"PHONE_ADMIN",name:"Admin",role:"admin",mustChangePassword:true,canSwitchAreaFreely:false}];
+{email:"rini@rml.app",loginName:"rini",active:true,phone:"085668027045",name:"Rini",role:"sales",mustChangePassword:true,canSwitchAreaFreely:false},
+{email:"lisna@rml.app",loginName:"lisna",active:true,phone:"085218600582",name:"Lisna",role:"sales",mustChangePassword:true,canSwitchAreaFreely:false},
+{email:"septino@rml.app",loginName:"septino",active:true,phone:"08116946999",name:"Septino",role:"supervisor",mustChangePassword:true,canSwitchAreaFreely:false},
+{email:"admin@rml.app",loginName:"admin",active:true,phone:"082284879722",name:"Admin",role:"admin",mustChangePassword:true,canSwitchAreaFreely:false}];
 function normalizeKnownUserRole(user){
  if(!user)return user;
  if(String(user.email||"").toLowerCase()==="septino@rml.app") return {...user,role:"supervisor",canSwitchAreaFreely:false};
@@ -2456,7 +2456,7 @@ function showDetail(){
  st.className="badge "+(selected.isHidden?"status-hidden":"status-active");
  document.getElementById("hideBtn").textContent=selected.isHidden?"Aktifkan untuk Sales":"Hide dari Sales";
  const visitBtn=document.getElementById("visitBtn");
- visitBtn.classList.toggle("hidden",currentUser.role!=="sales"||(selected.isHidden&&currentUser.role==="sales"));
+ visitBtn.classList.toggle("hidden",!(currentUser.role==="sales"||isSupervisorUser())||(selected.isHidden&&currentUser.role==="sales"));
  const active=getActiveVisit();
  visitBtn.textContent=active&&active.customerNo===selected.no?"Lanjutkan Kunjungan":"Check In";
  renderOutletVisitHistory(selected.no);
@@ -2541,7 +2541,7 @@ function isOutletBeingVisited(customer){
  return Boolean(active&&active.customerNo===customer.no);
 }
 function openVisitFlow(){
- if(currentUser.role!=="sales")return toast("Fitur kunjungan hanya untuk sales");
+ if(currentUser.role!=="sales"&&!isSupervisorUser())return toast("Fitur kunjungan hanya untuk sales atau supervisor");
  const active=getActiveVisit();
  if(active&&active.customerNo!==selected.no){
    return toast(`Selesaikan Check Out di ${active.name} terlebih dahulu`);
@@ -3213,7 +3213,7 @@ document.addEventListener("DOMContentLoaded",()=>{
 if("serviceWorker" in navigator&&location.protocol.startsWith("http")){
  window.addEventListener("load",async()=>{
   try{
-   const registration=await navigator.serviceWorker.register("./service-worker.js?v=1.8.0",{updateViaCache:"none"});
+   const registration=await navigator.serviceWorker.register("./service-worker.js?v=1.8.34",{updateViaCache:"none"});
    registration.update().catch(()=>{});
   }catch(e){console.warn("Service worker tidak dapat dipasang",e)}
  });
