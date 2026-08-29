@@ -24,8 +24,24 @@ function outletName(no){return customersList().find(c=>String(c.no)===String(no)
 function outletSalesName(x){return salesName(x.targetSalesEmail||x.salesEmail||x.assignedSalesEmail)}
 function sessionToken(){try{return typeof getSbSession==='function'?getSbSession()?.session_token:null}catch(_){return null}}
 async function targetRpc(name,args){if(typeof rpc!=='function')throw new Error('Modul sinkronisasi Supabase tidak tersedia');return rpc(name,args)}
-function normalizeRemoteRow(r){return {id:String(r.id),type:r.type,startMonth:r.start_month||r.month||monthNow(),month:r.start_month||r.month||monthNow(),durationMonths:Number(r.duration_months||1),ownerId:r.owner_id||'',targetSalesEmail:r.target_sales_email||'',description:r.description||'',target:Number(r.target||0),achieved:Number(r.achieved||0),rewardType:String(r.reward_type||'none'),rewardValue:Number(r.reward_value||0),updatedDate:r.updated_date||'',updatedAt:r.updated_at||''}}
-function targetToRemote(x){return {id:String(x.id),type:x.type,start_month:targetStart(x),duration_months:periodMonths(x),owner_id:String(x.ownerId||''),target_sales_email:String(x.targetSalesEmail||''),description:String(x.description||''),target:Number(x.target||0),achieved:Number(x.achieved||0),reward_type:String(x.rewardType||'none'),reward_value:Number(x.rewardValue||0),updated_date:x.updatedDate||null,updated_at:x.updatedAt||new Date().toISOString()}}
+function decodeRewardDescription(description){
+ const raw=String(description||'');
+ const m=raw.match(/\n?\[\[RML_REWARD:([^:]+):([^\]]+)\]\]\s*$/);
+ if(!m)return {description:raw,rewardType:'none',rewardValue:0};
+ const type=['none','percent','nominal'].includes(m[1])?m[1]:'none';
+ const value=Math.max(0,Number(m[2]||0));
+ return {description:raw.slice(0,m.index).trimEnd(),rewardType:type,rewardValue:value};
+}
+function encodeRewardDescription(description,rewardType,rewardValue){
+ const base=String(description||'').replace(/\n?\[\[RML_REWARD:[^:]+:[^\]]+\]\]\s*$/,'').trimEnd();
+ if(!rewardType||rewardType==='none'||Number(rewardValue||0)<=0)return base;
+ return `${base}\n[[RML_REWARD:${rewardType}:${Number(rewardValue)}]]`;
+}
+function normalizeRemoteRow(r){
+ const d=decodeRewardDescription(r.description||'');
+ return {id:String(r.id),type:r.type,startMonth:r.start_month||r.month||monthNow(),month:r.start_month||r.month||monthNow(),durationMonths:Number(r.duration_months||1),ownerId:r.owner_id||'',targetSalesEmail:r.target_sales_email||'',description:d.description,target:Number(r.target||0),achieved:Number(r.achieved||0),rewardType:String(r.reward_type||d.rewardType||'none'),rewardValue:Number(r.reward_value||d.rewardValue||0),updatedDate:r.updated_date||'',updatedAt:r.updated_at||''}
+}
+function targetToRemote(x){return {id:String(x.id),type:x.type,start_month:targetStart(x),duration_months:periodMonths(x),owner_id:String(x.ownerId||''),target_sales_email:String(x.targetSalesEmail||''),description:encodeRewardDescription(x.description,x.rewardType,x.rewardValue),target:Number(x.target||0),achieved:Number(x.achieved||0),reward_type:String(x.rewardType||'none'),reward_value:Number(x.rewardValue||0),updated_date:x.updatedDate||null,updated_at:x.updatedAt||new Date().toISOString()}}
 async function pullTargetsFromServer({silent=true,throwOnError=false}={}){
  const token=sessionToken();if(!navigator.onLine||!token){if(throwOnError)throw new Error('Tidak ada koneksi internet atau sesi login tidak valid');return null;}
  try{
