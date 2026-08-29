@@ -166,13 +166,14 @@
   </div>
 
   <div id="dashboardSummary" class="dashboard-grid"></div>
-  <div id="dashboardTargetSummary" class="dashboard-card dashboard-target-summary hidden"></div>
-
-  <button id="monthlyPromoCard" class="dashboard-price-card monthly-promo-card hidden" type="button" onclick="showPromoManagementPage()">
+  <div class="dashboard-promo-target-grid">
+    <button id="monthlyPromoCard" class="dashboard-price-card monthly-promo-card hidden" type="button" onclick="handlePromoCardClick()">
     <span class="dashboard-price-icon monthly-promo-icon" aria-hidden="true">🎁</span>
     <span><strong>Promo Bulan Ini</strong><small id="monthlyPromoSubtitle">Promo bulan ini belum diatur</small><span id="monthlyPromoList" class="monthly-promo-list"></span></span>
     <span class="dashboard-price-arrow" aria-hidden="true">›</span>
-  </button>
+    </button>
+    <div id="dashboardTargetSummary" class="dashboard-card dashboard-target-summary hidden"></div>
+  </div>
 
   <button id="dashboardPriceCard" class="dashboard-price-card hidden" type="button" onclick="showPriceList()">
     <span class="dashboard-price-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H11v17H6.5A2.5 2.5 0 0 0 4 22z"/><path d="M20 5.5A2.5 2.5 0 0 0 17.5 3H13v17h4.5A2.5 2.5 0 0 1 20 22z"/><path d="M7 7h2M15 7h2M7 11h2M15 11h2"/></svg></span>
@@ -490,7 +491,8 @@
     </div>
   </div>
   <div class="dashboard-card promo-management-card">
-    <div class="promo-management-head"><div><small>PERIODE PROMO</small><h3 id="promoMonthLabel">-</h3></div></div>
+    <div class="promo-management-head"><div><small>PERIODE PROMO</small><h3 id="promoMonthLabel">-</h3><small id="promoSalesLabel">Sales: -</small></div></div>
+    <label for="promoSalesSelect">Sales</label><select id="promoSalesSelect" onchange="handlePromoSalesChange()"></select>
     <label for="promoItemsInput">Nama Barang Promo</label>
     <textarea id="promoItemsInput" rows="10" placeholder="Contoh:
 Dodo Diapers Pants M
@@ -792,7 +794,7 @@ Satu baris untuk satu barang promo. Field ini bebas diisi sesuai nama barang/pro
 <script src="customers-v0-10-3.js"></script>
 <script src="app-v1-8-3.js?v=1.8.35"></script>
 <script src="dashboard-target-v1-8-5.js?v=1.8.35"></script>
-<script src="promo-v1-8-35.js?v=1.8.35"></script>
+<script src="promo-v1-8-35.js?v=1.8.36"></script>
 <script src="admin-sales-v1-8-9.js?v=1.8.35"></script>
 <script src="app-admin-photo-v1-7-8.js"></script>
 <script src="app-admin-delete-all-photos-v1-7-9.js"></script>

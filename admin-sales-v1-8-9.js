@@ -26,7 +26,7 @@ async function saveNewSales(){
   if(btn){btn.disabled=true;btn.textContent='Menyimpan...'}
   if(!navigator.onLine)throw new Error('Tambah sales memerlukan internet agar akun dapat disimpan ke server');
   const session=getSbSession();if(!session?.session_token)throw new Error('Sesi login tidak tersedia. Silakan login ulang.');
-  await rpc('app_admin_save_settings',{p_token:session.session_token,p_users:USERS.map(u=>({account_key:u.email,display_name:u.name,login_name:(u.loginName||u.name).trim().toLowerCase(),phone:u.phone,role:u.role,active:u.active!==false,can_switch_area_freely:u.canSwitchAreaFreely===true})),p_assignments:Object.entries(getAreaAssignments()).flatMap(([email,areas])=>(areas||[]).map(area=>({sales_email:email,area})))});
+  await rpc('app_admin_upsert_user',{p_token:session.session_token,p_user:{account_key:email,display_name:name,login_name:login,phone,role:'sales',active,can_switch_area_freely:canSwitch}});
   closeAddSalesModal();fillAreas();fillHistorySalesFilter();renderAreaAssignments();renderUserManagement();toast(`Sales ${name} berhasil ditambahkan`);
  }catch(e){USERS=oldUsers;persistUsers();toast(`Gagal menambah sales: ${e.message||'Periksa koneksi'}`)}
  finally{if(btn){btn.disabled=false;btn.textContent='Simpan Sales'}}

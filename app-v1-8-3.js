@@ -796,7 +796,7 @@ async function copyProductAssignmentsFromArea(){
  const ok=navigator.onLine?await syncProductsToSupabase({silent:true}):false;toast(ok?'Pembagian barang berhasil disalin':'Pembagian tersimpan lokal dan akan disinkronkan saat online');if(!ok)scheduleProductSync();
 }
 
-const APP_VERSION="1.8.34";
+const APP_VERSION="1.8.36";
 const USER_SETTINGS_KEY="rml_user_accounts_v1";
 const DEFAULT_USERS=[
 {email:"rini@rml.app",loginName:"rini",active:true,phone:"085668027045",name:"Rini",role:"sales",mustChangePassword:true,canSwitchAreaFreely:false},
@@ -825,6 +825,18 @@ function isSupervisorUser(user=currentUser){
 }
 function canViewAllSalesHistory(user=currentUser){return Boolean(user&&(user.role==="admin"||isSupervisorUser(user)));}
 function persistUsers(){localStorage.setItem(USER_SETTINGS_KEY,JSON.stringify(USERS));}
+async function pullUsersFromSupabase({silent=true}={}){
+ const session=getSbSession();
+ if(!navigator.onLine||!session?.session_token)return false;
+ try{
+  const data=await rpc('app_get_users',{p_token:session.session_token});
+  if(Array.isArray(data)){
+   USERS=data.map(u=>normalizeKnownUserRole({email:u.account_key,loginName:u.login_name||'',name:u.display_name||'',phone:u.phone||'',role:u.role||'sales',active:u.active!==false,mustChangePassword:!!u.must_change_password,canSwitchAreaFreely:u.can_switch_area_freely===true}));
+   persistUsers();
+  }
+  return true;
+ }catch(e){if(!silent)console.warn('Gagal mengambil akun dari server',e);return false}
+}
 function normalizePhone(value){return String(value||"").replace(/[^0-9]/g,"");}
 
 const DB_NAME="rml_sales_visit_db";
@@ -927,7 +939,8 @@ function resetAreaAssignments(){if(!confirm("Reset penugasan area ke default?"))
 function renderUserManagement(){
  const host=document.getElementById("userManagementList");
  if(!host)return;
- host.innerHTML=USERS.map((u,index)=>`<div class="user-setting-card">
+ const visibleUsers=currentUser?.role==="supervisor"?USERS.filter(u=>u.role==="sales"):USERS;
+ host.innerHTML=visibleUsers.map(u=>{const index=USERS.indexOf(u);return `<div class="user-setting-card">
   <div class="user-setting-head"><div><strong>${esc(u.role==="admin"?"Admin":(u.role==="supervisor"?"Supervisor":"Sales"))}</strong><span>${esc(u.email)}</span></div><span class="badge">${esc(u.role==="admin"?"ADMIN":(u.role==="supervisor"?"SUPERVISOR":"SALES"))}</span></div>
   ${currentUser?.role==="admin"&&u.role!=="admin"?`<label>Peran Akun</label><select id="userRole_${index}" class="user-role-select"><option value="sales" ${u.role==="sales"?"selected":""}>Sales</option><option value="supervisor" ${u.role==="supervisor"?"selected":""}>Supervisor</option></select><small class="user-role-help">Admin dapat mengubah Sales menjadi Supervisor.</small>`:""}
   <label>Nama Tampilan</label>
@@ -939,7 +952,7 @@ function renderUserManagement(){
   <label class="account-active-row"><input id="userActive_${index}" type="checkbox" ${u.active===false?"":"checked"}> Akun aktif</label>
   ${u.role==="sales"?`<label class="account-active-row permission-row"><input id="userFreeArea_${index}" type="checkbox" ${u.canSwitchAreaFreely===true?"checked":""}> Bebas ganti area tanpa isi alasan outlet</label>`:""}
   <div class="user-setting-actions"><button id="saveUserBtn_${index}" class="primary compact" type="button" onclick="saveUserAccount(${index})">Simpan Akun</button><button class="secondary compact" type="button" onclick="resetUserPassword(${index})">Reset Password</button></div>
- </div>`).join("");
+ </div>`}).join("");
 }
 async function saveUserAccount(index){
  if(!(currentUser?.role==="admin"||isSupervisorUser()))return;
@@ -966,13 +979,7 @@ async function saveUserAccount(index){
  const before={name:user.name,loginName:user.loginName||user.name.toLowerCase(),phone:user.phone,active:user.active!==false,canSwitchAreaFreely:user.canSwitchAreaFreely===true,role:user.role};
  try{
   if(btn){btn.disabled=true;btn.textContent="Menyimpan..."}
-  if(requestedRole!==user.role){
-   const nextUsers=USERS.map((x,i)=>i===index?{...x,name,loginName,phone,active,canSwitchAreaFreely,role:requestedRole}:x);
-   const assignments=Object.entries(getAreaAssignments()).flatMap(([email,areas])=>(areas||[]).map(area=>({sales_email:email,area})));
-   await rpc('app_admin_save_settings',{p_token:session.session_token,p_users:nextUsers.map(x=>({account_key:x.email,display_name:x.name,login_name:(x.loginName||x.name).trim().toLowerCase(),phone:x.phone,role:x.role,active:x.active!==false,can_switch_area_freely:x.canSwitchAreaFreely===true})),p_assignments:assignments});
-  }else{
-   await rpc('app_admin_update_user',{p_token:session.session_token,p_account_key:user.email,p_display_name:name,p_login_name:loginName,p_phone:phone,p_active:active,p_can_switch_area_freely:canSwitchFreely});
-  }
+  await rpc('app_admin_upsert_user',{p_token:session.session_token,p_user:{account_key:user.email,display_name:name,login_name:loginName,phone,role:requestedRole,active,can_switch_area_freely:canSwitchFreely}});
   user.name=name;user.loginName=loginName;user.phone=phone;user.active=active;user.canSwitchAreaFreely=canSwitchFreely;user.role=requestedRole;persistUsers();
   if(currentUser.email===user.email){
    currentUser={...currentUser,...user};
@@ -1332,6 +1339,9 @@ async function login(){
   currentUser=normalizeKnownUserRole({...local,email:p.account_key,phone:p.phone||local.phone||"",name:p.display_name,role:p.role,mustChangePassword:!!p.must_change_password,canSwitchAreaFreely:permissions?.can_switch_area_freely??local.canSwitchAreaFreely??false});
   sessionStorage.setItem("rml_user",JSON.stringify(currentUser));localStorage.setItem("rml_cached_user",JSON.stringify(currentUser));
   if(currentUser.mustChangePassword)return showForcedPasswordPage();
+  await pullUsersFromSupabase({silent:true});
+  currentUser=normalizeKnownUserRole({...currentUser,...(USERS.find(u=>u.email===currentUser.email)||{})});
+  sessionStorage.setItem("rml_user",JSON.stringify(currentUser));localStorage.setItem("rml_cached_user",JSON.stringify(currentUser));
   await pullCustomersFromSupabase({silent:true});
   if(currentUser?.role==="sales"){
    const synced=await pullAreaAssignmentsFromSupabase({silent:true});
@@ -1379,6 +1389,7 @@ function logout(){
 function completeLogout(){sessionStorage.removeItem("rml_user");localStorage.removeItem("rml_cached_user");localStorage.removeItem("lastLogin");sessionStorage.removeItem("lastLogin");setSbSession(null);currentUser=null;window.location.replace("index.html")}
 function openApp(){
  initializeData();
+ if(navigator.onLine&&(currentUser?.role==="admin"||isSupervisorUser()))setTimeout(async()=>{if(await pullUsersFromSupabase({silent:true})){fillAreas();fillHistorySalesFilter();renderAreaAssignments();renderUserManagement();}},350);
  setTimeout(()=>cleanupVisitsOlderThan30Days({remote:navigator.onLine,silent:true}),300);
  if(navigator.onLine){setTimeout(()=>syncPendingVisits(),800);setTimeout(()=>pullProductsFromSupabase({silent:true}),1000);}
  document.getElementById("loginPage").classList.add("hidden");

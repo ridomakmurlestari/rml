@@ -1048,3 +1048,13 @@ body.modal-open{overflow:hidden}
 .promo-saved-item>span{width:24px;height:24px;border-radius:8px;background:#f0fdfa;color:#0f766e;display:inline-flex;align-items:center;justify-content:center;font-weight:900;font-size:11px;flex:0 0 auto}
 .promo-saved-item strong{font-size:14px;line-height:1.4;overflow-wrap:anywhere}
 @media(max-width:640px){.promo-management-actions{position:sticky;bottom:0;background:#fff;padding-top:10px}.promo-management-actions button{flex:1}.monthly-promo-list{max-height:84px}}
+
+/* v1.8.36 dashboard promo + target */
+.dashboard-promo-target-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px;align-items:stretch;margin:14px 0 2px}
+.dashboard-promo-target-grid .dashboard-price-card,.dashboard-promo-target-grid .dashboard-target-summary{margin:0;height:100%;box-sizing:border-box}
+.dashboard-promo-target-grid .dashboard-target-summary{min-width:0}
+.dashboard-promo-target-grid .monthly-promo-card{min-height:150px}
+@media(max-width:680px){.dashboard-promo-target-grid{grid-template-columns:1fr}.dashboard-promo-target-grid .monthly-promo-card{min-height:0}}
+.promo-management-card select{width:100%;margin-bottom:12px}
+.promo-management-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.promo-management-head small:last-child{display:block;margin-top:4px;opacity:.7}
