@@ -1026,3 +1026,25 @@ body.modal-open{overflow:hidden}
 
 /* v1.8.35 - Target Reward */
 .target-reward-box{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:12px 0 10px;padding:10px;border:1px solid #d8e9e1;border-radius:12px;background:#f7fbf9}.target-reward-box>div{display:flex;flex-direction:column;gap:3px}.target-reward-box small{font-size:10px;color:#718078}.target-reward-box strong{font-size:13px;color:#167b59}.target-reward-full{text-align:right}.target-reward-mini{color:#167b59!important;font-weight:700}.target-form-help{display:block;margin:-5px 0 8px;color:#718078;font-size:11px;line-height:1.35}.target-manager-row small{line-height:1.4}@media(max-width:600px){.target-reward-box{grid-template-columns:1fr 1fr}.target-reward-full{grid-column:1/-1;text-align:left}}
+
+/* v1.8.35 Promo Bulan Ini */
+.monthly-promo-card{margin-top:0}
+.monthly-promo-card.hidden{display:none!important}
+.monthly-promo-card>span:nth-child(2){display:grid;gap:4px;min-width:0}
+.monthly-promo-icon{font-size:25px;display:flex;align-items:center;justify-content:center}
+.monthly-promo-list{display:grid;gap:4px;margin-top:4px;max-height:92px;overflow:hidden}
+.monthly-promo-item{display:flex;align-items:flex-start;gap:7px;font-size:11px;line-height:1.3;color:#475569}
+.monthly-promo-item span{width:17px;height:17px;border-radius:999px;background:#f1f5f9;display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;font-size:9px;font-weight:900;color:#0f766e}
+.monthly-promo-item strong{font-size:11px;font-weight:700;overflow-wrap:anywhere}
+.promo-management-card,.promo-saved-card{margin-bottom:16px}
+.promo-management-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px}
+.promo-management-head small{display:block;color:#0f766e;font-size:11px;font-weight:900;letter-spacing:.08em;margin-bottom:4px}
+.promo-management-head h3{margin:0;font-size:22px}
+.promo-management-card>label{display:block;margin-bottom:6px;font-size:12px;font-weight:800;color:#475569}
+.promo-management-card textarea{width:100%;min-height:190px;resize:vertical;line-height:1.5}
+.promo-management-actions{justify-content:flex-end}
+.promo-saved-list{display:grid;gap:8px}
+.promo-saved-item{display:flex;align-items:flex-start;gap:9px;padding:11px 12px;border:1px solid #e2e8f0;border-radius:12px;background:#fff}
+.promo-saved-item>span{width:24px;height:24px;border-radius:8px;background:#f0fdfa;color:#0f766e;display:inline-flex;align-items:center;justify-content:center;font-weight:900;font-size:11px;flex:0 0 auto}
+.promo-saved-item strong{font-size:14px;line-height:1.4;overflow-wrap:anywhere}
+@media(max-width:640px){.promo-management-actions{position:sticky;bottom:0;background:#fff;padding-top:10px}.promo-management-actions button{flex:1}.monthly-promo-list{max-height:84px}}

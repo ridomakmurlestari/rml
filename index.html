@@ -168,6 +168,12 @@
   <div id="dashboardSummary" class="dashboard-grid"></div>
   <div id="dashboardTargetSummary" class="dashboard-card dashboard-target-summary hidden"></div>
 
+  <button id="monthlyPromoCard" class="dashboard-price-card monthly-promo-card hidden" type="button" onclick="showPromoManagementPage()">
+    <span class="dashboard-price-icon monthly-promo-icon" aria-hidden="true">🎁</span>
+    <span><strong>Promo Bulan Ini</strong><small id="monthlyPromoSubtitle">Promo bulan ini belum diatur</small><span id="monthlyPromoList" class="monthly-promo-list"></span></span>
+    <span class="dashboard-price-arrow" aria-hidden="true">›</span>
+  </button>
+
   <button id="dashboardPriceCard" class="dashboard-price-card hidden" type="button" onclick="showPriceList()">
     <span class="dashboard-price-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H11v17H6.5A2.5 2.5 0 0 0 4 22z"/><path d="M20 5.5A2.5 2.5 0 0 0 17.5 3H13v17h4.5A2.5 2.5 0 0 1 20 22z"/><path d="M7 7h2M15 7h2M7 11h2M15 11h2"/></svg></span>
     <span><strong>Daftar Harga</strong><small>Cari nama, kode, kategori, harga, dan diskon produk</small></span>
@@ -476,6 +482,34 @@
   <div id="targetDashboardGroups" class="target-dashboard-groups"></div>
 </section>
 
+<section id="promoView" class="view hidden">
+  <div class="target-page-head">
+    <button class="back" type="button" onclick="closePromoManagementPage()">← Kembali ke Pengaturan</button>
+    <div class="title-row target-page-title-row">
+      <div><h3>🎁 Promo Bulan Ini</h3><p>Masukkan nama barang promo yang akan ditampilkan kepada Sales.</p></div>
+    </div>
+  </div>
+  <div class="dashboard-card promo-management-card">
+    <div class="promo-management-head"><div><small>PERIODE PROMO</small><h3 id="promoMonthLabel">-</h3></div></div>
+    <label for="promoItemsInput">Nama Barang Promo</label>
+    <textarea id="promoItemsInput" rows="10" placeholder="Contoh:
+Dodo Diapers Pants M
+Dodo Baby Wipes 80s
+Evangeline Selection Black Vanilla
+
+Satu baris untuk satu barang promo. Field ini bebas diisi sesuai nama barang/program."></textarea>
+    <small class="target-form-help">Satu baris = satu barang promo. Tidak perlu kode atau harga; tulis bebas sesuai kebutuhan.</small>
+    <div class="page-actions promo-management-actions">
+      <button class="secondary" type="button" onclick="clearMonthlyPromo()">Hapus Promo</button>
+      <button class="primary" type="button" onclick="saveMonthlyPromo()">Simpan Promo</button>
+    </div>
+  </div>
+  <div class="dashboard-card promo-saved-card">
+    <div class="dashboard-card-head"><div><h3>Promo Tersimpan</h3><small>Daftar promo bulan ini</small></div></div>
+    <div id="promoSavedList" class="promo-saved-list"></div>
+  </div>
+</section>
+
 <section id="assignmentView" class="view hidden">
   <div class="title-row"><div><h3>Pengaturan Admin</h3><p>Atur master produk, penugasan area, akun pengguna, serta backup data.</p></div><button class="secondary compact" onclick="resetAreaAssignments()">Reset Penugasan</button></div>
   <div class="dashboard-card settings-master-product-card">
@@ -487,6 +521,11 @@
   <button class="dashboard-card settings-master-product-card target-settings-entry" type="button" onclick="showTargetManagementPage()">
     <span class="target-settings-entry-icon">🎯</span>
     <span class="target-settings-entry-text"><strong>Target & Pencapaian</strong><small>Kelola target Sales dan target Outlet dalam satu halaman khusus.</small></span>
+    <span class="target-settings-entry-arrow">›</span>
+  </button>
+  <button class="dashboard-card settings-master-product-card target-settings-entry promo-settings-entry" type="button" onclick="showPromoManagementPage()">
+    <span class="target-settings-entry-icon">🎁</span>
+    <span class="target-settings-entry-text"><strong>Promo Bulan Ini</strong><small>Atur nama barang promo yang tampil di Dashboard Sales.</small></span>
     <span class="target-settings-entry-arrow">›</span>
   </button>
   <div class="dashboard-card area-assignment-card">
@@ -751,8 +790,9 @@
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.4/dist/jspdf.plugin.autotable.min.js"></script>
 <script src="customers-v0-10-3.js"></script>
-<script src="app-v1-8-3.js?v=1.8.34"></script>
+<script src="app-v1-8-3.js?v=1.8.35"></script>
 <script src="dashboard-target-v1-8-5.js?v=1.8.35"></script>
+<script src="promo-v1-8-35.js?v=1.8.35"></script>
 <script src="admin-sales-v1-8-9.js?v=1.8.35"></script>
 <script src="app-admin-photo-v1-7-8.js"></script>
 <script src="app-admin-delete-all-photos-v1-7-9.js"></script>
