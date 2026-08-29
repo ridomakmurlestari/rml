@@ -1,4 +1,4 @@
-/* RML Sales Visit v1.8.35 - Target Reward (Percent / Nominal) */
+/* RML Sales Visit v1.8.39 - Target Reward (Percent / Nominal) */
 (function(){
 const TARGET_KEY='rml_dashboard_targets_v1';
 const TARGET_REMOTE_READY='rml_dashboard_targets_remote_ready_v1';

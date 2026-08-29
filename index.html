@@ -10,7 +10,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   
-</head>
+<style>.promo-category-editor{display:grid;gap:12px}.promo-category-row{border:1px solid #d8e7e5;border-radius:14px;padding:12px;background:#fbfdfd}.promo-category-head{display:flex;justify-content:space-between;align-items:center}.promo-category-row label{display:block;margin:7px 0 4px;font-weight:700;font-size:13px}.promo-category-name,.promo-category-items{width:100%;box-sizing:border-box;border:1px solid #cbdedb;border-radius:10px;padding:10px;font:inherit}.promo-saved-category{border:1px solid #d8e7e5;border-radius:12px;padding:10px;margin-bottom:10px}.promo-saved-category>strong{display:block;margin-bottom:6px}.promo-detail-group{border:1px solid #d8e7e5;border-radius:12px;padding:10px;margin-bottom:10px}.promo-detail-group h4{margin:0 0 7px}.monthly-promo-item{display:block!important}.monthly-promo-item b{display:block}.monthly-promo-item span{display:block}</style></head>
 <body>
 <div id="toast" class="toast"></div>
 
@@ -496,24 +496,19 @@
       <div><h3>🎁 Promo Bulan Ini</h3><p>Masukkan nama barang promo yang akan ditampilkan kepada Sales.</p></div>
     </div>
   </div>
+  
   <div class="dashboard-card promo-management-card">
-    <div class="promo-management-head"><div><small>PERIODE PROMO</small><h3 id="promoMonthLabel">-</h3><small id="promoSalesLabel">Sales: -</small></div></div>
-    <label for="promoSalesSelect">Sales</label><select id="promoSalesSelect" onchange="handlePromoSalesChange()"></select>
-    <label for="promoItemsInput">Nama Barang Promo</label>
-    <textarea id="promoItemsInput" rows="10" placeholder="Contoh:
-Dodo Diapers Pants M
-Dodo Baby Wipes 80s
-Evangeline Selection Black Vanilla
-
-Satu baris untuk satu barang promo. Field ini bebas diisi sesuai nama barang/program."></textarea>
-    <small class="target-form-help">Satu baris = satu barang promo. Tidak perlu kode atau harga; tulis bebas sesuai kebutuhan.</small>
+    <div class="promo-management-head"><div><small>PERIODE PROMO</small><h3 id="promoMonthLabel">-</h3><small id="promoSalesLabel">Penanggung Jawab: -</small></div></div>
+    <label for="promoSalesSelect">Penanggung Jawab</label><select id="promoSalesSelect" onchange="handlePromoSalesChange()"></select>
+    <div id="promoCategoryEditor" class="promo-category-editor"></div>
     <div class="page-actions promo-management-actions">
+      <button class="secondary" type="button" onclick="addPromoCategory()">＋ Tambah Kategori</button>
       <button class="secondary" type="button" onclick="clearMonthlyPromo()">Hapus Promo</button>
       <button class="primary" type="button" onclick="saveMonthlyPromo()">Simpan Promo</button>
     </div>
   </div>
   <div class="dashboard-card promo-saved-card">
-    <div class="dashboard-card-head"><div><h3>Promo Tersimpan</h3><small>Daftar promo bulan ini</small></div></div>
+    <div class="dashboard-card-head"><div><h3>Promo Tersimpan</h3><small>Promo dikelompokkan berdasarkan kategori</small></div></div>
     <div id="promoSavedList" class="promo-saved-list"></div>
   </div>
 </section>
@@ -798,10 +793,10 @@ Satu baris untuk satu barang promo. Field ini bebas diisi sesuai nama barang/pro
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.4/dist/jspdf.plugin.autotable.min.js"></script>
 <script src="customers-v0-10-3.js"></script>
-<script src="app-v1-8-3.js?v=1.8.38"></script>
-<script src="dashboard-target-v1-8-5.js?v=1.8.38"></script>
-<script src="promo-v1-8-35.js?v=1.8.38"></script>
-<script src="admin-sales-v1-8-9.js?v=1.8.38"></script>
+<script src="app-v1-8-3.js?v=1.8.39"></script>
+<script src="dashboard-target-v1-8-5.js?v=1.8.39"></script>
+<script src="promo-v1-8-35.js?v=1.8.39"></script>
+<script src="admin-sales-v1-8-9.js?v=1.8.39"></script>
 <script src="app-admin-photo-v1-7-8.js"></script>
 <script src="app-admin-delete-all-photos-v1-7-9.js"></script>
 </body>
