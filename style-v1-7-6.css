@@ -1064,3 +1064,16 @@ body.modal-open{overflow:hidden}
 @media(max-width:720px){.user-setting-actions-3{grid-template-columns:1fr}.monthly-promo-area{grid-template-columns:1fr}}
 
 .promo-categories-editor{display:grid;gap:12px;margin-top:12px}.promo-category-editor{border:1px solid #dbe7e5;border-radius:15px;padding:12px;background:#fbfefe}.promo-category-head{display:flex;align-items:center;justify-content:space-between;gap:10px}.promo-category-head label{margin:0}.promo-category-name{margin:6px 0 10px}.promo-category-items{width:100%;box-sizing:border-box;resize:vertical}.promo-category-delete{padding:7px 10px!important;width:auto!important}.promo-saved-category{border:1px solid #dbe7e5;border-radius:13px;padding:10px;margin-bottom:10px;background:#fff}.promo-saved-category>strong{display:block;margin-bottom:8px;color:#0f766e}.promo-detail-category{border:1px solid #dbe7e5;border-radius:13px;padding:10px}.promo-detail-category h4{margin:0 0 8px;color:#0f766e}.promo-detail-category .promo-detail-item{margin-top:8px}.monthly-promo-category{display:grid;gap:2px;padding:5px 0}.monthly-promo-category b{font-size:11px;color:#0f766e}.monthly-promo-category em{font-size:11px;font-style:normal;color:#475569;overflow-wrap:anywhere}.promo-management-actions{display:flex;gap:10px;flex-wrap:wrap}.promo-management-actions button{flex:1;min-width:150px}
+
+/* v1.8.40 Promo catalog page */
+.promo-catalog-list{display:grid;gap:14px}
+.promo-catalog-category{background:#fff;border:1px solid #d5e7e4;border-radius:18px;padding:16px;box-shadow:0 4px 14px rgba(20,70,65,.04)}
+.promo-catalog-category-head{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.promo-catalog-category-head h3{margin:0;flex:1;color:#155e59;font-size:18px}
+.promo-catalog-category-head small{color:#718096}
+.promo-catalog-category-number{width:30px;height:30px;border-radius:10px;background:#e8f6f3;color:#117b73;display:grid;place-items:center;font-weight:800}
+.promo-catalog-items{display:grid;gap:8px}
+.promo-catalog-item{display:flex;gap:10px;align-items:center;border:1px solid #e2eceb;border-radius:12px;padding:11px 12px;background:#fbfdfd}
+.promo-catalog-item span{width:24px;height:24px;border-radius:8px;background:#edf8f6;color:#117b73;display:grid;place-items:center;font-size:12px;font-weight:800}
+.promo-catalog-item strong{font-size:15px;color:#3d3030}
+@media(max-width:600px){.promo-catalog-category{padding:13px}.promo-catalog-item{padding:10px}}
