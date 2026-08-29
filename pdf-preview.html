@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#176e59">
+  <title>Preview Laporan Kunjungan</title>
+  <link rel="stylesheet" href="pdf-preview.css">
+</head>
+<body>
+  <header class="preview-toolbar">
+    <button type="button" class="btn secondary" onclick="goBackToHistory()">← Kembali</button>
+    <div class="toolbar-title">
+      <strong>Preview Laporan</strong>
+      <small>Periksa data sebelum menyimpan PDF</small>
+    </div>
+    <button id="savePdfBtn" type="button" class="btn primary" onclick="savePreviewAsPdf()">Simpan PDF</button>
+  </header>
+
+  <main class="page-wrap">
+    <section class="report-sheet">
+      <div class="report-heading">
+        <div>
+          <h1 id="reportTitle">Laporan Riwayat Kunjungan Sales</h1>
+          <p id="reportSubtitle">RML Sales Visit</p>
+        </div>
+        <div class="report-meta">
+          <div><span>Dibuat</span><strong id="generatedAt">-</strong></div>
+          <div><span>Periode</span><strong id="periodLabel">-</strong></div>
+          <div><span>Filter Sales</span><strong id="salesLabel">-</strong></div>
+        </div>
+      </div>
+
+      <div class="summary-grid">
+        <article><span>Total Aktivitas</span><strong id="sumTotal">0</strong></article>
+        <article><span>Ada Order</span><strong id="sumOrder">0</strong></article>
+        <article><span>Tidak Order</span><strong id="sumNoOrder">0</strong></article>
+        <article><span>Tidak Bertemu</span><strong id="sumNoMeet">0</strong></article>
+        <article><span>Order Luar Area</span><strong id="sumOutside">0</strong></article>
+      </div>
+
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr><th>No.</th><th>Outlet</th><th>Sales</th><th>Status</th><th>Waktu</th><th>Orderan / Catatan</th></tr>
+          </thead>
+          <tbody id="reportRows"></tbody>
+        </table>
+      </div>
+      <footer>Dokumen dibuat dari RML Sales Visit</footer>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.4/dist/jspdf.plugin.autotable.min.js"></script>
+  <script src="pdf-preview.js"></script>
+</body>
+</html>
