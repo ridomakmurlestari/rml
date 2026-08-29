@@ -830,9 +830,26 @@ async function pullUsersFromSupabase({silent=true}={}){
  if(!navigator.onLine||!session?.session_token)return false;
  try{
   const data=await rpc('app_get_users',{p_token:session.session_token});
-  if(Array.isArray(data)){
-   USERS=data.map(u=>normalizeKnownUserRole({email:u.account_key,loginName:u.login_name||'',name:u.display_name||'',phone:u.phone||'',role:u.role||'sales',active:u.active!==false,mustChangePassword:!!u.must_change_password,canSwitchAreaFreely:u.can_switch_area_freely===true}));
+  if(!Array.isArray(data))return true;
+  const remoteUsers=data.map(u=>normalizeKnownUserRole({email:u.account_key,loginName:u.login_name||'',name:u.display_name||'',phone:u.phone||'',role:u.role||'sales',active:u.active!==false,mustChangePassword:!!u.must_change_password,canSwitchAreaFreely:u.can_switch_area_freely===true})).filter(u=>u.email);
+
+  // Jangan pernah menghapus cache USERS hanya karena response server kosong
+  // atau hanya berisi sebagian akun akibat filter role/session.
+  // Akun remote yang ada akan diperbarui, akun lokal yang tidak dikembalikan
+  // server tetap dipertahankan agar data Sales tidak hilang dari aplikasi.
+  if(remoteUsers.length){
+   const merged=new Map(USERS.map(u=>[String(u.email||'').toLowerCase(),u]));
+   remoteUsers.forEach(u=>{
+    const key=String(u.email||'').toLowerCase();
+    const old=merged.get(key);
+    merged.set(key,old?{...old,...u}:u);
+   });
+   USERS=Array.from(merged.values());
    persistUsers();
+  } else if(!Array.isArray(USERS)||USERS.length===0){
+   // Hanya jika cache memang sudah kosong, jangan membuat data baru palsu.
+   // Biarkan caller memakai fallback login/profile.
+   if(!silent)console.warn('app_get_users mengembalikan 0 akun; cache lokal juga kosong');
   }
   return true;
  }catch(e){if(!silent)console.warn('Gagal mengambil akun dari server',e);return false}

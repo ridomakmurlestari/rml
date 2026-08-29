@@ -1,4 +1,4 @@
-RML v1.8.36 FIX
+RML v1.8.37 FIX
 
 PENTING: Jalankan SUPABASE-FIX-v1-8-36.sql SATU KALI di Supabase SQL Editor sebelum memakai fitur berikut:
 - Tambah/Edit Sales oleh Admin/Supervisor
