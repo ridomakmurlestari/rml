@@ -1,4 +1,4 @@
-/* RML Sales Visit v1.8.39 - Target Reward (Percent / Nominal) */
+/* RML Sales Visit v1.8.35 - Target Reward (Percent / Nominal) */
 (function(){
 const TARGET_KEY='rml_dashboard_targets_v1';
 const TARGET_REMOTE_READY='rml_dashboard_targets_remote_ready_v1';
@@ -78,7 +78,7 @@ function fillTargetManagerFields(){
   label.textContent='Outlet';
   owner.innerHTML=customersList().map(c=>`<option value="${escTarget(c.no)}">${escTarget(c.name)}${c.area?` — ${escTarget(c.area)}`:''}</option>`).join('');
   salesWrap?.classList.remove('hidden');
-  if(sales)sales.innerHTML=selectableUsers.filter(u=>u.role==='sales').map(u=>`<option value="${escTarget(u.email)}">${escTarget(u.name)}</option>`).join('');
+  if(sales)sales.innerHTML=selectableUsers.map(u=>`<option value="${escTarget(u.email)}">${escTarget(u.name)}${u.role==='supervisor'?' — Supervisor':''}</option>`).join('');
  }
 }
 function formatUpdateDate(v){if(!v)return '-';const d=new Date(String(v).length===10?String(v)+'T00:00:00':v);if(Number.isNaN(d.getTime()))return escTarget(v);return d.toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'})}

@@ -10,7 +10,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   
-<style>.promo-category-editor{display:grid;gap:12px}.promo-category-row{border:1px solid #d8e7e5;border-radius:14px;padding:12px;background:#fbfdfd}.promo-category-head{display:flex;justify-content:space-between;align-items:center}.promo-category-row label{display:block;margin:7px 0 4px;font-weight:700;font-size:13px}.promo-category-name,.promo-category-items{width:100%;box-sizing:border-box;border:1px solid #cbdedb;border-radius:10px;padding:10px;font:inherit}.promo-saved-category{border:1px solid #d8e7e5;border-radius:12px;padding:10px;margin-bottom:10px}.promo-saved-category>strong{display:block;margin-bottom:6px}.promo-detail-group{border:1px solid #d8e7e5;border-radius:12px;padding:10px;margin-bottom:10px}.promo-detail-group h4{margin:0 0 7px}.monthly-promo-item{display:block!important}.monthly-promo-item b{display:block}.monthly-promo-item span{display:block}</style></head>
+</head>
 <body>
 <div id="toast" class="toast"></div>
 
@@ -57,7 +57,7 @@
       <label>Mulai Periode</label><input id="targetMonthInput" type="month">
       <label>Durasi Target</label><select id="targetDurationInput"><option value="1">1 Bulan</option><option value="3">3 Bulan</option><option value="6">6 Bulan</option><option value="12">12 Bulan</option></select>
       <label id="targetOwnerLabel">Sales</label><select id="targetOwnerInput"></select>
-      <div id="targetSalesWrap" class="hidden"><label>Sales Penanggung Jawab Outlet</label><select id="targetSalesInput"></select><small class="target-form-help">Target outlet ini akan muncul di Dashboard Sales yang dipilih.</small></div>
+      <div id="targetSalesWrap" class="hidden"><label>Penanggung Jawab Outlet</label><select id="targetSalesInput"></select><small class="target-form-help">Target outlet ini akan muncul di Dashboard Sales yang dipilih.</small></div>
       <label>Deskripsi / Nama Target</label><input id="targetDescriptionInput" type="text" placeholder="Contoh: Target Bulanan DODO / Target Produk / Program Agustus">
       <label>Target (Rp)</label><input id="targetAmountInput" type="number" min="0" step="1000" placeholder="80000000">
       <label>Reward</label><select id="targetRewardTypeInput" onchange="refreshTargetRewardFields()"><option value="none">Tanpa Reward</option><option value="percent">Persentase (%)</option><option value="nominal">Nominal (Rp)</option></select>
@@ -496,11 +496,10 @@
       <div><h3>🎁 Promo Bulan Ini</h3><p>Masukkan nama barang promo yang akan ditampilkan kepada Sales.</p></div>
     </div>
   </div>
-  
   <div class="dashboard-card promo-management-card">
     <div class="promo-management-head"><div><small>PERIODE PROMO</small><h3 id="promoMonthLabel">-</h3><small id="promoSalesLabel">Penanggung Jawab: -</small></div></div>
     <label for="promoSalesSelect">Penanggung Jawab</label><select id="promoSalesSelect" onchange="handlePromoSalesChange()"></select>
-    <div id="promoCategoryEditor" class="promo-category-editor"></div>
+    <div id="promoCategories" class="promo-categories-editor"></div>
     <div class="page-actions promo-management-actions">
       <button class="secondary" type="button" onclick="addPromoCategory()">＋ Tambah Kategori</button>
       <button class="secondary" type="button" onclick="clearMonthlyPromo()">Hapus Promo</button>
@@ -508,7 +507,7 @@
     </div>
   </div>
   <div class="dashboard-card promo-saved-card">
-    <div class="dashboard-card-head"><div><h3>Promo Tersimpan</h3><small>Promo dikelompokkan berdasarkan kategori</small></div></div>
+    <div class="dashboard-card-head"><div><h3>Promo Tersimpan</h3><small>Daftar promo bulan ini</small></div></div>
     <div id="promoSavedList" class="promo-saved-list"></div>
   </div>
 </section>
@@ -793,10 +792,10 @@
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.4/dist/jspdf.plugin.autotable.min.js"></script>
 <script src="customers-v0-10-3.js"></script>
-<script src="app-v1-8-3.js?v=1.8.39"></script>
+<script src="app-v1-8-3.js?v=1.8.38"></script>
 <script src="dashboard-target-v1-8-5.js?v=1.8.39"></script>
 <script src="promo-v1-8-35.js?v=1.8.39"></script>
-<script src="admin-sales-v1-8-9.js?v=1.8.39"></script>
+<script src="admin-sales-v1-8-9.js?v=1.8.38"></script>
 <script src="app-admin-photo-v1-7-8.js"></script>
 <script src="app-admin-delete-all-photos-v1-7-9.js"></script>
 </body>

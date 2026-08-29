@@ -1,9 +1,8 @@
-RML Sales Visit v1.8.35
+RML Sales Visit v1.8.34
+WEB / VERCEL PACKAGE
 
-TARGET REWARD:
-- Target Sales dan Target Outlet sekarang memiliki Reward opsional.
-- Pilihan reward: Tanpa Reward, Persentase (%), atau Nominal (Rp).
-- Reward penuh tercapai pada 100% target; estimasi reward berjalan proporsional terhadap pencapaian.
-- Data reward dikirim bersama p_target ke RPC target yang sudah digunakan aplikasi.
+Upload the CONTENTS of this folder to the root of the GitHub repository used by Vercel.
+Do not upload this ZIP file itself.
 
-UPLOAD THIS FOLDER CONTENTS TO THE ROOT OF THE GITHUB REPOSITORY USED BY VERCEL.
+This package includes the Check In/Supervisor fix and a refreshed service worker cache.
+After deployment, if an old page is still shown, close the browser/PWA and reload once.
