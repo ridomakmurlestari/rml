@@ -1058,3 +1058,7 @@ body.modal-open{overflow:hidden}
 .promo-management-card select{width:100%;margin-bottom:12px}
 .promo-management-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
 .promo-management-head small:last-child{display:block;margin-top:4px;opacity:.7}
+
+/* v1.8.38 promo per sales + delete sales */
+.monthly-promo-area{display:grid;gap:14px;min-width:0}.monthly-promo-area.hidden{display:none!important}.monthly-promo-area .monthly-promo-card{margin:0;width:100%;box-sizing:border-box}.monthly-promo-sales-card{cursor:pointer;text-align:left}.promo-detail-modal-card{max-width:560px}.promo-detail-modal-card .visit-detail-modal-head p{margin:4px 0 0;color:#64748b;font-size:12px}.promo-detail-list{display:grid;gap:10px;padding:16px}.promo-detail-item{display:flex;align-items:flex-start;gap:10px;padding:13px;border:1px solid #dbe7e5;border-radius:13px;background:#fff}.promo-detail-item>span{width:28px;height:28px;border-radius:9px;background:#f0fdfa;color:#0f766e;display:inline-flex;align-items:center;justify-content:center;font-weight:900;font-size:12px;flex:0 0 auto}.promo-detail-item strong{font-size:14px;line-height:1.45;overflow-wrap:anywhere}.user-setting-actions-3{grid-template-columns:1fr 1fr 1fr}.user-setting-actions .danger.compact{margin-top:0;padding:10px 12px;width:auto;background:#fee2e2;color:#b42318}.user-setting-actions .danger.compact:hover{filter:brightness(.98)}
+@media(max-width:720px){.user-setting-actions-3{grid-template-columns:1fr}.monthly-promo-area{grid-template-columns:1fr}}

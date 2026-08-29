@@ -163,4 +163,24 @@ begin
 end $$;
 grant execute on function public.app_admin_upsert_monthly_promo(text,text,text,jsonb) to anon,authenticated;
 
+-- 4) Hapus Sales secara aman: akun dinonaktifkan agar riwayat kunjungan tidak ikut terhapus.
+drop function if exists public.app_admin_delete_user(text,text);
+create function public.app_admin_delete_user(p_token text,p_account_key text)
+returns boolean
+language plpgsql security definer set search_path=public
+as $$
+declare v_role text; v_id uuid; v_target_role text;
+begin
+ select lower(s.role) into v_role from public._app_session_user(p_token) s;
+ if v_role not in ('admin','supervisor') then raise exception 'Tidak memiliki izin menghapus Sales'; end if;
+ select id,role into v_id,v_target_role from public.app_users where lower(account_key)=lower(trim(p_account_key)) limit 1;
+ if v_id is null then raise exception 'Akun Sales tidak ditemukan'; end if;
+ if v_target_role<>'sales' then raise exception 'Yang dapat dihapus hanya akun Sales'; end if;
+ update public.app_users set active=false,updated_at=now() where id=v_id;
+ delete from public.app_sessions where user_id=v_id;
+ delete from public.area_assignments where lower(sales_email)=lower(trim(p_account_key));
+ return true;
+end $$;
+grant execute on function public.app_admin_delete_user(text,text) to anon,authenticated;
+
 notify pgrst,'reload schema';

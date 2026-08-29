@@ -968,7 +968,7 @@ function renderUserManagement(){
   <input id="userPhone_${index}" type="tel" inputmode="numeric" value="${esc(u.phone||"")}" autocomplete="off">
   <label class="account-active-row"><input id="userActive_${index}" type="checkbox" ${u.active===false?"":"checked"}> Akun aktif</label>
   ${u.role==="sales"?`<label class="account-active-row permission-row"><input id="userFreeArea_${index}" type="checkbox" ${u.canSwitchAreaFreely===true?"checked":""}> Bebas ganti area tanpa isi alasan outlet</label>`:""}
-  <div class="user-setting-actions"><button id="saveUserBtn_${index}" class="primary compact" type="button" onclick="saveUserAccount(${index})">Simpan Akun</button><button class="secondary compact" type="button" onclick="resetUserPassword(${index})">Reset Password</button></div>
+  <div class="user-setting-actions user-setting-actions-3"><button id="saveUserBtn_${index}" class="primary compact" type="button" onclick="saveUserAccount(${index})">Simpan Akun</button><button class="secondary compact" type="button" onclick="resetUserPassword(${index})">Reset Password</button>${u.role==="sales"?`<button class="danger compact" type="button" onclick="deleteSalesAccount(${index})">Hapus Sales</button>`:""}</div>
  </div>`}).join("");
 }
 async function saveUserAccount(index){
@@ -1561,7 +1561,7 @@ async function refreshDashboard(){
 
  dailyAreaCard?.classList.remove("hidden");
  document.getElementById("salesStatsTitle").textContent="Statistik Sales Hari Ini";
- const salesUsers=USERS.filter(u=>u.role==="sales"||u.role==="supervisor");
+ const salesUsers=USERS.filter(u=>(u.role==="sales"||u.role==="supervisor")&&u.active!==false);
  document.getElementById("salesStatsList").innerHTML=salesUsers.map(user=>{
    const rows=allToday.filter(v=>v.salesEmail===user.email);
    return `<div class="sales-stat-card">

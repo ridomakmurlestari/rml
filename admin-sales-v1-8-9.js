@@ -32,3 +32,25 @@ async function saveNewSales(){
  finally{if(btn){btn.disabled=false;btn.textContent='Simpan Sales'}}
 }
 window.openAddSalesModal=openAddSalesModal;window.closeAddSalesModal=closeAddSalesModal;window.saveNewSales=saveNewSales;
+
+async function deleteSalesAccount(index){
+ if(!canManageSalesAccounts())return;
+ const user=USERS[index];
+ if(!user||user.role!=="sales")return toast("Akun Sales tidak ditemukan");
+ if(!confirm(`Hapus Sales ${user.name}? Akun akan dinonaktifkan dan tidak dapat login lagi. Riwayat kunjungan tetap disimpan.`))return;
+ if(!navigator.onLine)return toast("Hapus Sales memerlukan internet");
+ const session=getSbSession();if(!session?.session_token)return toast("Sesi login tidak tersedia. Silakan login ulang.");
+ try{
+   await rpc('app_admin_delete_user',{p_token:session.session_token,p_account_key:user.email});
+   const pos=USERS.findIndex(u=>u.email===user.email);
+   if(pos>=0)USERS.splice(pos,1);
+   persistUsers();
+   if(typeof renderAreaAssignments==='function')renderAreaAssignments();
+   if(typeof fillAreas==='function')fillAreas();
+   if(typeof fillHistorySalesFilter==='function')fillHistorySalesFilter();
+   if(typeof renderUserManagement==='function')renderUserManagement();
+   if(typeof renderMonthlyPromoCard==='function')renderMonthlyPromoCard();
+   toast(`Sales ${user.name} berhasil dihapus`);
+ }catch(e){toast(`Gagal menghapus Sales: ${e.message||'periksa SQL Supabase'}`)}
+}
+window.deleteSalesAccount=deleteSalesAccount;

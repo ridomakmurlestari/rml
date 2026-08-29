@@ -1,10 +1,8 @@
-RML Sales Visit v1.8.37 - SALES DATA SAFETY FIX
+RML Sales Visit v1.8.38
 
-Perbaikan utama:
-- app_get_users tidak lagi mengosongkan USERS lokal ketika response server kosong/sebagian.
-- Data akun remote di-merge ke cache lokal; akun lokal yang tidak ikut response tetap dipertahankan.
-- SQL app_get_users menggunakan session user yang diambil sekali dan mendukung admin/supervisor/sales.
-- Android build version dinaikkan ke 1.8.37.
-- Fitur camera/check-in, target/reward, promo per Sales dari v1.8.36 tetap dibawa.
-
-Jalankan SUPABASE-FIX-v1-8-36.sql (isinya sudah diperbarui untuk v1.8.37) di Supabase SQL Editor sebelum pengujian server.
+Perubahan:
+- Admin Dashboard tidak menampilkan Promo Bulan Ini.
+- Sales dapat klik kartu Promo Bulan Ini dan melihat setiap promo sebagai kartu terpisah.
+- Supervisor melihat promo berdasarkan Sales; setiap Sales yang memiliki promo ditampilkan sebagai kartu sendiri.
+- Admin/Supervisor mendapat tombol Hapus Sales. Hapus = menonaktifkan akun, menghapus sesi login dan penugasan area, tetapi tidak menghapus riwayat kunjungan.
+- Jalankan SUPABASE-FIX-v1-8-37.sql sekali di Supabase SQL Editor.
