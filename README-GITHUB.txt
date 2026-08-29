@@ -1,8 +1,9 @@
-RML Sales Visit v1.8.34
-WEB / VERCEL PACKAGE
+RML Sales Visit v1.8.35
 
-Upload the CONTENTS of this folder to the root of the GitHub repository used by Vercel.
-Do not upload this ZIP file itself.
+UPLOAD THIS FOLDER'S CONTENTS TO THE ROOT OF THE GITHUB REPOSITORY USED BY VERCEL.
 
-This package includes the Check In/Supervisor fix and a refreshed service worker cache.
-After deployment, if an old page is still shown, close the browser/PWA and reload once.
+Fixes:
+- Deleted remote visit records are reconciled and removed from local device cache.
+- Supervisor can finish today's area without entering reasons.
+- Sales must enter a reason for every unvisited outlet before finishing today's area.
+- Service worker cache bumped to force the latest web code.

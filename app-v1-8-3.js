@@ -109,6 +109,21 @@ async function pullRemoteVisits({reconcile=false}={}){
  return rows||[];
 }
 
+let lastVisitReconcileAt=0;
+async function reconcileRemoteVisits({force=false}={}){
+ if(!navigator.onLine||!getSbSession()?.session_token)return [];
+ const now=Date.now();
+ if(!force&&now-lastVisitReconcileAt<60000)return [];
+ try{
+   const rows=await pullRemoteVisits({reconcile:true});
+   lastVisitReconcileAt=Date.now();
+   return rows;
+ }catch(e){
+   console.warn("Rekonsiliasi riwayat gagal",e);
+   return [];
+ }
+}
+
 async function deleteVisitsRemote(ids){const session=getSbSession();if(currentUser?.role!=='admin')throw new Error('Hanya admin yang dapat menghapus riwayat');if(!navigator.onLine)throw new Error('Penghapusan riwayat memerlukan koneksi internet');if(!session?.session_token)throw new Error('Sesi login tidak tersedia');return rpc('app_admin_delete_visits',{p_token:session.session_token,p_visit_ids:ids})}
 const VISIT_RETENTION_DAYS=30;
 function visitRetentionCutoff(){
@@ -1330,20 +1345,22 @@ async function login(){
   }
   await pullProductsFromSupabase({silent:true});
   await cleanupVisitsOlderThan30Days({remote:true,silent:true});
-  await pullRemoteVisits();openApp();
+  await pullRemoteVisits();await reconcileRemoteVisits({force:true});openApp();
  }catch(e){toast(e.message||"Nama atau password salah")}
 }
 
 async function finishAreaTask(){
- if(currentUser?.role!=="sales")return;
+ if(!(currentUser?.role==="sales"||isSupervisorUser()))return;
  if(getActiveVisit())return toast("Selesaikan Check Out outlet yang sedang dikunjungi terlebih dahulu");
  await refreshVisitCache();
  const area=getDailyArea();
  if(!area)return toast("Belum ada area aktif hari ini");
- if(canSwitchAreaFreely()){
-   if(!confirm(`Selesaikan tugas area ${area} hari ini?\n\nAnda tetap login dan dapat memilih area lain.`))return;
+ // Supervisor boleh menyelesaikan area tanpa mengisi alasan outlet yang belum dikunjungi.
+ if(isSupervisorUser()){
+   if(!confirm(`Selesaikan tugas area ${area} hari ini?`))return;
    return completeAreaTask(area);
  }
+ // Sales WAJIB mengisi alasan untuk setiap outlet yang belum dikunjungi.
  const pending=getPendingOutletsForArea(area);
  return openUnvisitedReasonModal({type:"finishArea",area,pending});
 }
@@ -1369,7 +1386,7 @@ function openApp(){
  document.getElementById("roleText").textContent=currentUser.role==="admin"?"Admin":(isSupervisorUser()?"Supervisor":"Sales");
  document.getElementById("userText").textContent=currentUser.name;
  document.getElementById("finishBtn").textContent="Selesai Tugas Area Hari Ini";
- document.getElementById("finishBtn").classList.toggle("hidden",currentUser.role!=="sales");
+ document.getElementById("finishBtn").classList.toggle("hidden",!(currentUser.role==="sales"||isSupervisorUser()));
  document.getElementById("addBtn").classList.toggle("hidden",currentUser.role!=="admin");
  document.getElementById("editBtn").classList.toggle("hidden",currentUser.role!=="admin");
  document.getElementById("hideBtn").classList.toggle("hidden",currentUser.role!=="admin");
@@ -1451,6 +1468,7 @@ async function manualRefreshDashboard(){
   await syncPendingVisits({silent:true,autoRetry:false});
   await pullCustomersFromSupabase({silent:true});
   await pullRemoteVisits();
+  await reconcileRemoteVisits({force:true});
   await refreshDashboard();
   toast("Data berhasil diperbarui");
  }catch(e){
@@ -3192,7 +3210,7 @@ window.addEventListener("online",()=>{updateNetworkStatus();updatePendingSyncCou
   pullCustomersFromSupabase({silent:true}).then(()=>{if(!document.getElementById("customersView")?.classList.contains("hidden"))renderCustomers()}).catch(()=>{});
   if(currentUser.role==="sales"||currentUser.role==="supervisor")pullAreaAssignmentsFromSupabase({silent:true}).then(ok=>{if(ok&&document.getElementById("dailyAreaView")&&!document.getElementById("dailyAreaView").classList.contains("hidden"))showDailyAreaSelection();}).catch(()=>{});
   pullProductsFromSupabase({silent:true}).then(()=>{if(!document.getElementById('priceListView')?.classList.contains('hidden')){fillProductFilters();renderPriceList();if(currentUser?.role==='admin')renderProductAssignments()}}).catch(()=>{});
-  pullRemoteVisits().catch(()=>{});
+  reconcileRemoteVisits().catch(()=>{});
 }});
 window.addEventListener("focus",()=>{scheduleAutoSync(150);if((currentUser?.role==="sales"||currentUser?.role==="supervisor")&&navigator.onLine)pullAreaAssignmentsFromSupabase({silent:true}).then(ok=>{if(ok&&document.getElementById("dailyAreaView")&&!document.getElementById("dailyAreaView").classList.contains("hidden"))showDailyAreaSelection();}).catch(()=>{});});
 document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")scheduleAutoSync(150)});
@@ -3281,7 +3299,7 @@ function getSalesName(email){
 }
 function esc(v){return String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
 function toast(m){const t=document.getElementById("toast");t.textContent=m;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2200)}
-const saved=sessionStorage.getItem("rml_user")||localStorage.getItem("rml_cached_user");if(saved){try{const oldUser=JSON.parse(saved);USERS=loadUsers();const localUser=USERS.find(u=>u.email===oldUser.email)||{};currentUser=normalizeKnownUserRole({...localUser,...oldUser});sessionStorage.setItem("rml_user",JSON.stringify(currentUser));localStorage.setItem("rml_cached_user",JSON.stringify(currentUser));currentUser.mustChangePassword?showForcedPasswordPage():(async()=>{await pullCustomersFromSupabase({silent:true});await cleanupVisitsOlderThan30Days({remote:navigator.onLine,silent:true});if(navigator.onLine&&(currentUser.role==="sales"||currentUser.role==="supervisor"))await pullAreaAssignmentsFromSupabase({silent:true});if(navigator.onLine)await pullRemoteVisits();openApp()})()}catch(e){sessionStorage.removeItem("rml_user");localStorage.removeItem("rml_cached_user")}}
+const saved=sessionStorage.getItem("rml_user")||localStorage.getItem("rml_cached_user");if(saved){try{const oldUser=JSON.parse(saved);USERS=loadUsers();const localUser=USERS.find(u=>u.email===oldUser.email)||{};currentUser=normalizeKnownUserRole({...localUser,...oldUser});sessionStorage.setItem("rml_user",JSON.stringify(currentUser));localStorage.setItem("rml_cached_user",JSON.stringify(currentUser));currentUser.mustChangePassword?showForcedPasswordPage():(async()=>{await pullCustomersFromSupabase({silent:true});await cleanupVisitsOlderThan30Days({remote:navigator.onLine,silent:true});if(navigator.onLine&&(currentUser.role==="sales"||currentUser.role==="supervisor"))await pullAreaAssignmentsFromSupabase({silent:true});if(navigator.onLine){await pullRemoteVisits();await reconcileRemoteVisits({force:true});}openApp()})()}catch(e){sessionStorage.removeItem("rml_user");localStorage.removeItem("rml_cached_user")}}
 
 document.addEventListener("DOMContentLoaded",async()=>{
  try{
