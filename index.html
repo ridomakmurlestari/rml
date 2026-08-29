@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0F766E">
+<title>RML Sales Visit</title>
+<link rel="stylesheet" href="style-v1-7-6.css">
+  <meta name="theme-color" content="#0F766E">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  
+</head>
+<body>
+<div id="toast" class="toast"></div>
+
+<div id="dueReminderModal" class="due-reminder-modal hidden" role="dialog" aria-modal="true" aria-labelledby="dueReminderTitle" onclick="event.target.id==='dueReminderModal'&&closeDueReminder()">
+  <div class="due-reminder-card" onclick="event.stopPropagation()">
+    <div class="due-reminder-head">
+      <div class="due-reminder-icon">!</div>
+      <div>
+        <small>PENGINGAT JATUH TEMPO</small>
+        <h3 id="dueReminderTitle">Outlet Dekat Jatuh Tempo</h3>
+        <p id="dueReminderSubtitle"></p>
+      </div>
+      <button class="due-reminder-close" onclick="closeDueReminder()" aria-label="Tutup">×</button>
+    </div>
+    <div id="dueReminderList" class="due-reminder-list"></div>
+    <div class="due-reminder-actions">
+      <button class="primary" onclick="closeDueReminder()">Mengerti, Lanjutkan</button>
+    </div>
+  </div>
+</div>
+<div id="photoModal" class="photo-modal hidden" onclick="closePhotoModal()">
+  <div class="photo-modal-card" onclick="event.stopPropagation()">
+    <button class="photo-close" onclick="closePhotoModal()">×</button>
+    <img id="photoModalImage" alt="Foto check in">
+  </div>
+</div>
+
+
+<div id="targetManagerModal" class="visit-detail-modal hidden" onclick="closeTargetManager()">
+  <div class="edit-visit-modal-card target-manager-card" onclick="event.stopPropagation()">
+    <div class="visit-detail-modal-head"><div><small>TARGET BULANAN</small><h3>Kelola Target</h3></div><button class="visit-detail-close" onclick="closeTargetManager()">×</button></div>
+    <div class="edit-visit-modal-body">
+      <label>Jenis Target</label><select id="targetTypeInput" onchange="refreshTargetManagerFields()"><option value="sales">Target Sales</option><option value="outlet">Target Outlet</option></select>
+      <label>Mulai Periode</label><input id="targetMonthInput" type="month">
+      <label>Durasi Target</label><select id="targetDurationInput"><option value="1">1 Bulan</option><option value="3">3 Bulan</option><option value="6">6 Bulan</option><option value="12">12 Bulan</option></select>
+      <label id="targetOwnerLabel">Sales</label><select id="targetOwnerInput"></select>
+      <div id="targetSalesWrap" class="hidden"><label>Sales Penanggung Jawab Outlet</label><select id="targetSalesInput"></select><small class="target-form-help">Target outlet ini akan muncul di Dashboard Sales yang dipilih.</small></div>
+      <label>Deskripsi / Nama Target</label><input id="targetDescriptionInput" type="text" placeholder="Contoh: Target Bulanan DODO / Target Produk / Program Agustus">
+      <label>Target (Rp)</label><input id="targetAmountInput" type="number" min="0" step="1000" placeholder="80000000">
+      <label>Pencapaian / Realisasi (Rp)</label><input id="targetAchievedInput" type="number" min="0" step="1000" placeholder="52500000">
+      <label>Tanggal Update Realisasi</label><input id="targetUpdatedDateInput" type="date">
+      <input id="targetEditId" type="hidden">
+      <div class="edit-visit-actions"><button class="secondary" onclick="closeTargetManager()">Batal</button><button class="primary" onclick="saveDashboardTarget()">Simpan Target</button></div>
+      <div id="targetManagerList" class="target-manager-list"></div>
+    </div>
+  </div>
+</div>
+
+<div id="visitDetailModal" class="visit-detail-modal hidden" onclick="closeVisitDetailModal()">
+  <div class="visit-detail-modal-card" onclick="event.stopPropagation()">
+    <div class="visit-detail-modal-head">
+      <div>
+        <small id="visitDetailModalSales">Sales</small>
+        <h3 id="visitDetailModalTitle">Detail Kunjungan</h3>
+      </div>
+      <button class="visit-detail-close" onclick="closeVisitDetailModal()">×</button>
+    </div>
+    <div id="visitDetailModalList" class="visit-detail-list"></div>
+  </div>
+</div>
+
+<div id="editVisitNoteModal" class="visit-detail-modal hidden" onclick="closeEditVisitModal()">
+  <div class="edit-visit-modal-card" onclick="event.stopPropagation()">
+    <div class="visit-detail-modal-head">
+      <div>
+        <small id="editVisitOutletMeta">Outlet</small>
+        <h3 id="editVisitModalTitle">Edit Catatan</h3>
+      </div>
+      <button class="visit-detail-close" onclick="closeEditVisitModal()">×</button>
+    </div>
+
+    <div class="edit-visit-modal-body">
+      <label for="editVisitStatus">Status Kunjungan *</label>
+      <select id="editVisitStatus" onchange="updateEditVisitFields()">
+        <option value="Ada Order">Ada Order</option><option value="Tidak Order">Tidak Order</option><option value="Tidak Bertemu">Tidak Bertemu</option>
+      </select>
+      <label id="editVisitNoteLabel" for="editVisitNoteInput">Catatan *</label>
+      <textarea id="editVisitNoteInput" rows="6" placeholder="Masukkan catatan..." required></textarea>
+      <label>Status Pembayaran *</label>
+      <div class="payment-status-options edit-payment-options">
+        <label class="payment-status-option"><input type="radio" name="editVisitPaymentStatus" value="Bayar"><span>Bayar</span></label>
+        <label class="payment-status-option"><input type="radio" name="editVisitPaymentStatus" value="Tidak Bayar"><span>Tidak Bayar</span></label>
+      </div>
+      <div id="editVisitAuditSection" class="edit-audit-section hidden"><strong>Riwayat Perubahan</strong><div id="editVisitAuditList" class="edit-audit-list"></div></div>
+      <div class="edit-visit-actions"><button class="secondary" onclick="closeEditVisitModal()">Batal</button><button id="saveEditVisitButton" class="primary" onclick="saveEditedVisitNote()">Simpan Perubahan</button></div>
+    </div>
+  </div>
+</div>
+
+<section id="loginPage" class="login-page">
+  <div class="login-card">
+    <div class="logo">RML</div>
+    <h1>Sales Visit</h1>
+    <p>Master pelanggan dan kunjungan sales</p>
+    <label>Nama</label>
+    <input id="loginName" type="text" value="" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false">
+    <label>Password</label>
+    <div class="password-input-wrap"><input id="password" type="password" value="" autocomplete="new-password"><button type="button" class="password-toggle" id="passwordToggle" aria-label="Tampilkan password" onclick="toggleLoginPassword()">👁</button></div>
+    <button class="primary" onclick="login()">Masuk</button>
+    <div class="demo">
+      <b>Login menggunakan nama dan password</b>
+      <span>Pada login pertama, password awal adalah nomor handphone dan wajib diganti.</span>
+    </div>
+  </div>
+</section>
+
+<section id="forcePasswordPage" class="login-page hidden">
+  <div class="login-card password-card">
+    <div class="logo">RML</div>
+    <h1>Ubah Password</h1>
+    <p>Selamat datang, <strong id="forcePasswordUser"></strong>. Demi keamanan, ubah password sebelum melanjutkan.</p>
+    <label>Password Lama</label><input id="forceOldPassword" type="password" autocomplete="current-password">
+    <label>Password Baru</label><input id="forceNewPassword" type="password" autocomplete="new-password">
+    <label>Konfirmasi Password</label><input id="forceConfirmPassword" type="password" autocomplete="new-password">
+    <div class="password-hint">Minimal 6 karakter. Boleh menggunakan huruf, angka, atau kombinasi keduanya.</div>
+    <button class="primary" onclick="saveForcedPassword()">Simpan Password</button>
+  </div>
+</section>
+
+<section id="appPage" class="hidden">
+<header class="topbar">
+  <div><small id="roleText"></small><h2 id="userText"></h2></div>
+  <div class="topbar-actions">
+    <button id="finishBtn" class="ghost finish-task-btn" onclick="finishAreaTask()">Selesai Tugas Area Hari Ini</button>
+    <button id="logoutBtn" class="ghost logout-btn" onclick="logout()">Logout</button>
+  </div>
+</header>
+
+<main>
+<section id="dailyAreaView" class="view hidden">
+  <div class="area-picker-header">
+    <div>
+      <h2>Pilih Area Hari Ini</h2>
+      <p class="muted">Pilih area tugas hari ini dengan teliti. Pastikan jangan salah memilih area.</p>
+    </div>
+    <span id="areaPickerDate" class="badge"></span>
+  </div>
+
+  <div id="allAreasCompleteMessage" class="all-areas-complete hidden">
+    <strong>✓ Semua area yang memiliki outlet sudah selesai dikunjungi hari ini.</strong>
+  </div>
+
+  <div id="areaChoiceList" class="area-choice-list"></div>
+</section>
+
+<section id="dashboardView" class="view hidden">
+  <div class="title-row">
+    <div><h3 id="dashboardTitle">Dashboard Kunjungan</h3><p id="dashboardSubtitle">Ringkasan aktivitas hari ini</p></div>
+    <button id="dashboardRefreshBtn" class="secondary compact" onclick="manualRefreshDashboard()">Refresh</button>
+  </div>
+
+  <div id="dashboardSummary" class="dashboard-grid"></div>
+  <div id="dashboardTargetSummary" class="dashboard-card dashboard-target-summary hidden"></div>
+
+  <button id="dashboardPriceCard" class="dashboard-price-card hidden" type="button" onclick="showPriceList()">
+    <span class="dashboard-price-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H11v17H6.5A2.5 2.5 0 0 0 4 22z"/><path d="M20 5.5A2.5 2.5 0 0 0 17.5 3H13v17h4.5A2.5 2.5 0 0 1 20 22z"/><path d="M7 7h2M15 7h2M7 11h2M15 11h2"/></svg></span>
+    <span><strong>Daftar Harga</strong><small>Cari nama, kode, kategori, harga, dan diskon produk</small></span>
+    <span class="dashboard-price-arrow" aria-hidden="true">›</span>
+  </button>
+
+<div id="allSalesStatsCard" class="dashboard-card">
+    <div class="dashboard-card-head">
+      <h3 id="salesStatsTitle">Statistik Sales Hari Ini</h3>
+      <span id="dashboardDateLabel" class="muted"></span>
+    </div>
+    <div id="salesStatsList" class="sales-stats-list"></div>
+  </div>
+
+
+  <div id="dailyAreaProgressCard" class="dashboard-card daily-area-progress-card hidden">
+    <div class="dashboard-card-head daily-area-progress-head">
+      <div>
+        <h3>Progress Sales per Hari</h3>
+        <small>Otomatis menampilkan area yang dikunjungi sales hari ini</small>
+      </div>
+      <span id="dailyAreaProgressDate" class="muted"></span>
+    </div>
+    <div id="dailyAreaProgressList" class="daily-area-progress-list"></div>
+  </div>
+</section>
+
+<section id="customerView" class="view">
+  <div id="selectedAreaBanner" class="selected-area-banner hidden">
+    <div>
+      <small>Area yang sedang dikerjakan</small>
+      <strong id="selectedAreaName">-</strong>
+    </div>
+    <button class="secondary compact" onclick="changeDailyArea()">Pilih Area Lain</button>
+  </div>
+
+  <div id="areaProgressCard" class="area-progress-card hidden">
+    <div class="area-progress-head">
+      <div>
+        <small>Progres Area Hari Ini</small>
+        <strong id="areaProgressCount">0/0 outlet</strong>
+      </div>
+      <span id="areaProgressPercent">0%</span>
+    </div>
+    <div class="area-progress-track"><div id="areaProgressBar"></div></div>
+    <div id="areaProgressStats" class="area-progress-stats"></div>
+  </div>
+
+  <div id="areaDoneCard" class="area-done-card hidden">
+    <strong>✓ AREA SELESAI</strong>
+    <span id="areaDoneSummary"></span>
+    <button class="primary compact" onclick="changeDailyArea()">Pilih Area Lain</button>
+  </div>
+  <div class="summary">
+    <div><small>Total Pelanggan</small><strong id="customerCount">0</strong></div>
+    <div><small>Total Area</small><strong id="areaCount">0</strong></div>
+  </div>
+
+  <div class="title-row">
+    <div><h3>Pembagian Tugas Area Sales</h3><p>Atur pelanggan, sales yang bertugas, status aktif, dan penghapusan langsung dari daftar.</p></div>
+    <button id="addBtn" class="primary compact hidden" onclick="openForm()">+ Tambah</button>
+  </div>
+
+  <div id="adminCustomerToolbar" class="admin-customer-toolbar hidden">
+    <div class="admin-toolbar-actions">
+      <button class="secondary compact" type="button" onclick="toggleCustomerSelectMode()" id="selectCustomersBtn">Pilih</button>
+      <button class="secondary compact" type="button" onclick="document.getElementById('customerImportFile').click()">Import Excel</button>
+      <button class="secondary compact" type="button" onclick="exportCustomersExcel()">Export Excel</button>
+      <input id="customerImportFile" class="hidden" type="file" accept=".xlsx,.xls,.csv" onchange="importCustomersExcel(event)">
+    </div>
+    <div id="bulkCustomerActions" class="bulk-customer-actions hidden">
+      <span id="selectedCustomerCount">0 pelanggan dipilih</span>
+      <button class="danger compact" type="button" onclick="deleteSelectedCustomers()">Hapus Dipilih</button>
+      <button class="secondary compact" type="button" onclick="cancelCustomerSelectMode()">Batal</button>
+    </div>
+  </div>
+
+  <div class="filters">
+    <input id="search" placeholder="Cari kode, nama, area, atau pemilik..." oninput="renderCustomers()">
+    <select id="salesCustomerFilter" class="hidden" onchange="renderCustomers()"><option value="">Semua Sales</option></select>
+    <select id="areaFilter" onchange="renderCustomers()"></select>
+    <select id="statusFilter" class="hidden" onchange="renderCustomers()">
+      <option value="">Semua Visibilitas</option>
+      <option value="normal">Normal</option>
+      <option value="hidden">Hidden</option>
+    </select>
+    <select id="outletStatusFilter" onchange="renderCustomers()">
+      <option value="">Semua Status Outlet</option>
+      <option value="normal">Normal</option>
+      <option value="dueSoon">Jatuh Tempo Dekat</option>
+      <option value="pending">Pending Barang</option>
+    </select>
+    <button id="outsideAreaOrderBtn" class="primary compact hidden" type="button" onclick="openOutsideAreaOrder()">+ Order Luar Area</button>
+  </div>
+  <div id="customerList" class="customer-list"></div>
+  <div id="empty" class="empty hidden">Pelanggan tidak ditemukan.</div>
+</section>
+
+<section id="detailView" class="view hidden">
+  <button class="back" onclick="showCustomers()">← Kembali</button>
+  <div class="detail-card">
+    <div class="detail-badges">
+      <span id="detailArea" class="badge"></span>
+      <span id="detailStatus" class="badge status-active">Aktif</span>
+      <span id="detailOutletStatus" class="badge outlet-normal">Normal</span>
+    </div>
+    <div class="detail-code" id="detailCode"></div>
+    <h2 id="detailName"></h2>
+    <div id="detailSalesWrap" class="assignment-box">
+      <small>Sales Penanggung Jawab</small>
+      <strong id="detailSales">Belum ditentukan</strong>
+    </div>
+    <div id="outletInfoBox" class="outlet-info-box hidden">
+      <div><small>Tanggal</small><strong id="detailDueDate">-</strong></div>
+      <div><small>Nominal</small><strong id="detailDueAmount">-</strong></div>
+      <div class="full"><small>Keterangan</small><strong id="detailOutletNote">-</strong></div>
+    </div>
+    <div class="detail-history-block">
+      <div class="dashboard-card-head">
+        <h3>Riwayat Outlet</h3>
+        <span id="outletVisitHistoryCount" class="muted"></span>
+      </div>
+      <div id="outletVisitHistory" class="mini-history-list"></div>
+    </div>
+    <button id="visitBtn" class="primary" onclick="openVisitFlow()">Check In</button>
+    <button id="editBtn" class="secondary hidden" onclick="editCustomer()">Edit Pelanggan</button>
+    <button id="hideBtn" class="warning hidden" onclick="toggleHidden()">Hide dari Sales</button>
+    <button id="deleteBtn" class="danger hidden" onclick="deleteCustomer()">Hapus Pelanggan</button>
+  </div>
+</section>
+
+<section id="formView" class="view hidden">
+  <button class="back" onclick="showCustomers()">← Kembali</button>
+  <div class="form-card">
+    <h2 id="formTitle">Tambah Pelanggan</h2>
+    <input id="editNo" type="hidden">
+    <label>Kode Pelanggan</label>
+    <input id="formCode" placeholder="Contoh: SW001">
+    <label>Nama Pelanggan</label>
+    <input id="formName" placeholder="Nama pelanggan">
+    <label>Area</label>
+    <select id="formArea"></select>
+    <label>Sales Penanggung Jawab</label>
+    <select id="formSales"></select>
+    <p class="note">Pilih satu sales, Semua Sales, atau biarkan belum ditentukan.</p>
+
+    <label>Status Outlet</label>
+    <select id="formOutletStatus" onchange="toggleOutletFields()">
+      <option value="normal">Normal</option>
+      <option value="dueSoon">Jatuh Tempo Dekat</option>
+      <option value="pending">Pending Barang</option>
+    </select>
+
+    <div id="outletExtraFields" class="outlet-extra hidden">
+      <label id="dateLabel">Tanggal</label>
+      <input id="formDueDate" type="date">
+      <div id="amountFields">
+        <label>Nominal Tagihan</label>
+        <input id="formDueAmount" type="number" min="0" step="1000" placeholder="Contoh: 5250000">
+      </div>
+      <label>Keterangan</label>
+      <textarea id="formOutletNote" rows="3" placeholder="Catatan status outlet..."></textarea>
+    </div>
+
+    <button class="primary" onclick="saveCustomer()">Simpan</button>
+    <p class="note">Tidak tersedia tombol hapus pelanggan.</p>
+  </div>
+</section>
+
+<section id="visitView" class="view hidden">
+  <button class="back" onclick="closeVisitFlow()">← Kembali</button>
+  <div class="form-card">
+    <span id="visitArea" class="badge"></span>
+    <div id="visitCode" class="detail-code"></div>
+    <h2 id="visitName"></h2>
+
+    <div id="checkInPanel">
+      <div class="visit-state state-ready">Belum Check In</div>
+      <p class="note">Foto check in wajib diambil langsung dari kamera.</p>
+
+      <div class="camera-shell">
+        <video id="cameraVideo" class="hidden" autoplay playsinline muted></video>
+        <canvas id="cameraCanvas" class="hidden"></canvas>
+        <img id="checkInPreview" class="camera-preview hidden" alt="Foto check in">
+        <div id="cameraPlaceholder" class="camera-placeholder">
+          Tekan “Buka Kamera” untuk mengambil foto check in.
+        </div>
+      </div>
+
+      <div class="camera-actions">
+        <button id="openCameraBtn" class="secondary" onclick="openCamera()">Buka Kamera</button>
+        <button id="captureBtn" class="secondary hidden" onclick="captureCheckInPhoto()">Ambil Foto</button>
+        <button id="retakeBtn" class="secondary hidden" onclick="retakePhoto()">Foto Ulang</button>
+      </div>
+
+      <button id="checkInBtn" class="primary" onclick="confirmCheckIn()" disabled>
+        Check In Sekarang
+      </button>
+    </div>
+
+    <div id="checkOutPanel" class="hidden">
+      <div class="visit-state state-visiting">Sedang Dikunjungi</div>
+
+      <div class="hidden" aria-hidden="true">
+        <strong id="visitCheckInDate">-</strong>
+        <strong id="visitCheckIn">-</strong>
+        <img id="activeCheckInPhoto" alt="Foto check in">
+      </div>
+
+      <div id="pendingDeliveryReminder" class="pending-delivery-reminder hidden">
+        <strong>⚠ Barang Belum Terkirim</strong>
+        <div id="pendingDeliveryReminderList"></div>
+      </div>
+
+      <label>Status Kunjungan Outlet</label>
+      <select id="visitStatus">
+        <option value="">Pilih status kunjungan</option>
+        <option value="Ada Order">Ada Order</option>
+        <option value="Tidak Bertemu">Tidak Bertemu</option>
+        <option value="Tidak Order">Tidak Order</option>
+      </select>
+
+      <div id="visitNoteContainer" class="hidden">
+        <label id="visitNoteLabel" for="visitNote">Catatan *</label>
+        <textarea id="visitNote" rows="4" placeholder="Tuliskan catatan..." required></textarea>
+      </div>
+
+      <div class="payment-status-box">
+        <strong>Status Pembayaran *</strong>
+        <div class="payment-status-options">
+          <label class="payment-status-option"><input type="radio" name="visitPaymentStatus" value="Bayar"><span>Bayar</span></label>
+          <label class="payment-status-option"><input type="radio" name="visitPaymentStatus" value="Tidak Bayar"><span>Tidak Bayar</span></label>
+        </div>
+      </div>
+
+      <button class="primary" onclick="confirmCheckOut()">Check Out & Simpan</button>
+
+      <details id="visitPriceSearchCard" class="visit-price-search-card" ontoggle="handleVisitPriceSearchToggle(this)">
+        <summary>
+          <span><b>🔎 Cari Daftar Harga</b><small>Cek harga tanpa meninggalkan halaman kunjungan</small></span>
+          <span class="visit-price-chevron">⌄</span>
+        </summary>
+        <div class="visit-price-search-body">
+          <input id="visitPriceSearchInput" type="search" placeholder="Cari nama, kode, atau kategori barang..." oninput="renderVisitPriceSearch()">
+          <div id="visitPriceSearchSummary" class="visit-price-search-summary">Ketik nama atau kode barang.</div>
+          <div id="visitPriceSearchResults" class="visit-price-search-results"></div>
+        </div>
+      </details>
+    </div>
+  </div>
+</section>
+
+<section id="outsideAreaOrderView" class="view hidden page-form-view">
+  <button class="back" type="button" onclick="closeOutsideAreaOrder()">← Kembali ke Pelanggan</button>
+  <div class="page-form-card">
+    <div class="page-form-head">
+      <div><small>ORDER TAMBAHAN</small><h2>Order Pelanggan Luar Area</h2><p>Tidak memengaruhi progres area aktif hari ini.</p></div>
+    </div>
+    <div class="info-strip"><span>Area aktif</span><strong id="outsideOrderActiveArea">-</strong></div>
+    <div id="outsideOrderAreaWrap"><label>Area Pelanggan *</label>
+    <select id="outsideOrderArea" onchange="fillOutsideOrderCustomers()"></select></div>
+    <div id="outsideOrderSearchWrap" class="hidden"><label>Cari Pelanggan *</label>
+    <input id="outsideOrderSearch" type="search" placeholder="Cari nama, kode, atau area..." oninput="fillOutsideOrderCustomers()"></div>
+    <label>Pelanggan *</label>
+    <select id="outsideOrderCustomer"></select>
+    <label>Orderan *</label>
+    <textarea id="outsideOrderNote" rows="7" placeholder="Masukkan orderan pelanggan..."></textarea>
+    <div class="page-actions">
+      <button class="secondary" type="button" onclick="closeOutsideAreaOrder()">Batal</button>
+      <button class="primary" type="button" onclick="saveOutsideAreaOrder()">Simpan Order</button>
+    </div>
+  </div>
+</section>
+
+<section id="finishAreaView" class="view hidden page-form-view">
+  <button class="back" type="button" onclick="closeUnvisitedReasonModal()">← Kembali</button>
+  <div class="page-form-card finish-page-card">
+    <div class="page-form-head">
+      <div><small>SELESAIKAN PEKERJAAN</small><h2 id="unvisitedReasonTitle">Selesaikan Area</h2><p id="unvisitedReasonSubtitle"></p></div>
+    </div>
+    <div class="warning-box">
+      <strong>Semua outlet wajib memiliki status hari ini.</strong>
+      <span>Outlet yang belum dikunjungi akan dicatat sebagai <b>Tidak Bertemu</b> beserta alasannya.</span>
+    </div>
+    <div id="unvisitedReasonList" class="unvisited-reason-list"></div>
+    <div id="finishCompleteMessage" class="success-box hidden"><strong>✓ Semua outlet sudah selesai.</strong><span>Anda dapat mengakhiri pekerjaan hari ini.</span></div>
+    <div class="page-actions sticky-page-actions">
+      <button class="secondary" type="button" onclick="closeUnvisitedReasonModal()">Kembali</button>
+      <button id="saveFinishAreaBtn" class="primary" type="button" onclick="saveUnvisitedReasons()">Simpan Alasan & Selesai Tugas Area Hari Ini</button>
+    </div>
+  </div>
+</section>
+
+<section id="targetView" class="view hidden">
+  <div class="target-page-head">
+    <button class="back" type="button" onclick="showAreaAssignments()">← Kembali ke Pengaturan</button>
+    <div class="title-row target-page-title-row">
+      <div><h3>🎯 Target & Pencapaian</h3><p>Kelola seluruh target berdasarkan Sales.</p></div>
+      <div class="target-page-actions">
+        <select id="targetDurationFilter" aria-label="Filter periode target" onchange="renderDashboardTargets({sync:false})"><option value="all">Semua Periode</option><option value="1">1 Bulan</option><option value="3">3 Bulan</option><option value="6">6 Bulan</option><option value="12">12 Bulan</option></select>
+        <button class="secondary compact" type="button" onclick="refreshTargetManagementPage()">↻ Refresh</button>
+        <button class="primary compact" type="button" onclick="openTargetManager()">＋ Tambah Target</button>
+      </div>
+    </div>
+  </div>
+  <div id="targetDashboardGroups" class="target-dashboard-groups"></div>
+</section>
+
+<section id="assignmentView" class="view hidden">
+  <div class="title-row"><div><h3>Pengaturan Admin</h3><p>Atur master produk, penugasan area, akun pengguna, serta backup data.</p></div><button class="secondary compact" onclick="resetAreaAssignments()">Reset Penugasan</button></div>
+  <div class="dashboard-card settings-master-product-card">
+    <div class="title-row inner-title">
+      <div><h3>Master Produk</h3><p>Kelola data barang, kategori, harga, diskon, status produk, serta import produk.</p></div>
+      <button class="primary compact" type="button" onclick="showPriceList()">Buka Master Produk</button>
+    </div>
+  </div>
+  <button class="dashboard-card settings-master-product-card target-settings-entry" type="button" onclick="showTargetManagementPage()">
+    <span class="target-settings-entry-icon">🎯</span>
+    <span class="target-settings-entry-text"><strong>Target & Pencapaian</strong><small>Kelola target Sales dan target Outlet dalam satu halaman khusus.</small></span>
+    <span class="target-settings-entry-arrow">›</span>
+  </button>
+  <div class="dashboard-card area-assignment-card">
+    <button id="areaAssignmentHeader" class="area-assignment-header" type="button" onclick="toggleAreaAssignmentPanel()" aria-expanded="true" aria-controls="areaAssignmentBody">
+      <span class="area-assignment-heading">
+        <span class="area-assignment-icon">📍</span>
+        <span><strong>Penugasan Area Sales</strong><small id="areaAssignmentCollapseSummary" class="area-collapse-summary">Memuat data penugasan...</small></span>
+      </span>
+      <span class="area-assignment-toggle"><span id="areaAssignmentToggleText">Tutup</span><span id="areaAssignmentChevron" class="area-assignment-chevron">⌄</span></span>
+    </button>
+    <div id="areaAssignmentBody" class="area-assignment-body">
+      <div class="assignment-help"><strong>Atur area kerja sales</strong><span>Centang area yang ditugaskan. Tekan <b>Edit</b> untuk mengubah nama area. Semua perubahan tersimpan otomatis.</span></div>
+      <div id="areaAssignmentMatrix" class="assignment-matrix-wrap"></div>
+    </div>
+  </div>
+  <div class="dashboard-card user-management-card">
+    <div class="title-row inner-title"><div><h3>Data Akun</h3><p>Admin dan Supervisor dapat mengelola akun sales.</p></div><button id="addSalesBtn" class="primary compact" type="button" onclick="openAddSalesModal()">＋ Tambah Sales</button></div>
+    <div class="account-warning">Password awal sales baru adalah nomor handphone dan wajib diganti saat login pertama.</div>
+    <div id="userManagementList" class="user-management-list"></div>
+  </div>
+  <div class="dashboard-card backup-restore-card">
+    <div class="title-row inner-title"><div><h3>Backup & Restore Data</h3><p>Simpan salinan data aplikasi atau pulihkan data dari file backup.</p></div></div>
+    <div class="backup-notice"><strong>Backup tidak menyimpan password atau sesi login.</strong><span>Data pelanggan, pembagian tugas, pengaturan akun, area, dan riwayat kunjungan akan disertakan.</span></div>
+    <div class="backup-actions">
+      <button class="primary" type="button" onclick="downloadDatabaseBackup()">📥 Download Backup</button>
+      <button class="secondary" type="button" onclick="document.getElementById('restoreBackupInput').click()">📤 Pilih File Restore</button>
+      <input id="restoreBackupInput" class="hidden" type="file" accept="application/json,.json" onchange="handleRestoreBackupFile(event)">
+    </div>
+    <div id="restoreBackupInfo" class="restore-backup-info hidden"></div>
+  </div>
+</section>
+
+<div id="addSalesModal" class="visit-detail-modal hidden" onclick="event.target.id==='addSalesModal'&&closeAddSalesModal()">
+  <div class="edit-visit-modal-card add-sales-modal-card add-sales-polished" onclick="event.stopPropagation()">
+    <div class="visit-detail-modal-head add-sales-head">
+      <div class="add-sales-title">
+        <div class="add-sales-icon">👤</div>
+        <div><small>AKUN SALES</small><h3>Tambah Sales</h3><p>Isi data akun sales baru untuk digunakan saat login.</p></div>
+      </div>
+      <button class="visit-detail-close" type="button" aria-label="Tutup" onclick="closeAddSalesModal()">×</button>
+    </div>
+
+    <div class="add-sales-body">
+      <div class="add-sales-section-title"><span>1</span><div><strong>Data Sales</strong><small>Informasi dasar sales</small></div></div>
+      <div class="add-sales-form-grid">
+        <div class="add-sales-field add-sales-field-full">
+          <label for="newSalesName">Nama Sales</label>
+          <input id="newSalesName" type="text" placeholder="Contoh: Andi" autocomplete="off">
+        </div>
+        <div class="add-sales-field">
+          <label for="newSalesLogin">Nama Login</label>
+          <input id="newSalesLogin" type="text" placeholder="Contoh: andi" autocomplete="off" autocapitalize="none">
+          <small>Digunakan untuk login.</small>
+        </div>
+        <div class="add-sales-field">
+          <label for="newSalesPhone">Nomor Handphone</label>
+          <input id="newSalesPhone" type="tel" inputmode="numeric" placeholder="08xxxxxxxxxx" autocomplete="off">
+          <small>Menjadi password awal.</small>
+        </div>
+      </div>
+
+      <div class="add-sales-section-title add-sales-section-space"><span>2</span><div><strong>Akses Akun</strong><small>Atur status dan izin sales</small></div></div>
+      <div class="add-sales-options">
+        <label class="add-sales-option">
+          <input id="newSalesActive" type="checkbox" checked>
+          <span><strong>Akun aktif</strong><small>Sales dapat login dan menggunakan aplikasi.</small></span>
+        </label>
+        <label class="add-sales-option">
+          <input id="newSalesFreeArea" type="checkbox">
+          <span><strong>Bebas ganti area</strong><small>Sales boleh mengganti area tanpa mengisi alasan outlet.</small></span>
+        </label>
+      </div>
+
+      <div class="add-sales-info">
+        <span>ⓘ</span>
+        <p>Email akun: <b>namalogin@rml.app</b><br>Password awal menggunakan <b>nomor handphone</b>.</p>
+      </div>
+    </div>
+
+    <div class="edit-visit-actions add-sales-actions">
+      <button class="secondary" type="button" onclick="closeAddSalesModal()">Batal</button>
+      <button id="saveNewSalesBtn" class="primary" type="button" onclick="saveNewSales()">Simpan Sales</button>
+    </div>
+  </div>
+</div>
+
+<section id="accountView" class="view hidden">
+  <div class="title-row"><div><h3>Akun</h3><p>Informasi akun dan keamanan password.</p></div></div>
+  <div class="dashboard-card account-profile-card"><div><small>NAMA</small><strong id="accountName"></strong></div><div><small>NOMOR HANDPHONE</small><strong id="accountPhone"></strong></div></div>
+  <div class="dashboard-card account-password-card"><h3>Ubah Password</h3><p>Password baru minimal 6 karakter.</p>
+    <label>Password Lama</label><input id="accountOldPassword" type="password" autocomplete="current-password">
+    <label>Password Baru</label><input id="accountNewPassword" type="password" autocomplete="new-password">
+    <label>Konfirmasi Password</label><input id="accountConfirmPassword" type="password" autocomplete="new-password">
+    <button class="primary" type="button" onclick="changeOwnPassword()">Ubah Password</button>
+  </div>
+</section>
+
+
+<section id="priceListView" class="view hidden">
+  <button id="productBackToSettingsBtn" class="back hidden" type="button" onclick="showAreaAssignments()">← Kembali ke Pengaturan</button>
+  <div class="title-row">
+    <div><h3 id="priceListTitle">Daftar Harga</h3><p id="priceListSubtitle">Cari harga barang berdasarkan kategori.</p></div>
+    <div id="productAdminTitleActions" class="title-actions hidden">
+      <button id="productSelectModeBtn" class="secondary compact" type="button" onclick="toggleProductSelectMode()">Pilih Produk</button>
+      <button class="secondary compact" type="button" onclick="openProductHistoryModal()">Riwayat Harga</button>
+      <button class="secondary compact" type="button" onclick="undoLastProductUpdate()">Undo Terakhir</button>
+      <button id="importProductPriceBtn" class="secondary compact" type="button" onclick="document.getElementById('productPriceImportFile').click()">Import / Update Harga & Diskon</button>
+      <button id="addProductBtn" class="primary compact" type="button" onclick="openProductCreateModal()">+ Tambah Barang</button>
+      <input id="productPriceImportFile" class="hidden" type="file" accept=".xlsx,.xls,.csv" onchange="importProductPricesExcel(event)">
+    </div>
+  </div>
+
+  <div class="filters product-price-filters">
+    <input id="productSearchInput" placeholder="Cari nama, kategori, atau barcode..." oninput="handleProductSearchInput()">
+    <select id="productCategoryFilter" onchange="handleProductFilterChange()"><option value="">Semua Kategori</option></select>
+  </div>
+  <div id="productBulkToolbar" class="product-bulk-toolbar hidden"><strong id="selectedProductCount">0 produk dipilih</strong><div><button class="secondary compact" type="button" onclick="selectAllVisibleProducts(true)">Pilih Semua Hasil</button><button class="secondary compact" type="button" onclick="selectAllVisibleProducts(false)">Hapus Pilihan Hasil</button><button id="openBulkEditBtn" class="primary compact" type="button" onclick="openProductBulkModal()">Bulk Edit</button></div></div>
+  <div id="productPriceSummary" class="product-list-summary"></div>
+  <div id="productPriceList" class="product-price-list"></div>
+  <div id="productPriceEmpty" class="empty hidden">Barang tidak ditemukan.</div>
+  <button id="productLoadMoreBtn" class="secondary product-load-more hidden" type="button" onclick="loadMoreProducts()">Muat lebih banyak</button>
+</section>
+
+
+<div id="productEditModal" class="product-edit-modal hidden" role="dialog" aria-modal="true" aria-labelledby="productEditModalTitle" onclick="handleProductEditBackdrop(event)">
+  <div class="product-edit-modal-card" onclick="event.stopPropagation()">
+    <div class="product-edit-modal-head">
+      <div>
+        <small id="productModalEyebrow">MASTER PRODUK</small>
+        <h3 id="productEditModalTitle">Edit Produk</h3>
+      </div>
+      <button class="product-edit-close" type="button" aria-label="Tutup" onclick="closeProductEditModal()">×</button>
+    </div>
+    <input id="productModalEditId" type="hidden">
+    <div class="product-edit-form">
+      <div>
+        <label for="productModalCodeInput">Kode Barang</label>
+        <input id="productModalCodeInput" autocomplete="off">
+      </div>
+      <div>
+        <label for="productModalNameInput">Nama Barang *</label>
+        <input id="productModalNameInput" autocomplete="off">
+      </div>
+      <div>
+        <label for="productModalCategoryInput">Kategori *</label>
+        <div class="product-category-picker">
+          <select id="productModalCategoryInput" aria-label="Pilih kategori produk"></select>
+          <button class="secondary compact" type="button" onclick="addNewProductCategory()">＋ Baru</button>
+        </div>
+      </div>
+      <div>
+        <label for="productModalPriceInput">Harga *</label>
+        <input id="productModalPriceInput" type="number" min="0" step="1" inputmode="numeric">
+      </div>
+      <div>
+        <label for="productModalDiscountInput">Diskon (%)</label>
+        <input id="productModalDiscountInput" type="number" min="0" max="100" step="0.01" inputmode="decimal" value="0">
+      </div>
+      <label class="product-active-check product-edit-active"><input id="productModalActiveInput" type="checkbox"> Aktif</label>
+    </div>
+    <div class="product-edit-modal-actions">
+      <button class="secondary" type="button" onclick="closeProductEditModal()">Batal</button>
+      <button id="productModalSaveBtn" class="primary" type="button" onclick="saveProductFromModal()">Simpan Perubahan</button>
+    </div>
+  </div>
+</div>
+
+<div id="productBulkModal" class="product-edit-modal hidden" role="dialog" aria-modal="true" onclick="event.target.id==='productBulkModal'&&closeProductBulkModal()"><div class="product-edit-modal-card" onclick="event.stopPropagation()"><div class="product-edit-modal-head"><div><small>BULK EDIT</small><h3>Ubah Banyak Produk</h3></div><button class="product-edit-close" onclick="closeProductBulkModal()">×</button></div><p id="productBulkCount" class="muted"></p><label>Jenis Perubahan</label><select id="productBulkOperation" onchange="handleProductBulkOperationChange()"><option value="set_discount">Atur Diskon</option><option value="increase_price">Naikkan Harga</option><option value="decrease_price">Turunkan Harga</option><option value="set_category">Ubah Kategori</option><option value="activate">Aktifkan Produk</option><option value="deactivate">Nonaktifkan Produk</option></select><label id="productBulkValueLabel">Nilai</label><input id="productBulkValue"><div class="product-edit-modal-actions"><button class="secondary" onclick="closeProductBulkModal()">Batal</button><button id="productBulkSaveBtn" class="primary" onclick="applyProductBulkEdit()">Terapkan Perubahan</button></div></div></div>
+<div id="productHistoryModal" class="product-edit-modal hidden" role="dialog" aria-modal="true" onclick="event.target.id==='productHistoryModal'&&closeProductHistoryModal()"><div class="product-edit-modal-card product-history-modal-card" onclick="event.stopPropagation()"><div class="product-edit-modal-head"><div><small>MASTER PRODUK</small><h3>Riwayat Perubahan Harga</h3></div><button class="product-edit-close" onclick="closeProductHistoryModal()">×</button></div><input id="productHistorySearch" placeholder="Cari produk, kode, atau jenis perubahan..." oninput="renderProductHistory()"><div id="productHistoryList" class="product-history-list"></div><div class="product-edit-modal-actions"><button class="secondary" onclick="closeProductHistoryModal()">Tutup</button><button class="primary" onclick="undoLastProductUpdate()">Undo Perubahan Terakhir</button></div></div></div>
+
+<section id="historyView" class="view hidden">
+  <div class="title-row">
+    <div><h3>Riwayat Kunjungan</h3><p>Daftar aktivitas sales</p></div>
+    <div class="title-actions">
+      <button id="historyRefreshBtn" class="secondary compact" type="button" onclick="refreshHistoryFromServer()">Refresh</button>
+      <button id="exportPdfBtn" class="secondary compact" onclick="exportPDF()">Export PDF</button>
+    </div>
+  </div>
+
+  <div id="adminHistorySalesFilterWrap" class="history-filter-card hidden">
+    <div class="history-filter-field">
+      <label for="historyPeriodFilter">Periode</label>
+      <select id="historyPeriodFilter" onchange="handleHistoryPeriodChange()">
+        <option value="today" selected>Hari Ini</option>
+        <option value="yesterday">Kemarin</option>
+        <option value="7days">7 Hari Terakhir</option>
+        <option value="30days">30 Hari Terakhir</option>
+      </select>
+    </div>
+    <div id="historyVisibilityField" class="history-filter-field hidden">
+      <label for="historyVisibilityFilter">Tampilan</label>
+      <select id="historyVisibilityFilter" onchange="handleHistoryVisibilityChange()">
+        <option value="active" selected>Aktif / Belum Selesai</option>
+        <option value="hidden">Hidden / Semua Terkirim</option>
+        <option value="all">Semua</option>
+      </select>
+    </div>
+    <div id="historySalesField" class="history-filter-field">
+      <label for="historySalesFilter">Sales</label>
+      <select id="historySalesFilter" onchange="renderHistory()">
+        <option value="">Semua Sales</option>
+      </select>
+    </div>
+    <div id="historyAreaField" class="history-filter-field">
+      <label for="historyAreaFilter">Area</label>
+      <select id="historyAreaFilter" onchange="handleHistoryAreaChange()">
+        <option value="">Semua Area</option>
+      </select>
+    </div>
+    <div id="historyOutletField" class="history-filter-field">
+      <label for="historyOutletFilter">Outlet</label>
+      <select id="historyOutletFilter" onchange="renderHistory()">
+        <option value="">Semua Outlet</option>
+      </select>
+    </div>
+    <div id="historyCustomDateWrap" class="history-custom-dates hidden">
+      <div class="history-filter-field"><label for="historyDateFrom">Dari</label><input id="historyDateFrom" type="date" onchange="renderHistory()"></div>
+      <div class="history-filter-field"><label for="historyDateTo">Sampai</label><input id="historyDateTo" type="date" onchange="renderHistory()"></div>
+    </div>
+    <div id="historyFilterSummary" class="history-filter-summary"></div>
+    <div id="adminHistoryDeleteToolbar" class="history-delete-toolbar hidden">
+      <button id="historySelectModeBtn" class="secondary compact" type="button" onclick="toggleHistorySelectMode()">Pilih Riwayat</button>
+      <div id="historyBulkDeleteActions" class="history-bulk-delete hidden">
+        <span id="historySelectedCount">0 dipilih</span>
+        <button class="secondary compact" type="button" onclick="cancelHistorySelectMode()">Batal</button>
+        <button id="historyBulkDeleteBtn" class="danger compact" type="button" onclick="deleteSelectedVisits()">Hapus (0)</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="historyList" class="history-list"></div>
+</section>
+</main>
+
+
+<nav class="bottom-nav" aria-label="Navigasi utama">
+  <button onclick="showDashboard()" aria-label="Dashboard">
+    <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg></span>
+    <span class="nav-label">Dashboard</span>
+  </button>
+  <button onclick="showCustomers()" aria-label="Pelanggan">
+    <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5.5 20c.5-4 2.7-6 6.5-6s6 2 6.5 6"/><path d="M17.5 6.5a3 3 0 0 1 0 5.5M19 14.5c2 .9 3 2.7 3 5.5"/></svg></span>
+    <span id="customersNavLabel" class="nav-label">Pelanggan</span>
+  </button>
+  <button onclick="showHistory()" aria-label="Riwayat">
+    <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/><path d="M7 3.8 4.5 6.2"/></svg></span>
+    <span class="nav-label">Riwayat</span>
+  </button>
+  <button id="assignmentNavBtn" class="hidden" onclick="showAreaAssignments()" aria-label="Pengaturan">
+    <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2.8 2.8-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6v.2h-4V21a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1L4.2 17l.1-.1a1.7 1.7 0 0 0 .3-1.9A1.7 1.7 0 0 0 3 14H2.8v-4H3a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9L4.2 7 7 4.2l.1.1a1.7 1.7 0 0 0 1.9.3A1.7 1.7 0 0 0 10 3V2.8h4V3a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1L19.8 7l-.1.1a1.7 1.7 0 0 0-.3 1.9A1.7 1.7 0 0 0 21 10h.2v4H21a1.7 1.7 0 0 0-1.6 1z"/></svg></span>
+    <span class="nav-label">Pengaturan</span>
+  </button>
+  <button id="accountNavBtn" class="hidden" onclick="showAccount()" aria-label="Akun">
+    <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="9" r="3"/><path d="M6.8 19c.8-3 2.5-4.5 5.2-4.5s4.4 1.5 5.2 4.5"/></svg></span>
+    <span class="nav-label">Akun</span>
+  </button>
+</nav>
+</section>
+
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.4/dist/jspdf.plugin.autotable.min.js"></script>
+<script src="customers-v0-10-3.js"></script>
+<script src="app-v1-8-3.js?v=1.8.33"></script>
+<script src="dashboard-target-v1-8-5.js?v=1.8.31"></script>
+<script src="admin-sales-v1-8-9.js?v=1.8.23"></script>
+<script src="app-admin-photo-v1-7-8.js"></script>
+<script src="app-admin-delete-all-photos-v1-7-9.js"></script>
+</body>
+</html>

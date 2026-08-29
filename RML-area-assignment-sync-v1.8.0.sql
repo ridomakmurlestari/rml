@@ -1,0 +1,2 @@
+-- Area assignment sync is handled by the existing app_admin_save_settings RPC.
+-- Keep this file as a deployment note; run your existing Supabase area-assignment SQL if not already installed.

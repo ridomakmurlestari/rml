@@ -1,0 +1,30 @@
+RML SALES VISIT v0.10.2 — LOGIN INTERNAL
+
+PENTING:
+Versi ini TIDAK memakai menu Supabase Authentication > Users.
+Tidak perlu membuat user email di Supabase Auth.
+
+LANGKAH INSTALASI
+1. Buka Supabase Dashboard.
+2. Masuk ke SQL Editor > New Query.
+3. Salin seluruh isi file supabase/setup.sql.
+4. Klik Run.
+5. Pastikan hasil terakhir menampilkan 4 akun.
+6. Upload semua file aplikasi ini ke repository GitHub, lalu deploy ulang di Vercel.
+7. Di browser, hapus cache situs / lakukan hard refresh.
+
+LOGIN AWAL
+Rini / 085668027045
+Lisna / 085218600582
+Septino / 08116946999
+Admin / 082284879722
+
+Setiap akun wajib mengganti password pada login pertama.
+Admin dapat mengubah nama, nomor HP, penugasan area, dan reset password dari aplikasi.
+
+KEAMANAN
+- Tabel tidak dapat dibaca langsung memakai anon key.
+- Aplikasi hanya mengakses data melalui fungsi RPC yang memvalidasi token sesi internal.
+- Password disimpan sebagai bcrypt hash menggunakan pgcrypto.
+- Token sesi disimpan dalam bentuk hash di database dan berlaku 30 hari.
+- Jangan pernah memasukkan service_role key ke aplikasi web.
