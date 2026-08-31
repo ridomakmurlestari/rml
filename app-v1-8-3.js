@@ -1248,7 +1248,38 @@ function saveVisits(v){console.warn("saveVisits legacy dipanggil",v)}
 function activeVisitKey(){return currentUser?`rml_active_visit_${currentUser.email}`:""}
 function getActiveVisit(){
  if(!currentUser)return null;
- try{return JSON.parse(localStorage.getItem(activeVisitKey())||"null")}catch(e){return null}
+ try{
+  const raw=localStorage.getItem(activeVisitKey());
+  if(!raw)return null;
+  const active=JSON.parse(raw);
+  if(!active||active.visitState!=="visiting")return null;
+
+  // Repair stale local check-in records. A visit is only considered active
+  // for the current local day and (for Sales) the area currently being worked.
+  // This prevents an old/deleted visit from blocking checkout in another area.
+  const checkInDate=active.checkInAt?new Date(active.checkInAt):null;
+  const today=todayLocalKey();
+  const checkInDay=checkInDate&&!Number.isNaN(checkInDate.getTime())
+    ? `${checkInDate.getFullYear()}-${String(checkInDate.getMonth()+1).padStart(2,"0")}-${String(checkInDate.getDate()).padStart(2,"0")}`
+    : "";
+  if(!checkInDay||checkInDay!==today){
+   localStorage.removeItem(activeVisitKey());
+   clearVisitDraft(active);
+   return null;
+  }
+  const currentArea=getDailyArea();
+  if(currentUser.role==="sales"&&currentArea&&active.area&&active.area!==currentArea){
+   // The active visit belongs to a different/stale area. Do not let it block
+   // today's current-area visit. Keep completed history untouched.
+   localStorage.removeItem(activeVisitKey());
+   clearVisitDraft(active);
+   return null;
+  }
+  return active;
+ }catch(e){
+  localStorage.removeItem(activeVisitKey());
+  return null;
+ }
 }
 function saveActiveVisit(v){localStorage.setItem(activeVisitKey(),JSON.stringify(v))}
 function clearActiveVisit(){localStorage.removeItem(activeVisitKey())}
