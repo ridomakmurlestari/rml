@@ -1,4 +1,4 @@
-/* RML Sales Visit v1.8.49 - Master Promo + multi-sales assignment + lightweight sync */
+/* RML Sales Visit v1.8.50 - Master Promo + robust delete + lightweight sync */
 (function(){
   const KEY='rml_monthly_promo_v4';
   const OLD_KEY='rml_monthly_promo_v3';
@@ -27,7 +27,7 @@
   const migrateOld=()=>{try{if(localStorage.getItem(KEY))return;const old=JSON.parse(localStorage.getItem(OLD_KEY)||'{}');if(old&&typeof old==='object'){writeLocal(old)}}catch(_){}};
   migrateOld();
   let remoteRows=[]; let masterCards=[]; let lastPullAt=0;
-  function normalizeRows(rows){return (Array.isArray(rows)?rows:[]).map(r=>({monthKey:r.month_key,ownerEmail:String(r.sales_email||'').toLowerCase(),categories:normalizeCategories(r.items),updatedAt:r.updated_at||''})).filter(r=>r.monthKey===monthKey()&&r.ownerEmail)}
+  function normalizeRows(rows){const allowed=new Set(managedUsers().map(u=>String(u.email||'').toLowerCase()).filter(Boolean));return (Array.isArray(rows)?rows:[]).map(r=>({monthKey:r.month_key,ownerEmail:String(r.sales_email||'').toLowerCase(),categories:normalizeCategories(r.items),updatedAt:r.updated_at||''})).filter(r=>r.monthKey===monthKey()&&r.ownerEmail&&allowed.has(r.ownerEmail))}
   function hydrateFromLocal(){const all=readLocal(),m=all[monthKey()]||{};remoteRows=Object.entries(m).map(([email,v])=>({monthKey:monthKey(),ownerEmail:String(email).toLowerCase(),categories:normalizeCategories(v)}));}
   function localForOwner(email){const r=remoteRows.find(x=>x.ownerEmail===String(email||'').toLowerCase());return r?r.categories:[]}
   async function pullRemote(force=false){
@@ -83,7 +83,7 @@
     const cards=readMasterCards(); if(!cards[i])return; if(!confirm(`Hapus promo ${cards[i].name||''}?`))return;
     cards.splice(i,1); const token=sessionToken(); if(!navigator.onLine||!token)return toast('Memerlukan internet');
     const byOwner={};cards.forEach(c=>c.assignees.forEach(e=>{(byOwner[e]??=[]).push({name:c.name,items:c.items})}));
-    try{const owners=new Set(remoteRows.map(r=>r.ownerEmail));for(const email of owners)await rpc('app_admin_upsert_monthly_promo',{p_token:token,p_month_key:monthKey(),p_sales_email:email,p_items:{categories:byOwner[email]||[]}});await pullRemote(true);buildMasterCards();renderMasterCards();renderSaved();renderCard();toast('Promo dihapus')}catch(e){toast(`Gagal menghapus promo: ${e.message||'periksa koneksi'}`)}
+    try{const owners=new Set(remoteRows.map(r=>r.ownerEmail));for(const email of owners)await rpc('app_admin_upsert_monthly_promo',{p_token:token,p_month_key:monthKey(),p_sales_email:email,p_items:{categories:byOwner[email]||[]}});remoteRows=remoteRows.map(r=>({...r,categories:byOwner[r.ownerEmail]||[]})).filter(r=>r.categories.length);const all=readLocal(),m={};remoteRows.forEach(r=>{m[r.ownerEmail]={categories:r.categories}});all[monthKey()]=m;writeLocal(all);buildMasterCards();renderMasterCards();renderSaved();renderCard();toast('Promo dihapus')}catch(e){toast(`Gagal menghapus promo: ${e.message||'periksa koneksi'}`)}
   }
   function cardsForOwner(email){const key=String(email||'').toLowerCase();const r=remoteRows.find(x=>x.ownerEmail===key);return r?.categories||[]}
   function openDetail(email){const cats=cardsForOwner(email).filter(c=>c.items.length);if(!cats.length)return;const view=document.getElementById('promoCatalogView');if(!view)return;if(typeof hide==='function')hide();document.getElementById('promoCatalogOwner').textContent=`Promo ${userName(email)}`;document.getElementById('promoCatalogMonth').textContent=monthLabel(monthKey());document.getElementById('promoCatalogList').innerHTML=cats.map(c=>`<section class="promo-catalog-category"><div class="promo-catalog-category-head"><span>🎁</span><div><strong>${escP(c.name)}</strong><small>${c.items.length} barang promo</small></div></div><div class="promo-catalog-items">${c.items.map((x,i)=>`<div class="promo-catalog-item"><span>${i+1}</span><strong>${escP(x)}</strong></div>`).join('')}</div></section>`).join('');view.classList.remove('hidden')}

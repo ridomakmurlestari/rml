@@ -799,7 +799,7 @@ async function copyProductAssignmentsFromArea(){
  const ok=navigator.onLine?await syncProductsToSupabase({silent:true}):false;toast(ok?'Pembagian barang berhasil disalin':'Pembagian tersimpan lokal dan akan disinkronkan saat online');if(!ok)scheduleProductSync();
 }
 
-const APP_VERSION="1.8.36";
+const APP_VERSION="1.8.51";
 const USER_SETTINGS_KEY="rml_user_accounts_v1";
 const DEFAULT_USERS=[
 {email:"rini@rml.app",loginName:"rini",active:true,phone:"085668027045",name:"Rini",role:"sales",mustChangePassword:true,canSwitchAreaFreely:false},
@@ -834,25 +834,15 @@ async function pullUsersFromSupabase({silent=true}={}){
  try{
   const data=await rpc('app_get_users',{p_token:session.session_token});
   if(!Array.isArray(data))return true;
-  const remoteUsers=data.map(u=>normalizeKnownUserRole({email:u.account_key,loginName:u.login_name||'',name:u.display_name||'',phone:u.phone||'',role:u.role||'sales',active:u.active!==false,mustChangePassword:!!u.must_change_password,canSwitchAreaFreely:u.can_switch_area_freely===true})).filter(u=>u.email);
+  const remoteUsers=data.map(u=>normalizeKnownUserRole({email:u.account_key,loginName:u.login_name||'',name:u.display_name||'',phone:u.phone||'',role:u.role||'sales',active:u.active!==false,mustChangePassword:!!u.must_change_password,canSwitchAreaFreely:u.can_switch_area_freely===true})).filter(u=>u.email&&u.active!==false);
 
-  // Jangan pernah menghapus cache USERS hanya karena response server kosong
-  // atau hanya berisi sebagian akun akibat filter role/session.
-  // Akun remote yang ada akan diperbarui, akun lokal yang tidak dikembalikan
-  // server tetap dipertahankan agar data Sales tidak hilang dari aplikasi.
-  if(remoteUsers.length){
-   const merged=new Map(USERS.map(u=>[String(u.email||'').toLowerCase(),u]));
-   remoteUsers.forEach(u=>{
-    const key=String(u.email||'').toLowerCase();
-    const old=merged.get(key);
-    merged.set(key,old?{...old,...u}:u);
-   });
-   USERS=Array.from(merged.values());
+  // SERVER adalah sumber kebenaran untuk daftar akun.
+  // Jangan mempertahankan akun lokal yang sudah tidak dikembalikan server,
+  // karena akun seperti itu biasanya sudah dinonaktifkan/dihapus di perangkat lain.
+  // Ini mencegah Sales lama (mis. Andi) muncul kembali dari localStorage.
+  if(Array.isArray(data)){
+   USERS=remoteUsers;
    persistUsers();
-  } else if(!Array.isArray(USERS)||USERS.length===0){
-   // Hanya jika cache memang sudah kosong, jangan membuat data baru palsu.
-   // Biarkan caller memakai fallback login/profile.
-   if(!silent)console.warn('app_get_users mengembalikan 0 akun; cache lokal juga kosong');
   }
   return true;
  }catch(e){if(!silent)console.warn('Gagal mengambil akun dari server',e);return false}
