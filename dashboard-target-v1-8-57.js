@@ -38,9 +38,11 @@ function normalizeOwnerEmail(value){
  return hit?String(hit.email||'').trim().toLowerCase():raw;
 }
 function ownerMatchesCurrentUser(value){
- const me=getAppUser();
- const email=String(me?.email||'').trim().toLowerCase();
- return !!email && normalizeOwnerEmail(value)===email;
+ const me=getAppUser()||{};
+ const candidates=[me.email,me.loginName,me.login_name,me.name,me.displayName,me.display_name].map(v=>String(v||'').trim().toLowerCase()).filter(Boolean);
+ if(!candidates.length)return false;
+ const owner=normalizeOwnerEmail(value);
+ return candidates.some(v=>normalizeOwnerEmail(v)===owner || v===owner);
 }
 
 const canManageTargets=()=>{const u=getAppUser();return !!(u&&(u.role==='admin'||u.role==='supervisor'||(typeof isSupervisorUser==='function'&&isSupervisorUser(u))))};
@@ -198,7 +200,7 @@ async function renderDashboardTargetSummary(){
  host.classList.remove('hidden');
  const visible=rows.slice(0,5);
  const collapsed=localStorage.getItem('rml_dashboard_target_summary_collapsed')==='1';
- host.innerHTML=`<div class="dashboard-card-head dashboard-target-summary-head"><button type="button" class="dashboard-target-collapse-btn" onclick="toggleDashboardTargetSummary()" aria-expanded="${collapsed?'false':'true'}"><span class="dashboard-target-chevron ${collapsed?'collapsed':''}">›</span><span><h3>🎯 Target Saya</h3><small>${rows.length} target aktif</small></span></button><button type="button" class="secondary compact" onclick="showTargetView()">Lihat Semua</button></div><div id="dashboardTargetSummaryBody" class="dashboard-target-summary-body ${collapsed?'collapsed':''}"><div class="dashboard-target-mini-list">${visible.map(x=>{const pct=x.target>0?(Number(x.achieved||0)/Number(x.target))*100:0;return `<div class="dashboard-target-mini"><div><strong>${escTarget(ownerMeta(x))}</strong><small>${escTarget(x.description||'Target')} • ${escTarget(periodText(x))}</small></div><div class="dashboard-target-mini-right"><strong>${Math.round(pct*10)/10}%</strong><small>${money(x.achieved)} / ${money(x.target)}</small>${targetTiers(x).length?`<small class="target-reward-mini">${escTarget(rewardSummaryText(x))}</small>`:''}</div></div>`}).join('')}</div></div>`;
+ host.innerHTML=`<div class="dashboard-card-head dashboard-target-summary-head"><button type="button" class="dashboard-target-collapse-btn" onclick="toggleDashboardTargetSummary()" aria-expanded="${collapsed?'false':'true'}"><span class="dashboard-target-chevron ${collapsed?'collapsed':''}">›</span><span><h3>🎯 Target Saya</h3><small>${rows.length} target aktif</small></span></button><button type="button" class="secondary compact" onclick="showTargetView()">Lihat Semua</button></div><div id="dashboardTargetSummaryBody" class="dashboard-target-summary-body ${collapsed?'collapsed':''}"><div class="dashboard-target-mini-list">${visible.map(x=>{const pct=x.target>0?(Number(x.achieved||0)/Number(x.target))*100:0;const tiers=targetTiers(x);return `<div class="dashboard-target-mini"><div><strong>${escTarget(ownerMeta(x))}</strong><small>${escTarget(x.description||'Target')} • ${escTarget(periodText(x))}</small></div><div class="dashboard-target-mini-right"><strong>${Math.round(pct*10)/10}%</strong><small>${money(x.achieved)} / ${money(x.target)}</small>${tiers.length?`<small class="target-reward-mini">${escTarget(rewardSummaryText(x))}</small>`:''}</div>${tiers.length?rewardHtml(x):''}</div>`}).join('')}</div></div>`;
 }
 function toggleDashboardTargetSummary(){const body=document.getElementById('dashboardTargetSummaryBody');if(!body)return;const collapsed=body.classList.toggle('collapsed');localStorage.setItem('rml_dashboard_target_summary_collapsed',collapsed?'1':'0');const btn=body.previousElementSibling?.querySelector('.dashboard-target-collapse-btn');btn?.setAttribute('aria-expanded',collapsed?'false':'true');btn?.querySelector('.dashboard-target-chevron')?.classList.toggle('collapsed',collapsed)}
 async function renderSettingsTargetList(){
