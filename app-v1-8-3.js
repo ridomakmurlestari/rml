@@ -836,22 +836,31 @@ async function pullUsersFromSupabase({silent=true}={}){
   if(!Array.isArray(data))return true;
   const remoteUsers=data.map(u=>normalizeKnownUserRole({email:u.account_key,loginName:u.login_name||'',name:u.display_name||'',phone:u.phone||'',role:u.role||'sales',active:u.active!==false,mustChangePassword:!!u.must_change_password,canSwitchAreaFreely:u.can_switch_area_freely===true})).filter(u=>u.email);
 
-  // Jangan pernah menghapus cache USERS hanya karena response server kosong
-  // atau hanya berisi sebagian akun akibat filter role/session.
-  // Akun remote yang ada akan diperbarui, akun lokal yang tidak dikembalikan
-  // server tetap dipertahankan agar data Sales tidak hilang dari aplikasi.
+  // Saat online, daftar akun dari server menjadi sumber kebenaran untuk status akun.
+  // Cache lokal tidak boleh mempertahankan Sales yang sudah dinonaktifkan/dihapus
+  // karena itu membuat perangkat lain tetap menampilkan akun lama setelah login ulang.
+  // Tetap pertahankan akun lokal yang memang belum ada di server hanya untuk akun
+  // yang sedang dipakai sebagai fallback login/profile, tetapi akun Sales/Supervisor
+  // yang tidak dikembalikan server tidak boleh ditampilkan di Data Akun.
   if(remoteUsers.length){
-   const merged=new Map(USERS.map(u=>[String(u.email||'').toLowerCase(),u]));
-   remoteUsers.forEach(u=>{
+   const remoteMap=new Map(remoteUsers.map(u=>[String(u.email||'').toLowerCase(),u]));
+   const localMap=new Map(USERS.map(u=>[String(u.email||'').toLowerCase(),u]));
+   const merged=[];
+   for(const [key,u] of remoteMap){
+    const old=localMap.get(key);
+    merged.push(old?{...old,...u}:u);
+   }
+   // Akun lokal default/admin yang tidak dikembalikan server tetap dipertahankan
+   // hanya untuk mencegah fallback login menjadi kosong; akun Sales yang hilang
+   // dari hasil remote sengaja tidak dipertahankan agar delete tersinkron.
+   for(const u of USERS){
     const key=String(u.email||'').toLowerCase();
-    const old=merged.get(key);
-    merged.set(key,old?{...old,...u}:u);
-   });
-   USERS=Array.from(merged.values());
+    if(remoteMap.has(key))continue;
+    if(u.role==='admin' || key===String(currentUser?.email||'').toLowerCase()) merged.push(u);
+   }
+   USERS=merged;
    persistUsers();
   } else if(!Array.isArray(USERS)||USERS.length===0){
-   // Hanya jika cache memang sudah kosong, jangan membuat data baru palsu.
-   // Biarkan caller memakai fallback login/profile.
    if(!silent)console.warn('app_get_users mengembalikan 0 akun; cache lokal juga kosong');
   }
   return true;
@@ -959,7 +968,7 @@ function resetAreaAssignments(){if(!confirm("Reset penugasan area ke default?"))
 function renderUserManagement(){
  const host=document.getElementById("userManagementList");
  if(!host)return;
- const visibleUsers=currentUser?.role==="supervisor"?USERS.filter(u=>u.role==="sales"):USERS;
+ const visibleUsers=currentUser?.role==="supervisor"?USERS.filter(u=>u.role==="sales"&&u.active!==false):USERS.filter(u=>u.role!=="sales"||u.active!==false);
  host.innerHTML=visibleUsers.map(u=>{const index=USERS.indexOf(u);return `<div class="user-setting-card">
   <div class="user-setting-head"><div><strong>${esc(u.role==="admin"?"Admin":(u.role==="supervisor"?"Supervisor":"Sales"))}</strong><span>${esc(u.email)}</span></div><span class="badge">${esc(u.role==="admin"?"ADMIN":(u.role==="supervisor"?"SUPERVISOR":"SALES"))}</span></div>
   ${currentUser?.role==="admin"&&u.role!=="admin"?`<label>Peran Akun</label><select id="userRole_${index}" class="user-role-select"><option value="sales" ${u.role==="sales"?"selected":""}>Sales</option><option value="supervisor" ${u.role==="supervisor"?"selected":""}>Supervisor</option></select><small class="user-role-help">Admin dapat mengubah Sales menjadi Supervisor.</small>`:""}
@@ -1470,7 +1479,7 @@ function fillAreas(){
  const a=[...new Set(customers().map(x=>x.area))].sort();
  document.getElementById("areaFilter").innerHTML='<option value="">Semua Area</option>'+a.map(x=>`<option>${esc(x)}</option>`).join("");
  document.getElementById("formArea").innerHTML=a.map(x=>`<option>${esc(x)}</option>`).join("");
- const salesUsers=USERS.filter(x=>x.role==="sales");
+ const salesUsers=USERS.filter(x=>x.role==="sales"&&x.active!==false);
  document.getElementById("formSales").innerHTML=
    '<option value="">Belum ditentukan</option>'+
    '<option value="__ALL__">Semua Sales</option>'+
@@ -1481,7 +1490,7 @@ function fillAreas(){
 function fillHistorySalesFilter(){
  const el=document.getElementById("historySalesFilter");if(!el)return;
  const selected=el.value;
- el.innerHTML='<option value="">Semua Sales</option>'+USERS.filter(x=>x.role==="sales").map(x=>`<option value="${esc(x.email)}">${esc(x.name)}</option>`).join("");
+ el.innerHTML='<option value="">Semua Sales</option>'+USERS.filter(x=>x.role==="sales"&&x.active!==false).map(x=>`<option value="${esc(x.email)}">${esc(x.name)}</option>`).join("");
  if([...el.options].some(o=>o.value===selected))el.value=selected;
 }
 
