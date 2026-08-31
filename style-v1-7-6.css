@@ -1050,11 +1050,11 @@ body.modal-open{overflow:hidden}
 @media(max-width:640px){.promo-management-actions{position:sticky;bottom:0;background:#fff;padding-top:10px}.promo-management-actions button{flex:1}.monthly-promo-list{max-height:84px}}
 
 /* v1.8.36 dashboard promo + target */
-.dashboard-promo-target-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px;align-items:stretch;margin:14px 0 2px}
-.dashboard-promo-target-grid .dashboard-price-card,.dashboard-promo-target-grid .dashboard-target-summary{margin:0;height:100%;box-sizing:border-box}
-.dashboard-promo-target-grid .dashboard-target-summary{min-width:0}
-.dashboard-promo-target-grid .monthly-promo-card{min-height:150px}
-@media(max-width:680px){.dashboard-promo-target-grid{grid-template-columns:1fr}.dashboard-promo-target-grid .monthly-promo-card{min-height:0}}
+.dashboard-target-full{width:100%;box-sizing:border-box;margin:14px 0 2px}
+.dashboard-promo-price-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px;align-items:stretch;margin:14px 0 2px}
+.dashboard-promo-price-grid .dashboard-price-card,.dashboard-promo-price-grid .monthly-promo-area{margin:0;height:100%;box-sizing:border-box;min-width:0}
+.dashboard-promo-price-grid .monthly-promo-area .monthly-promo-card{min-height:150px;margin:0;width:100%;box-sizing:border-box}
+@media(max-width:680px){.dashboard-promo-price-grid{grid-template-columns:1fr}.dashboard-promo-price-grid .monthly-promo-area .monthly-promo-card{min-height:0}}
 .promo-management-card select{width:100%;margin-bottom:12px}
 .promo-management-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
 .promo-management-head small:last-child{display:block;margin-top:4px;opacity:.7}
@@ -1098,3 +1098,6 @@ body.modal-open{overflow:hidden}
 
 /* v1.8.63 - Target Sales reward tiers */
 .target-tier-table-wrap{margin:12px 0 10px;border:1px solid #d8e9e1;border-radius:12px;background:#f8fcfa;overflow:hidden}.target-tier-table-title{padding:10px 12px;font-size:13px;font-weight:800;color:#25483e;border-bottom:1px solid #d8e9e1}.target-tier-table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:11px}.target-tier-table th,.target-tier-table td{padding:8px 7px;border-bottom:1px solid #e5eee9;text-align:left;vertical-align:middle;overflow-wrap:anywhere}.target-tier-table th{font-size:10px;color:#718078;background:#f1f8f5}.target-tier-table th:nth-child(1){width:18%}.target-tier-table th:nth-child(2){width:27%}.target-tier-table th:nth-child(3){width:35%}.target-tier-table th:nth-child(4){width:20%}.target-tier-table tr:last-child td{border-bottom:0}.target-tier-table tr.is-reached td{background:#eef9f3}.target-tier-table td:nth-child(4){font-weight:700;color:#718078}.target-tier-table tr.is-reached td:nth-child(4){color:#167b59}.target-tier-table small{display:block;font-size:9px;color:#718078;margin-top:2px}.target-current-reward{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 12px;border-top:1px solid #d8e9e1;background:#eef8f4}.target-current-reward small{font-size:10px;color:#5e746b}.target-current-reward strong{font-size:14px;color:#167b59}.dashboard-target-mini-right .target-tier-table-wrap{margin-top:8px;text-align:left}.dashboard-target-mini-right .target-tier-table{font-size:10px}.dashboard-target-mini-right .target-tier-table th,.dashboard-target-mini-right .target-tier-table td{padding:6px 5px}.dashboard-target-mini-right .target-tier-table-title{font-size:11px;padding:8px}.dashboard-target-mini-right .target-current-reward{font-size:10px}.dashboard-target-mini-right .target-current-reward strong{font-size:12px}@media(max-width:600px){.target-tier-table-wrap{width:100%;box-sizing:border-box}.target-tier-table{font-size:10px}.target-tier-table th,.target-tier-table td{padding:7px 5px}.target-tier-table th:nth-child(1){width:19%}.target-tier-table th:nth-child(2){width:27%}.target-tier-table th:nth-child(3){width:34%}.target-tier-table th:nth-child(4){width:20%}.dashboard-target-mini-right .target-tier-table-wrap{min-width:0}}
+
+/* v1.8.65 dashboard target tier layout */
+.dashboard-target-tier-wrap{grid-column:1 / -1;width:100%;min-width:0;margin-top:10px;overflow:hidden}.dashboard-target-tier-wrap .target-reward-table,.dashboard-target-tier-wrap table{width:100%;max-width:100%;table-layout:fixed}.dashboard-target-tier-wrap th,.dashboard-target-tier-wrap td{overflow-wrap:anywhere;word-break:break-word}@media(max-width:680px){.dashboard-target-tier-wrap{margin-top:8px}.dashboard-target-tier-wrap th,.dashboard-target-tier-wrap td{font-size:11px;padding:7px 6px}}

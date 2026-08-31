@@ -177,16 +177,17 @@
   </div>
 
   <div id="dashboardSummary" class="dashboard-grid"></div>
-  <div class="dashboard-promo-target-grid">
-    <div id="monthlyPromoArea" class="monthly-promo-area hidden"></div>
-    <div id="dashboardTargetSummary" class="dashboard-card dashboard-target-summary hidden"></div>
-  </div>
 
-  <button id="dashboardPriceCard" class="dashboard-price-card hidden" type="button" onclick="showPriceList()">
+  <div id="dashboardTargetSummary" class="dashboard-card dashboard-target-summary dashboard-target-full hidden"></div>
+
+  <div class="dashboard-promo-price-grid">
+    <button id="dashboardPriceCard" class="dashboard-price-card hidden" type="button" onclick="showPriceList()">
     <span class="dashboard-price-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H11v17H6.5A2.5 2.5 0 0 0 4 22z"/><path d="M20 5.5A2.5 2.5 0 0 0 17.5 3H13v17h4.5A2.5 2.5 0 0 1 20 22z"/><path d="M7 7h2M15 7h2M7 11h2M15 11h2"/></svg></span>
     <span><strong>Daftar Harga</strong><small>Cari nama, kode, kategori, harga, dan diskon produk</small></span>
     <span class="dashboard-price-arrow" aria-hidden="true">›</span>
-  </button>
+    </button>
+    <div id="monthlyPromoArea" class="monthly-promo-area hidden"></div>
+  </div>
 
 <div id="allSalesStatsCard" class="dashboard-card">
     <div class="dashboard-card-head">
