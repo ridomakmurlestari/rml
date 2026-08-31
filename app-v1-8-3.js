@@ -103,13 +103,13 @@ async function pullRemoteVisits({reconcile=false}={}){
  }else if(!fullSyncDone){
   // One-time repair/full sync for this browser/device. After this, login uses delta only.
   // The server retains 30 days, so this downloads the retained rows once, not on every login.
-  rows=await rpc('app_pull_visits',{p_token:session.session_token,p_limit:REMOTE_VISIT_INITIAL_LIMIT});
+  rows=await rpc('app_pull_visits_nophoto',{p_token:session.session_token,p_limit:REMOTE_VISIT_INITIAL_LIMIT});
  }else{
   const since=meta.visits_updated_at||await (async()=>{
    const localRows=await idbGetAll(STORE_VISITS);
    return maxVisitUpdatedAt(localRows);
   })();
-  rows=await rpc('app_pull_visits_delta',{p_token:session.session_token,p_since:since||null,p_limit:500});
+  rows=await rpc('app_pull_visits_delta_nophoto',{p_token:session.session_token,p_since:since||null,p_limit:500});
  }
  for(const r of rows||[]){
   const local=visitWithoutPhoto({...(r.payload||{}),id:r.id,syncStatus:'synced',updatedAt:r.updated_at});
@@ -809,7 +809,7 @@ async function copyProductAssignmentsFromArea(){
  const ok=navigator.onLine?await syncProductsToSupabase({silent:true}):false;toast(ok?'Pembagian barang berhasil disalin':'Pembagian tersimpan lokal dan akan disinkronkan saat online');if(!ok)scheduleProductSync();
 }
 
-const APP_VERSION="1.8.52";
+const APP_VERSION="1.8.53";
 const USER_SETTINGS_KEY="rml_user_accounts_v1";
 const DEFAULT_USERS=[
 {email:"rini@rml.app",loginName:"rini",active:true,phone:"085668027045",name:"Rini",role:"sales",mustChangePassword:true,canSwitchAreaFreely:false},
