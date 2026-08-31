@@ -493,21 +493,19 @@
   <div class="target-page-head">
     <button class="back" type="button" onclick="closePromoManagementPage()">← Kembali ke Pengaturan</button>
     <div class="title-row target-page-title-row">
-      <div><h3>🎁 Promo Bulan Ini</h3><p>Masukkan nama barang promo yang akan ditampilkan kepada Sales.</p></div>
+      <div><h3>🎁 Promo Bulan Ini</h3><p>Buat satu promo per kategori, lalu assign ke beberapa Sales/Supervisor sekaligus.</p></div>
     </div>
   </div>
   <div class="dashboard-card promo-management-card">
-    <div class="promo-management-head"><div><small>PERIODE PROMO</small><h3 id="promoMonthLabel">-</h3><small id="promoSalesLabel">Penanggung Jawab: -</small></div></div>
-    <label for="promoSalesSelect">Penanggung Jawab</label><select id="promoSalesSelect" onchange="handlePromoSalesChange()"></select>
-    <div id="promoCategories" class="promo-categories-editor"></div>
+    <div class="promo-management-head"><div><small>PERIODE PROMO</small><h3 id="promoMonthLabel">-</h3><small>Input sekali, assign ke banyak penanggung jawab.</small></div></div>
+    <div id="promoMasterCards" class="promo-master-cards"></div>
     <div class="page-actions promo-management-actions">
-      <button class="secondary" type="button" onclick="addPromoCategory()">＋ Tambah Kategori</button>
-      <button class="secondary" type="button" onclick="clearMonthlyPromo()">Hapus Promo</button>
-      <button class="primary" type="button" onclick="saveMonthlyPromo()">Simpan Promo</button>
+      <button class="secondary" type="button" onclick="addMasterPromo()">＋ Tambah Promo</button>
+      <button class="primary" type="button" onclick="saveMonthlyPromo()">Simpan Semua Promo</button>
     </div>
   </div>
   <div class="dashboard-card promo-saved-card">
-    <div class="dashboard-card-head"><div><h3>Promo Tersimpan</h3><small>Daftar promo bulan ini</small></div></div>
+    <div class="dashboard-card-head"><div><h3>Promo Tersimpan</h3><small>1 card = 1 kategori promo</small></div></div>
     <div id="promoSavedList" class="promo-saved-list"></div>
   </div>
 </section>
@@ -808,7 +806,7 @@
 <script src="customers-v0-10-3.js"></script>
 <script src="app-v1-8-3.js?v=1.8.46"></script>
 <script src="dashboard-target-v1-8-45.js?v=1.8.45"></script>
-<script src="promo-v1-8-44.js?v=1.8.47"></script>
+<script src="promo-v1-8-49.js?v=1.8.49"></script>
 <script src="admin-sales-v1-8-9.js?v=1.8.38"></script>
 <script src="app-admin-photo-v1-7-8.js"></script>
 <script src="app-admin-delete-all-photos-v1-7-9.js"></script>
