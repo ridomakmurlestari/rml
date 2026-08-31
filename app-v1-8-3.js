@@ -72,7 +72,17 @@ async function upsertSingleProductToSupabase(product){
 async function sbSignIn(name,password){const data=await rpc('app_login',{p_login_name:name,p_password:password});const row=Array.isArray(data)?data[0]:data;if(!row?.session_token)throw new Error('Nama atau password salah');setSbSession(row);return row}
 async function sbProfile(){const session=getSbSession();if(!session?.session_token)return null;const data=await rpc('app_get_profile',{p_token:session.session_token});return Array.isArray(data)?data[0]:data}
 async function sbUpdatePassword(oldPassword,newPassword){const session=getSbSession();if(!session?.session_token)throw new Error('Sesi login tidak tersedia');return rpc('app_change_password',{p_token:session.session_token,p_old_password:oldPassword,p_new_password:newPassword})}
-function visitToRemote(v){return {id:v.id,sales_email:v.salesEmail||currentUser?.email||'',sales_name:v.salesName||currentUser?.name||'',customer_no:String(v.customerNo||''),customer_code:v.code||'',customer_name:v.name||'',area:v.area||'',status:v.status||'',visit_type:v.visitType||'Kunjungan Area',check_in_at:v.checkInAt||null,check_out_at:v.checkOutAt||null,updated_at:v.updatedAt||new Date().toISOString(),payload:v}}
+function visitToRemote(v){
+ const payload={...(v||{})};
+ // Foto check-in hanya menjadi bukti wajib saat proses check-in; jangan kirim/retensi di Supabase.
+ delete payload.checkInPhoto;
+ return {id:v.id,sales_email:v.salesEmail||currentUser?.email||'',sales_name:v.salesName||currentUser?.name||'',customer_no:String(v.customerNo||''),customer_code:v.code||'',customer_name:v.name||'',area:v.area||'',status:v.status||'',visit_type:v.visitType||'Kunjungan Area',check_in_at:v.checkInAt||null,check_out_at:v.checkOutAt||null,updated_at:v.updatedAt||new Date().toISOString(),payload};
+}
+function visitWithoutPhoto(v){
+ const clean={...(v||{})};
+ delete clean.checkInPhoto;
+ return clean;
+}
 async function pullRemoteVisits({reconcile=false}={}){
  const session=getSbSession();
  if(!navigator.onLine||!session?.session_token)return [];
@@ -102,7 +112,7 @@ async function pullRemoteVisits({reconcile=false}={}){
   rows=await rpc('app_pull_visits_delta',{p_token:session.session_token,p_since:since||null,p_limit:500});
  }
  for(const r of rows||[]){
-  const local={...(r.payload||{}),id:r.id,syncStatus:'synced',updatedAt:r.updated_at};
+  const local=visitWithoutPhoto({...(r.payload||{}),id:r.id,syncStatus:'synced',updatedAt:r.updated_at});
   await idbPut(STORE_VISITS,local);
  }
  const newest=maxVisitUpdatedAt(rows);
@@ -799,7 +809,7 @@ async function copyProductAssignmentsFromArea(){
  const ok=navigator.onLine?await syncProductsToSupabase({silent:true}):false;toast(ok?'Pembagian barang berhasil disalin':'Pembagian tersimpan lokal dan akan disinkronkan saat online');if(!ok)scheduleProductSync();
 }
 
-const APP_VERSION="1.8.51";
+const APP_VERSION="1.8.52";
 const USER_SETTINGS_KEY="rml_user_accounts_v1";
 const DEFAULT_USERS=[
 {email:"rini@rml.app",loginName:"rini",active:true,phone:"085668027045",name:"Rini",role:"sales",mustChangePassword:true,canSwitchAreaFreely:false},
@@ -3210,7 +3220,7 @@ async function syncPendingVisits(options={}){
    const batch=pending.slice(i,i+batchSize);
    const results=await Promise.allSettled(batch.map(async v=>{
     await rpc('app_upsert_visit',{p_token:session.session_token,p_visit:visitToRemote(v)});
-    await idbPut(STORE_VISITS,{...v,syncStatus:"synced",updatedAt:new Date().toISOString()});
+    await idbPut(STORE_VISITS,{...visitWithoutPhoto(v),syncStatus:"synced",updatedAt:new Date().toISOString()});
     return v.id;
    }));
    for(let j=0;j<results.length;j++){
