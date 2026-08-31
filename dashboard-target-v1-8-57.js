@@ -1,4 +1,4 @@
-/* RML Sales Visit v1.8.58 - Target Reward Bertingkat - Realization Based Percent */
+/* RML Sales Visit v1.8.60 - Target Reward Bertingkat - Persistent Reward Table */
 (function(){
 const TARGET_KEY='rml_dashboard_targets_v1';
 const TARGET_REMOTE_READY='rml_dashboard_targets_remote_ready_v1';
@@ -83,13 +83,13 @@ function encodeRewardDescription(description,rewardType,rewardValue){
 }
 function normalizeRemoteRow(r){
  const d=decodeRewardDescription(r.description||'');
- const td=decodeRewardTiers(d.description);const tiers=td.tiers;const legacyTarget=Number(r.target||0);return {id:String(r.id),type:r.type,startMonth:r.start_month||r.month||monthNow(),month:r.start_month||r.month||monthNow(),durationMonths:Number(r.duration_months||1),ownerId:normalizeOwnerEmail(r.owner_id||''),targetSalesEmail:normalizeOwnerEmail(r.target_sales_email||''),description:td.description||d.description,target:tiers.length?Math.max(...tiers.map(t=>Number(t.target||0)),legacyTarget):legacyTarget,achieved:Number(r.achieved||0),rewardType:String(r.reward_type||d.rewardType||'none'),rewardValue:Number(r.reward_value||d.rewardValue||0),tiers,updatedDate:r.updated_date||'',updatedAt:r.updated_at||''}
+ const rawTiers=[];const td=decodeRewardTiers(d.description);const tiers=td.tiers.map(t=>({target:Number(t.target||0),rewardType:String(t.rewardType||t.reward_type||'nominal'),rewardValue:Number(t.rewardValue??t.reward_value??0)})).filter(t=>t.target>0&&t.rewardValue>0);const legacyTarget=Number(r.target||0);return {id:String(r.id),type:r.type,startMonth:r.start_month||r.month||monthNow(),month:r.start_month||r.month||monthNow(),durationMonths:Number(r.duration_months||1),ownerId:normalizeOwnerEmail(r.owner_id||''),targetSalesEmail:normalizeOwnerEmail(r.target_sales_email||''),description:td.description||d.description,target:tiers.length?Math.max(...tiers.map(t=>Number(t.target||0)),legacyTarget):legacyTarget,achieved:Number(r.achieved||0),rewardType:String(r.reward_type||d.rewardType||'none'),rewardValue:Number(r.reward_value||d.rewardValue||0),tiers,updatedDate:r.updated_date||'',updatedAt:r.updated_at||''}
 }
 function targetToRemote(x){return {id:String(x.id),type:x.type,start_month:targetStart(x),duration_months:periodMonths(x),owner_id:String(x.ownerId||''),target_sales_email:String(x.targetSalesEmail||''),description:encodeRewardTiers(x.description,x.tiers||[]),target:Number((x.tiers&&x.tiers.length)?Math.max(...x.tiers.map(t=>Number(t.target||0))):x.target||0),achieved:Number(x.achieved||0),reward_type:String((x.tiers&&x.tiers.length)?'none':(x.rewardType||'none')),reward_value:Number((x.tiers&&x.tiers.length)?0:(x.rewardValue||0)),updated_date:x.updatedDate||null,updated_at:x.updatedAt||new Date().toISOString()}}
 async function pullTargetsFromServer({silent=true,throwOnError=false}={}){
  const token=sessionToken();if(!navigator.onLine||!token){if(throwOnError)throw new Error('Tidak ada koneksi internet atau sesi login tidak valid');return null;}
  try{
-  const data=await targetRpc('app_get_dashboard_targets',{p_token:token});
+  const data=await targetRpc('app_get_dashboard_targets_v2',{p_token:token});
   let remote=Array.isArray(data)?data.map(normalizeRemoteRow):[];
   const local=targetRows();
   // Migrasi target lama hanya SATU KALI. Setelah remote berhasil dibaca,
@@ -103,7 +103,7 @@ async function pullTargetsFromServer({silent=true,throwOnError=false}={}){
     try{await targetRpc('app_admin_upsert_dashboard_target',{p_token:token,p_target:targetToRemote(x)})}
     catch(e){console.warn('Migrasi target gagal',e)}
    }
-   if(missing.length){const fresh=await targetRpc('app_get_dashboard_targets',{p_token:token});remote=Array.isArray(fresh)?fresh.map(normalizeRemoteRow):[]}
+   if(missing.length){const fresh=await targetRpc('app_get_dashboard_targets_v2',{p_token:token});remote=Array.isArray(fresh)?fresh.map(normalizeRemoteRow):[]}
   }
   saveTargetRows(remote);localStorage.setItem(TARGET_REMOTE_READY,'1');return remote;
  }catch(e){console.warn('Sinkronisasi target gagal',e);if(throwOnError)throw e;if(!silent&&typeof toast==='function')toast(`Sinkronisasi target gagal: ${e.message||'periksa koneksi/database'}`);return null}

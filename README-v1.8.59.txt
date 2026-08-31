@@ -1,0 +1,1 @@
+RML v1.8.59: target/reward bertingkat disimpan di kolom reward_tiers dan dibaca melalui satu RPC ringan. Jalankan SUPABASE-FIX-v1-8-59-TARGET-REWARD-TIERS.sql sekali. Foto Check-In tetap wajib tetapi tidak disimpan ke Supabase seperti v1.8.53.
