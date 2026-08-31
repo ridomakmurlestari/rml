@@ -53,7 +53,7 @@
   <div class="edit-visit-modal-card target-manager-card" onclick="event.stopPropagation()">
     <div class="visit-detail-modal-head"><div><small>TARGET BULANAN</small><h3>Kelola Target</h3></div><button class="visit-detail-close" onclick="closeTargetManager()">×</button></div>
     <div class="edit-visit-modal-body">
-      <label>Jenis Target</label><select id="targetTypeInput" onchange="refreshTargetManagerFields()"><option value="sales">Target Sales</option><option value="outlet">Target Outlet</option></select>
+      <label>Jenis Target</label><select id="targetTypeInput" onchange="refreshTargetManagerFields();refreshTargetRewardFields()"><option value="sales">Target Sales</option><option value="outlet">Target Outlet</option></select>
       <label>Mulai Periode</label><input id="targetMonthInput" type="month">
       <label>Durasi Target</label><select id="targetDurationInput"><option value="1">1 Bulan</option><option value="3">3 Bulan</option><option value="6">6 Bulan</option><option value="12">12 Bulan</option></select>
       <label id="targetOwnerLabel">Sales</label><select id="targetOwnerInput"></select>
@@ -823,7 +823,7 @@
 <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.4/dist/jspdf.plugin.autotable.min.js"></script>
 <script src="customers-v0-10-3.js"></script>
 <script src="app-v1-8-3.js?v=1.8.53"></script>
-<script src="dashboard-target-v2-00.js?v=1.8.68"></script>
+<script src="dashboard-target-v1-8-63.js?v=1.8.68"></script>
 <script src="promo-v1-8-49.js?v=1.8.50"></script>
 <script src="admin-sales-v1-8-9.js?v=1.8.38"></script>
 <script src="app-admin-photo-v1-7-8.js"></script>
