@@ -59,11 +59,22 @@
       <label id="targetOwnerLabel">Sales</label><select id="targetOwnerInput"></select>
       <div id="targetSalesWrap" class="hidden"><label>Penanggung Jawab Outlet</label><select id="targetSalesInput"></select><small class="target-form-help">Target outlet ini akan muncul di Dashboard Sales yang dipilih.</small></div>
       <label>Deskripsi / Nama Target</label><input id="targetDescriptionInput" type="text" placeholder="Contoh: Target Bulanan DODO / Target Produk / Program Agustus">
-      <label>Target & Reward Bertingkat</label>
-      <small class="target-form-help">Contoh: Rp10 juta → Reward A, Rp20 juta → Reward B. Tambahkan beberapa tingkat sesuai kebutuhan.</small>
-      <div id="targetTierList" class="target-tier-list"></div>
-      <button type="button" class="secondary compact" onclick="addTargetTier()">＋ Tambah Tingkat Reward</button>
-      <input id="targetRewardTypeInput" type="hidden" value="none"><input id="targetRewardValueInput" type="hidden" value=""><label id="targetRewardValueLabel" class="hidden">Nilai Reward</label>
+      <div id="targetSalesTierSection">
+        <label>Target & Reward Bertingkat</label>
+        <small class="target-form-help">Contoh: Rp10 juta → Reward A, Rp20 juta → Reward B. Tambahkan beberapa tingkat sesuai kebutuhan.</small>
+        <div id="targetTierList" class="target-tier-list"></div>
+        <button type="button" class="secondary compact" onclick="addTargetTier()">＋ Tambah Tingkat Reward</button>
+      </div>
+      <div id="targetOutletRewardSection" class="hidden">
+        <label>Target Outlet (Rp)</label>
+        <input id="targetAmountInput" type="number" min="0" step="1000" placeholder="Contoh: 2500000">
+        <label>Reward Outlet</label>
+        <div class="target-reward-inline">
+          <select id="targetRewardTypeInput"><option value="nominal">Nominal</option><option value="percent">Persentase</option><option value="none">Tanpa Reward</option></select>
+          <input id="targetRewardValueInput" type="number" min="0" step="0.01" placeholder="Contoh: 5">
+        </div>
+        <small id="targetRewardValueLabel" class="target-form-help">Isi nominal reward atau persentase reward.</small>
+      </div>
       <label>Pencapaian / Realisasi (Rp)</label><input id="targetAchievedInput" type="number" min="0" step="1000" placeholder="52500000">
       <small class="target-form-help">Tanggal dan jam update otomatis mengikuti waktu saat tombol Simpan Target ditekan.</small>
       <input id="targetEditId" type="hidden">
@@ -807,7 +818,7 @@
 <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.4/dist/jspdf.plugin.autotable.min.js"></script>
 <script src="customers-v0-10-3.js"></script>
 <script src="app-v1-8-3.js?v=1.8.53"></script>
-<script src="dashboard-target-v1-8-63.js?v=1.8.66"></script>
+<script src="dashboard-target-v1-8-63.js?v=1.8.67"></script>
 <script src="promo-v1-8-49.js?v=1.8.50"></script>
 <script src="admin-sales-v1-8-9.js?v=1.8.38"></script>
 <script src="app-admin-photo-v1-7-8.js"></script>

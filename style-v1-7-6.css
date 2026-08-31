@@ -1172,3 +1172,6 @@ body.modal-open{overflow:hidden}
     gap:8px;
   }
 }
+
+/* v1.8.67 Target Outlet single reward */
+.target-reward-inline{display:grid;grid-template-columns:minmax(130px,.8fr) minmax(0,1.2fr);gap:8px;margin-bottom:6px}.target-reward-inline input,.target-reward-inline select{width:100%;box-sizing:border-box}.target-outlet-reward-box{min-width:120px;text-align:right;padding:7px 9px;border:1px solid #d8e9e1;border-radius:10px;background:#f4faf7}.target-outlet-reward-box small{display:block;font-size:9px;color:#718078}.target-outlet-reward-box strong{display:block;font-size:12px;color:#167b59;margin-top:2px}.target-outlet-reward-box span{display:block;font-size:9px;color:#718078;margin-top:2px}@media(max-width:600px){.target-outlet-reward-box{grid-column:1/-1;text-align:left;display:flex;align-items:center;gap:8px}.target-outlet-reward-box small,.target-outlet-reward-box strong,.target-outlet-reward-box span{display:inline}.target-outlet-reward-box span{margin-left:auto}.target-reward-inline{grid-template-columns:1fr 1fr}}
