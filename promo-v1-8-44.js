@@ -1,6 +1,8 @@
 /* RML Sales Visit v1.8.41 - Promo Bulan Ini: per Penanggung Jawab + kategori */
 (function(){
   const KEY='rml_monthly_promo_v3';
+  const CACHE_KEY='rml_monthly_promo_remote_cache_v1';
+  const CACHE_TTL=15*60*1000;
   const monthKey=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`};
   const monthLabel=m=>{const [y,mo]=String(m).split('-').map(Number);return new Date(y,mo-1,1).toLocaleDateString('id-ID',{month:'long',year:'numeric'})};
   const escP=v=>typeof esc==='function'?esc(v):String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
@@ -36,9 +38,29 @@
   };
   const localForOwner=email=>{const all=readLocal(),m=all[monthKey()]||{},raw=m[String(email||'').toLowerCase()];return normalizeCategories(raw)};
   const saveLocal=(email,categories)=>{const all=readLocal(),m=all[monthKey()]||{};m[String(email||'').toLowerCase()]={categories};all[monthKey()]=m;writeLocal(all)};
-  let remoteRows=[];let selectedOwnerEmail='';
+  let remoteRows=[];let selectedOwnerEmail='';let lastPullAt=0;
+  function hydrateFromLocal(){const all=readLocal(),m=all[monthKey()]||{};remoteRows=Object.entries(m).map(([email,v])=>({monthKey:monthKey(),ownerEmail:String(email).toLowerCase(),categories:normalizeCategories(v),updatedAt:''}));}
   function normalizeRows(rows){return (Array.isArray(rows)?rows:[]).map(r=>({monthKey:r.month_key,ownerEmail:String(r.sales_email||'').toLowerCase(),categories:normalizeCategories(r.items),updatedAt:r.updated_at||''}));}
-  async function pullRemote(){const token=sessionToken();if(!navigator.onLine||!token)return false;try{const data=await rpc('app_get_monthly_promos',{p_token:token,p_month_key:monthKey()});remoteRows=normalizeRows(data);const all=readLocal(),m={};remoteRows.forEach(r=>{m[r.ownerEmail]={categories:r.categories}});all[monthKey()]=m;writeLocal(all);return true}catch(e){console.warn('Promo remote gagal',e);return false}}
+  async function pullRemote(force=false){
+    const now=Date.now();
+    if(!force && lastPullAt && now-lastPullAt<CACHE_TTL){return true}
+    if(!force){
+      try{const c=JSON.parse(localStorage.getItem(CACHE_KEY)||'null');if(c&&c.monthKey===monthKey()&&now-Number(c.at||0)<CACHE_TTL){hydrateFromLocal();lastPullAt=Number(c.at)||now;return true}}catch(_){ }
+    }
+    hydrateFromLocal();
+    const token=sessionToken();
+    if(!navigator.onLine||!token)return false;
+    try{
+      const data=await rpc('app_get_monthly_promos',{p_token:token,p_month_key:monthKey()});
+      remoteRows=normalizeRows(data);
+      const all=readLocal(),m={};
+      remoteRows.forEach(r=>{m[r.ownerEmail]={categories:r.categories}});
+      all[monthKey()]=m;writeLocal(all);
+      lastPullAt=Date.now();
+      localStorage.setItem(CACHE_KEY,JSON.stringify({monthKey:monthKey(),at:lastPullAt}));
+      return true;
+    }catch(e){console.warn('Promo remote gagal',e);return false}
+  }
   function categoriesForOwner(email){const key=String(email||'').toLowerCase();const r=remoteRows.find(x=>x.ownerEmail===key&&x.monthKey===monthKey());return r?r.categories:localForOwner(key)}
   function ownerByEmail(email){const key=String(email||'').toLowerCase();return managedUsers().find(u=>String(u.email||'').toLowerCase()===key)||(()=>{const me=getUser();return String(me?.email||'').toLowerCase()===key?me:null})()}
   function userName(email){return ownerByEmail(email)?.name||email||'-'}
@@ -73,12 +95,12 @@
   function removeCategory(i){const cats=readCategories();if(cats.length<=1)return;cats.splice(i,1);renderCategories(cats)}
   function loadSelectedIntoForm(){renderCategories(categoriesForOwner(selectedOwnerEmail));const meta=document.getElementById('promoSalesLabel');if(meta)meta.textContent=`Penanggung Jawab: ${userName(selectedOwnerEmail)}`;renderSaved()}
   function renderSaved(){const box=document.getElementById('promoSavedList');if(!box)return;const cats=categoriesForOwner(selectedOwnerEmail);box.innerHTML=cats.length?cats.filter(c=>c.items.length).map(c=>`<div class="promo-saved-category"><strong>${escP(c.name)}</strong>${c.items.map((x,i)=>`<div class="promo-saved-item"><span>${i+1}</span><strong>${escP(x)}</strong></div>`).join('')}</div>`).join(''):'<div class="empty">Belum ada promo untuk penanggung jawab ini.</div>'}
-  async function showPage(){if(!canManage())return typeof toast==='function'&&toast('Hanya Admin/Supervisor yang dapat mengelola promo');if(typeof hide==='function')hide();document.getElementById('promoView')?.classList.remove('hidden');await pullRemote();renderOwnerSelect();const label=document.getElementById('promoMonthLabel');if(label)label.textContent=monthLabel(monthKey());loadSelectedIntoForm()}
+  async function showPage(){if(!canManage())return typeof toast==='function'&&toast('Hanya Admin/Supervisor yang dapat mengelola promo');if(typeof hide==='function')hide();document.getElementById('promoView')?.classList.remove('hidden');hydrateFromLocal();await pullRemote(true);renderOwnerSelect();const label=document.getElementById('promoMonthLabel');if(label)label.textContent=monthLabel(monthKey());loadSelectedIntoForm()}
   function handleOwnerChange(){selectedOwnerEmail=document.getElementById('promoSalesSelect')?.value||'';loadSelectedIntoForm()}
-  async function savePage(){if(!canManage())return;const categories=readCategories().filter(c=>c.name||c.items.length);if(!selectedOwnerEmail)return toast('Pilih penanggung jawab terlebih dahulu');if(!categories.length)return toast('Isi minimal satu kategori dengan barang promo');if(categories.some(c=>c.items.length&&!c.name))return toast('Nama kategori wajib diisi');saveLocal(selectedOwnerEmail,categories);const token=sessionToken();try{if(!navigator.onLine||!token)throw new Error('Promo memerlukan koneksi internet agar tersimpan untuk semua perangkat');await rpc('app_admin_upsert_monthly_promo',{p_token:token,p_month_key:monthKey(),p_sales_email:selectedOwnerEmail,p_items:{categories}});await pullRemote();loadSelectedIntoForm();renderCard();toast(`Promo untuk ${userName(selectedOwnerEmail)} berhasil disimpan`)}catch(e){toast(`Gagal menyimpan promo: ${e.message||'periksa SQL Supabase'}`)}}
-  async function clearPage(){if(!canManage()||!selectedOwnerEmail)return;if(!confirm('Hapus promo bulan ini untuk penanggung jawab yang dipilih?'))return;const token=sessionToken();try{if(!navigator.onLine||!token)throw new Error('Memerlukan internet');await rpc('app_admin_upsert_monthly_promo',{p_token:token,p_month_key:monthKey(),p_sales_email:selectedOwnerEmail,p_items:{categories:[]}});saveLocal(selectedOwnerEmail,[]);await pullRemote();loadSelectedIntoForm();renderCard();toast('Promo dihapus')}catch(e){toast(`Gagal menghapus promo: ${e.message||'periksa koneksi'}`)}}
+  async function savePage(){if(!canManage())return;const categories=readCategories().filter(c=>c.name||c.items.length);if(!selectedOwnerEmail)return toast('Pilih penanggung jawab terlebih dahulu');if(!categories.length)return toast('Isi minimal satu kategori dengan barang promo');if(categories.some(c=>c.items.length&&!c.name))return toast('Nama kategori wajib diisi');saveLocal(selectedOwnerEmail,categories);const token=sessionToken();try{if(!navigator.onLine||!token)throw new Error('Promo memerlukan koneksi internet agar tersimpan untuk semua perangkat');await rpc('app_admin_upsert_monthly_promo',{p_token:token,p_month_key:monthKey(),p_sales_email:selectedOwnerEmail,p_items:{categories}});await pullRemote(true);loadSelectedIntoForm();renderCard();toast(`Promo untuk ${userName(selectedOwnerEmail)} berhasil disimpan`)}catch(e){toast(`Gagal menyimpan promo: ${e.message||'periksa SQL Supabase'}`)}}
+  async function clearPage(){if(!canManage()||!selectedOwnerEmail)return;if(!confirm('Hapus promo bulan ini untuk penanggung jawab yang dipilih?'))return;const token=sessionToken();try{if(!navigator.onLine||!token)throw new Error('Memerlukan internet');await rpc('app_admin_upsert_monthly_promo',{p_token:token,p_month_key:monthKey(),p_sales_email:selectedOwnerEmail,p_items:{categories:[]}});saveLocal(selectedOwnerEmail,[]);await pullRemote(true);loadSelectedIntoForm();renderCard();toast('Promo dihapus')}catch(e){toast(`Gagal menghapus promo: ${e.message||'periksa koneksi'}`)}}
   window.showPromoManagementPage=showPage;window.closePromoManagementPage=()=>{if(typeof showAreaAssignments==='function')showAreaAssignments();else if(typeof showDashboard==='function')showDashboard()};window.saveMonthlyPromo=savePage;window.clearMonthlyPromo=clearPage;window.handlePromoSalesChange=handleOwnerChange;window.addPromoCategory=addCategory;window.removePromoCategory=removeCategory;window.openMonthlyPromoDetail=openDetail;window.closePromoDetailModal=closeDetail;window.closePromoCatalog=closeDetail;window.renderMonthlyPromoCard=renderCard;window.pullMonthlyPromos=pullRemote;
-  document.addEventListener('DOMContentLoaded',()=>setTimeout(async()=>{await pullRemote();renderCard()},0));
-  const oldOpenApp=window.openApp;window.openApp=function(){const r=oldOpenApp?oldOpenApp.apply(this,arguments):undefined;setTimeout(async()=>{await pullRemote();renderCard()},300);return r};
-  const oldRefresh=window.refreshDashboard;if(oldRefresh)window.refreshDashboard=async function(){const r=await oldRefresh.apply(this,arguments);await pullRemote();renderCard();return r};
+  document.addEventListener('DOMContentLoaded',()=>setTimeout(async()=>{hydrateFromLocal();renderCard();await pullRemote(false);renderCard()},0));
+  const oldOpenApp=window.openApp;window.openApp=function(){const r=oldOpenApp?oldOpenApp.apply(this,arguments):undefined;setTimeout(async()=>{hydrateFromLocal();renderCard();await pullRemote(false);renderCard()},300);return r};
+  const oldRefresh=window.refreshDashboard;if(oldRefresh)window.refreshDashboard=async function(){const r=await oldRefresh.apply(this,arguments);await pullRemote(false);renderCard();return r};
 })();
