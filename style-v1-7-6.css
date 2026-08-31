@@ -1101,3 +1101,74 @@ body.modal-open{overflow:hidden}
 
 /* v1.8.65 dashboard target tier layout */
 .dashboard-target-tier-wrap{grid-column:1 / -1;width:100%;min-width:0;margin-top:10px;overflow:hidden}.dashboard-target-tier-wrap .target-reward-table,.dashboard-target-tier-wrap table{width:100%;max-width:100%;table-layout:fixed}.dashboard-target-tier-wrap th,.dashboard-target-tier-wrap td{overflow-wrap:anywhere;word-break:break-word}@media(max-width:680px){.dashboard-target-tier-wrap{margin-top:8px}.dashboard-target-tier-wrap th,.dashboard-target-tier-wrap td{font-size:11px;padding:7px 6px}}
+
+/* v1.8.66 - Mobile dashboard target tier layout fix */
+.dashboard-target-summary .dashboard-target-mini{
+  display:block;
+  width:100%;
+  box-sizing:border-box;
+  min-width:0;
+}
+.dashboard-target-summary .dashboard-target-mini > div:first-child{
+  min-width:0;
+}
+.dashboard-target-summary .dashboard-target-mini-right{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-top:7px;
+  min-width:0;
+  text-align:right;
+}
+.dashboard-target-summary .dashboard-target-tier-wrap{
+  display:block;
+  width:100%;
+  max-width:100%;
+  min-width:0;
+  box-sizing:border-box;
+  margin-top:10px;
+  overflow:hidden;
+}
+.dashboard-target-summary .dashboard-target-tier-wrap .target-tier-table-wrap{
+  width:100%;
+  max-width:100%;
+  box-sizing:border-box;
+  margin:0;
+}
+.dashboard-target-summary .dashboard-target-tier-wrap .target-tier-table{
+  width:100%;
+  max-width:100%;
+  table-layout:fixed;
+}
+@media(max-width:680px){
+  .dashboard-target-summary .dashboard-target-mini-right{
+    align-items:flex-end;
+  }
+  .dashboard-target-summary .dashboard-target-mini-right > strong{
+    font-size:18px;
+    white-space:nowrap;
+  }
+  .dashboard-target-summary .dashboard-target-mini-right > small{
+    white-space:normal;
+    text-align:right;
+  }
+  .dashboard-target-summary .target-tier-table th,
+  .dashboard-target-summary .target-tier-table td{
+    font-size:10px;
+    line-height:1.25;
+    padding:7px 5px;
+    overflow-wrap:anywhere;
+    word-break:normal;
+  }
+  .dashboard-target-summary .target-tier-table th:nth-child(1){width:20%}
+  .dashboard-target-summary .target-tier-table th:nth-child(2){width:25%}
+  .dashboard-target-summary .target-tier-table th:nth-child(3){width:35%}
+  .dashboard-target-summary .target-tier-table th:nth-child(4){width:20%}
+  .dashboard-target-summary .target-current-reward{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:8px;
+  }
+}
