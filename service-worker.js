@@ -1,9 +1,9 @@
-const CACHE_NAME="rml-sales-visit-2.00-promo-image";
+const CACHE_NAME="rml-sales-visit-2.0.1";
 const APP_SHELL=[
  "./","./index.html","./style-v1-7-6.css",
  "./pdf-preview.html","./pdf-preview.css","./pdf-preview.js",
- "./app-v1-8-3.js?v=1.8.53","./promo-v1-8-49.js?v=2.00","./customers-v0-10-3.js",
- "./dashboard-target-v1-8-63.js?v=1.8.64","./admin-sales-v1-8-9.js?v=1.8.62",
+ "./app-v1-8-3.js?v=2.0.1","./promo-v1-8-51.js?v=2.0.1-text","./customers-v0-10-3.js",
+ "./dashboard-target-v1-8-63.js?v=2.0.1","./admin-sales-v1-8-9.js?v=2.0.1",
  "./app-admin-photo-v1-7-8.js","./app-admin-delete-all-photos-v1-7-9.js"
 ];
 self.addEventListener("install",event=>{
@@ -16,9 +16,7 @@ self.addEventListener("fetch",event=>{
  const req=event.request;
  if(req.method!=="GET") return;
  event.respondWith(fetch(req).then(res=>{
-   if(new URL(req.url).origin===self.location.origin){
-     const copy=res.clone(); caches.open(CACHE_NAME).then(c=>c.put(req,copy)).catch(()=>{});
-   }
+   if(new URL(req.url).origin===self.location.origin){const copy=res.clone();caches.open(CACHE_NAME).then(c=>c.put(req,copy)).catch(()=>{});}
    return res;
  }).catch(()=>caches.match(req).then(c=>c||caches.match("./index.html"))));
 });
