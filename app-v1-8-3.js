@@ -2311,6 +2311,7 @@ function customerVisibleToCurrentUser(customer){
 }
 function adminCustomerCard(x){
  const sales=USERS.filter(u=>u.role==="sales");
+ const supervisors=USERS.filter(u=>u.role==="supervisor");
  const selectedChecked=selectedCustomerNos.has(String(x.no));
  return `<div class="customer-card admin-customer-card ${x.isHidden?"hidden-customer":""} ${selectedChecked?"selected-for-delete":""}">
   ${customerSelectMode?`<label class="customer-select-check"><input type="checkbox" ${selectedChecked?"checked":""} onchange="toggleCustomerSelection('${esc(String(x.no))}',this.checked)"><span>Pilih</span></label>`:""}
