@@ -97,7 +97,9 @@ async function pullRemoteVisits({reconcile=false}={}){
   const localRows=await idbGetAll(STORE_VISITS);
   for(const local of localRows){
    const belongsToCurrentUser=currentUser?.role==='admin'||local.salesEmail===currentUser?.email;
-   if(belongsToCurrentUser&&local.syncStatus==='synced'&&!remoteIds.has(String(local.id)))await idbDelete(STORE_VISITS,local.id);
+   // Admin deletion must be reflected locally immediately after a forced reconciliation.
+   // Do not keep a stale synced history row when its remote ID no longer exists.
+   if(belongsToCurrentUser&&!remoteIds.has(String(local.id)))await idbDelete(STORE_VISITS,local.id);
   }
   return remoteRows||[];
  }else if(!fullSyncDone){
@@ -241,11 +243,14 @@ async function pullCustomersFromSupabase({silent=true}={}){
    return true;
   }
   const remote=Array.isArray(row?.customers)?row.customers:(Array.isArray(row)?row:null);
-  if(Array.isArray(remote)&&remote.length){
+  if(Array.isArray(remote)){
+   // Always reconcile the local customer list, including an empty remote list.
+   // This is important when Admin deactivates/deletes the last remaining outlet: 
+   // keeping the old local array would make a deleted outlet reappear on another device.
    const migrated=applyKm2Km14AreaMigration(remote);
    localStorage.setItem('rml_customers',JSON.stringify(migrated.rows));
    fillAreas();
-   if(row.updated_at)setRemoteSyncMeta({customers_updated_at:row.updated_at});
+   if(row?.updated_at)setRemoteSyncMeta({customers_updated_at:row.updated_at});
    if(currentUser?.role==='admin'){
     fillCustomerSalesFilter();
     if(migrated.changed){
@@ -809,7 +814,7 @@ async function copyProductAssignmentsFromArea(){
  const ok=navigator.onLine?await syncProductsToSupabase({silent:true}):false;toast(ok?'Pembagian barang berhasil disalin':'Pembagian tersimpan lokal dan akan disinkronkan saat online');if(!ok)scheduleProductSync();
 }
 
-const APP_VERSION="2.0.1";
+const APP_VERSION="2.0.3";
 const USER_SETTINGS_KEY="rml_user_accounts_v1";
 const DEFAULT_USERS=[
 {email:"rini@rml.app",loginName:"rini",active:true,phone:"085668027045",name:"Rini",role:"sales",mustChangePassword:true,canSwitchAreaFreely:false},
@@ -1090,7 +1095,7 @@ function openOutsideAreaOrder(){
 function fillOutsideOrderCustomers(){
  const supervisor=isSupervisorUser();
  const q=(document.getElementById("outsideOrderSearch")?.value||"").trim().toLowerCase();
- const rows=customers().filter(c=>!c.isHidden&&(supervisor||c.area===outsideOrderArea.value)).filter(c=>!q||`${c.code||""} ${c.name||""} ${c.area||""}`.toLowerCase().includes(q)).sort(compareCustomerCode);
+ const rows=customers().filter(c=>customerVisibleToCurrentUser(c)&&(supervisor||c.area===outsideOrderArea.value)).filter(c=>!q||`${c.code||""} ${c.name||""} ${c.area||""}`.toLowerCase().includes(q)).sort(compareCustomerCode);
  outsideOrderCustomer.innerHTML=rows.map(c=>`<option value="${c.no}">${esc(c.code||"-")} • ${esc(c.name)} • ${esc(c.area||"-")}</option>`).join("");
 }
 function closeOutsideAreaOrder(){isSupervisorUser()?showDashboard():showCustomers()}
@@ -1530,7 +1535,15 @@ async function manualRefreshDashboard(){
   await syncPendingVisits({silent:true,autoRetry:false});
   await pullCustomersFromSupabase({silent:true});
   await pullRemoteVisits();
+  // Manual Refresh must also reconcile remote visit IDs so an Admin deletion
+  // immediately removes the stale local history row. This downloads IDs only.
+  await reconcileRemoteVisits({force:true});
+  await refreshVisitCache();
+  // Manual Refresh is an explicit request for fresh data. Promo uses a tiny text-only
+  // payload, so force its existing single RPC here rather than adding another query.
+  if(typeof pullMonthlyPromos==='function') await pullMonthlyPromos(true);
   await refreshDashboard();
+  if(typeof renderMonthlyPromoCard==='function') renderMonthlyPromoCard();
   toast("Data berhasil diperbarui");
  }catch(e){
   console.error("Refresh dashboard gagal",e);
@@ -1619,7 +1632,7 @@ function dashboardAreaProgressKey(){return "rml_dashboard_selected_area_v1";}
 function getDashboardSelectedArea(){return "";}
 function setDashboardSelectedArea(area){}
 function areaProgressForSales(area,salesEmail){
- const outlets=customers().filter(c=>!c.isHidden&&c.area===area&&isAreaAssigned(salesEmail,area));
+ const outlets=customers().filter(c=>!c.isHidden&&c.area===area&&isAreaAssigned(salesEmail,area)&&canSalesAccessCustomer(c,salesEmail));
  const visits=visitCache.filter(v=>v.salesEmail===salesEmail&&v.area===area&&String(v.checkOutAt||v.createdAt||"").slice(0,10)===todayLocalKey());
  const completedOutletNos=new Set(visits.map(v=>String(v.customerNo)));
  const completed=outlets.filter(c=>completedOutletNos.has(String(c.no))).length;
@@ -1996,8 +2009,7 @@ function todayVisitForOutlet(customerNo){
  return salesVisitsToday().find(v=>String(v.customerNo)===String(customerNo))||null;
 }
 function areaProgress(area){
- const outlets=customers().filter(c=>!c.isHidden&&
-   (isSupervisorUser()||isAreaAssigned(currentUser.email,area))&&c.area===area);
+ const outlets=customers().filter(c=>customerVisibleToCurrentUser(c)&&c.area===area);
  const visits=salesVisitsToday().filter(v=>v.area===area);
  const completedOutletNos=new Set(visits.map(v=>String(v.customerNo)));
  const completed=outlets.filter(c=>completedOutletNos.has(String(c.no))).length;
@@ -2019,7 +2031,7 @@ async function showDailyAreaSelection(){
  document.getElementById("areaPickerDate").textContent=
    new Date().toLocaleDateString("id-ID",{weekday:"long",day:"2-digit",month:"long",year:"numeric"});
 
- const areas=assignedAreasForUser(currentUser.email).filter(area=>customers().some(c=>!c.isHidden&&c.area===area)).sort((a,b)=>a.localeCompare(b,"id",{numeric:true}));
+ const areas=assignedAreasForUser(currentUser.email).filter(area=>customers().some(c=>customerVisibleToCurrentUser(c)&&c.area===area)).sort((a,b)=>a.localeCompare(b,"id",{numeric:true}));
 
  const current=getDailyArea();
  const rows=areas.map(area=>areaProgress(area));
@@ -2076,7 +2088,7 @@ function dueReminderOutlets(area){
  const limit=new Date(today);
  limit.setDate(limit.getDate()+60);
  return customers().filter(c=>{
-   if(c.isHidden||c.area!==area||c.outletStatus!=="dueSoon")return false;
+   if(!customerVisibleToCurrentUser(c)||c.area!==area||c.outletStatus!=="dueSoon")return false;
    if(!c.dueDate)return true;
    const due=new Date(`${c.dueDate}T00:00:00`);
    return !Number.isNaN(due.getTime())&&due<=limit;
@@ -2139,9 +2151,8 @@ function getPendingOutletsForArea(area){
    salesVisitsToday().filter(v=>v.area===area).map(v=>String(v.customerNo))
  );
  return customers().filter(c=>
-   !c.isHidden&&
+   customerVisibleToCurrentUser(c)&&
    c.area===area&&
-   isAreaAssigned(currentUser.email,area)&&
    !completedNos.has(String(c.no))
  );
 }
@@ -2273,7 +2284,16 @@ function customerAssignedSales(customer){
  if(customer.assignedSalesEmail==="__ALL__")return USERS.filter(u=>u.role==="sales").map(u=>u.email);
  return customer.assignedSalesEmail?[customer.assignedSalesEmail]:[];
 }
-function canSalesAccessCustomer(customer,email){return customerAssignedSales(customer).includes(email)}
+function canSalesAccessCustomer(customer,email){
+ const target=String(email||'').trim().toLowerCase();
+ return customerAssignedSales(customer).some(x=>String(x||'').trim().toLowerCase()===target);
+}
+function customerVisibleToCurrentUser(customer){
+ if(!customer||customer.isHidden)return false;
+ if(currentUser?.role==='admin'||isSupervisorUser())return true;
+ const email=currentUser?.email||'';
+ return isAreaAssigned(email,customer.area)&&canSalesAccessCustomer(customer,email);
+}
 function adminCustomerCard(x){
  const sales=USERS.filter(u=>u.role==="sales");
  const selectedChecked=selectedCustomerNos.has(String(x.no));
