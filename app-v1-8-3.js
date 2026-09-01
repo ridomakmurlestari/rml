@@ -814,7 +814,7 @@ async function copyProductAssignmentsFromArea(){
  const ok=navigator.onLine?await syncProductsToSupabase({silent:true}):false;toast(ok?'Pembagian barang berhasil disalin':'Pembagian tersimpan lokal dan akan disinkronkan saat online');if(!ok)scheduleProductSync();
 }
 
-const APP_VERSION="2.0.3";
+const APP_VERSION="2.0.4";
 const USER_SETTINGS_KEY="rml_user_accounts_v1";
 const DEFAULT_USERS=[
 {email:"rini@rml.app",loginName:"rini",active:true,phone:"085668027045",name:"Rini",role:"sales",mustChangePassword:true,canSwitchAreaFreely:false},
@@ -1836,7 +1836,8 @@ function handleOrderBulletKeydown(event){
 function canEditVisitNote(visit){
  if(!currentUser||!visit)return false;
  if(currentUser.role==="admin")return true;
- if(currentUser.role!=="sales"||visit.salesEmail!==currentUser.email)return false;
+ if(currentUser.role==="supervisor")return canSupervisorAccessCustomer(customers().find(c=>String(c.no)===String(visit.customerNo))||{area:visit.area},currentUser.email);
+ if(currentUser.role!=="sales"||String(visit.salesEmail||"").toLowerCase()!==String(currentUser.email||"").toLowerCase())return false;
  const visitDate=String(visit.checkOutAt||visit.createdAt||"").slice(0,10);
  return visitDate===todayLocalKey();
 }
@@ -1929,7 +1930,7 @@ async function openEditVisitModal(visitId){
  await refreshVisitCache();
  const visit=visitCache.find(v=>String(v.id)===String(visitId));
  if(!visit)return toast("Data kunjungan tidak ditemukan");
- if(!canEditVisitNote(visit))return toast("Sales hanya dapat mengedit kunjungan miliknya pada hari yang sama");
+ if(!canEditVisitNote(visit))return toast(currentUser?.role==="supervisor"?"Supervisor tidak memiliki akses ke outlet ini":"Sales hanya dapat mengedit kunjungan miliknya pada hari yang sama");
  editingVisitId=visit.id;
  document.getElementById("editVisitModalTitle").textContent="Edit Kunjungan";
  document.getElementById("editVisitOutletMeta").textContent=`${visit.code||"TANPA KODE"} • ${visit.name||"-"} • ${visit.salesName||getSalesName(visit.salesEmail)}`;
@@ -1949,7 +1950,7 @@ async function saveEditedVisitNote(){
  await refreshVisitCache();
  const visit=visitCache.find(v=>String(v.id)===String(editingVisitId));
  if(!visit)return toast("Data kunjungan tidak ditemukan");
- if(!canEditVisitNote(visit))return toast("Sales hanya dapat mengedit kunjungan miliknya pada hari yang sama");
+ if(!canEditVisitNote(visit))return toast(currentUser?.role==="supervisor"?"Supervisor tidak memiliki akses ke outlet ini":"Sales hanya dapat mengedit kunjungan miliknya pada hari yang sama");
  const status=document.getElementById("editVisitStatus")?.value||"";
  const input=document.getElementById("editVisitNoteInput");
  const paymentStatus=document.querySelector('input[name="editVisitPaymentStatus"]:checked')?.value||"";
@@ -2284,13 +2285,27 @@ function customerAssignedSales(customer){
  if(customer.assignedSalesEmail==="__ALL__")return USERS.filter(u=>u.role==="sales").map(u=>u.email);
  return customer.assignedSalesEmail?[customer.assignedSalesEmail]:[];
 }
+function customerAssignedSupervisors(customer){
+ const raw=Array.isArray(customer.assignedSupervisorEmails)?customer.assignedSupervisorEmails:[];
+ if(raw.length)return [...new Set(raw.filter(Boolean))];
+ return [];
+}
 function canSalesAccessCustomer(customer,email){
  const target=String(email||'').trim().toLowerCase();
  return customerAssignedSales(customer).some(x=>String(x||'').trim().toLowerCase()===target);
 }
+function canSupervisorAccessCustomer(customer,email){
+ const target=String(email||'').trim().toLowerCase();
+ const assigned=customerAssignedSupervisors(customer);
+ if(assigned.some(x=>String(x||'').trim().toLowerCase()===target))return true;
+ // Preserve legacy behaviour until Admin has configured at least one outlet for this supervisor.
+ const configured=customers().some(c=>customerAssignedSupervisors(c).some(x=>String(x||'').trim().toLowerCase()===target));
+ return !configured;
+}
 function customerVisibleToCurrentUser(customer){
  if(!customer||customer.isHidden)return false;
- if(currentUser?.role==='admin'||isSupervisorUser())return true;
+ if(currentUser?.role==='admin')return true;
+ if(isSupervisorUser())return canSupervisorAccessCustomer(customer,currentUser.email);
  const email=currentUser?.email||'';
  return isAreaAssigned(email,customer.area)&&canSalesAccessCustomer(customer,email);
 }
@@ -2302,6 +2317,7 @@ function adminCustomerCard(x){
   <div class="admin-customer-main">
    <div class="admin-customer-head"><div><div class="customer-code">${esc(x.code||"TANPA KODE")}</div><h4>${esc(x.name)}</h4></div><span class="badge">${esc(x.area)}</span></div>
    <div class="admin-sales-checks">${sales.map(u=>`<label class="sales-check"><input type="checkbox" ${customerAssignedSales(x).includes(u.email)?"checked":""} onchange="toggleCustomerSales(${x.no},'${u.email}',this.checked)"><span>${esc(u.name)}</span></label>`).join("")}</div>
+   ${supervisors.length?`<div class="admin-sales-checks admin-supervisor-checks"><small class="assignment-role-note">Supervisor</small>${supervisors.map(u=>`<label class="sales-check"><input type="checkbox" ${customerAssignedSupervisors(x).includes(u.email)?"checked":""} onchange="toggleCustomerSupervisor(${x.no},'${u.email}',this.checked)"><span>${esc(u.name)}</span></label>`).join("")}</div>`:""}
    <div class="admin-outlet-status-row">
     <label>Status Outlet
      <select onchange="setCustomerOutletStatus(${x.no},this.value)">
@@ -2404,6 +2420,12 @@ function toggleCustomerSales(no,email,checked){
  const data=customers(),i=data.findIndex(x=>x.no===no);if(i<0)return;
  const set=new Set(customerAssignedSales(data[i]));checked?set.add(email):set.delete(email);
  data[i]={...data[i],assignedSalesEmails:[...set],assignedSalesEmail:""};saveCustomers(data);toast("Pembagian sales disimpan");
+}
+function toggleCustomerSupervisor(no,email,checked){
+ if(currentUser.role!=="admin")return;
+ const data=customers(),i=data.findIndex(x=>x.no===no);if(i<0)return;
+ const set=new Set(customerAssignedSupervisors(data[i]));checked?set.add(email):set.delete(email);
+ data[i]={...data[i],assignedSupervisorEmails:[...set]};saveCustomers(data);toast("Pembagian supervisor disimpan");
 }
 function ensureCustomerAreaModal(){
  let modal=document.getElementById("customerAreaEditModal");

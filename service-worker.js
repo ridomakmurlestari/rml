@@ -1,9 +1,9 @@
-const CACHE_NAME="rml-sales-visit-2.0.3";
+const CACHE_NAME="rml-sales-visit-2.0.4";
 const APP_SHELL=[
  "./","./index.html","./style-v1-7-6.css",
  "./pdf-preview.html","./pdf-preview.css","./pdf-preview.js",
- "./app-v1-8-3.js?v=2.0.3","./promo-v1-8-51.js?v=2.0.3-text","./customers-v0-10-3.js",
- "./dashboard-target-v1-8-63.js?v=2.0.3","./admin-sales-v1-8-9.js?v=2.0.3",
+ "./app-v1-8-3.js?v=2.0.4","./promo-v1-8-51.js?v=2.0.4-text","./customers-v0-10-3.js",
+ "./dashboard-target-v1-8-63.js?v=2.0.4","./admin-sales-v1-8-9.js?v=2.0.4",
  "./app-admin-photo-v1-7-8.js","./app-admin-delete-all-photos-v1-7-9.js"
 ];
 self.addEventListener("install",event=>{
