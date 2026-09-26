@@ -98,6 +98,23 @@
   </div>
 </div>
 
+<div id="pendingOutletModal" class="visit-detail-modal hidden" onclick="event.target.id==='pendingOutletModal'&&closePendingOutletModal()">
+  <div class="visit-detail-modal-card pending-outlet-modal-card" onclick="event.stopPropagation()">
+    <div class="visit-detail-modal-head">
+      <div>
+        <small id="pendingOutletModalMeta">Sales • Area</small>
+        <h3 id="pendingOutletModalTitle">Outlet Belum Dikunjungi</h3>
+      </div>
+      <button class="visit-detail-close" onclick="closePendingOutletModal()">×</button>
+    </div>
+    <div id="pendingOutletModalSummary" class="pending-outlet-summary"></div>
+    <div id="pendingOutletModalList" class="visit-detail-list pending-outlet-list"></div>
+    <div class="pending-outlet-modal-actions">
+      <button class="secondary compact" onclick="closePendingOutletModal()">Tutup</button>
+    </div>
+  </div>
+</div>
+
 <div id="editVisitNoteModal" class="visit-detail-modal hidden" onclick="closeEditVisitModal()">
   <div class="edit-visit-modal-card" onclick="event.stopPropagation()">
     <div class="visit-detail-modal-head">

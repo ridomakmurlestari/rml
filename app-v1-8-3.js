@@ -1636,8 +1636,9 @@ function areaProgressForSales(area,salesEmail){
  const visits=visitCache.filter(v=>v.salesEmail===salesEmail&&v.area===area&&String(v.checkOutAt||v.createdAt||"").slice(0,10)===todayLocalKey());
  const completedOutletNos=new Set(visits.map(v=>String(v.customerNo)));
  const completed=outlets.filter(c=>completedOutletNos.has(String(c.no))).length;
+ const pendingOutlets=outlets.filter(c=>!completedOutletNos.has(String(c.no)));
  const total=outlets.length;
- return {completed,total,pending:Math.max(0,total-completed),percent:total?Math.round(completed/total*100):0,visits};
+ return {completed,total,pending:Math.max(0,total-completed),percent:total?Math.round(completed/total*100):0,visits,outlets,pendingOutlets};
 }
 function renderDailyAreaProgress(){
  const card=document.getElementById("dailyAreaProgressCard");
@@ -1669,7 +1670,9 @@ function renderDailyAreaProgress(){
      return `<div class="daily-area-progress-row">
        <div class="daily-area-progress-info"><strong>${esc(user.name)}</strong><span>${p.completed}/${p.total} outlet selesai hari ini • ${visitCount} kunjungan</span></div>
        <div class="daily-area-progress-value"><strong>${p.percent}%</strong><small>${p.pending} belum</small></div>
-       <div class="daily-area-progress-track"><span style="width:${Math.min(100,p.percent)}%"></span></div>
+       <button type="button" class="daily-area-progress-track daily-area-progress-track-clickable" data-area="${esc(area)}" data-email="${esc(user.email)}" title="Klik untuk melihat outlet yang belum dikunjungi hari ini" aria-label="Lihat ${p.pending} outlet yang belum dikunjungi">
+         <span style="width:${Math.min(100,p.percent)}%"></span>
+       </button>
      </div>`;
    }).join("");
    return `<section class="daily-area-group"><div class="daily-area-group-head"><strong>${esc(area)}</strong><span>${salesUsers.length} pengguna</span></div>${rows||'<div class="daily-area-empty"><span>Data sales tidak ditemukan.</span></div>'}</section>`;
@@ -1677,6 +1680,36 @@ function renderDailyAreaProgress(){
  list.innerHTML=groups;
 }
 function onDashboardAreaProgressChange(){}
+
+function closePendingOutletModal(){
+ const modal=document.getElementById("pendingOutletModal");
+ if(modal)modal.classList.add("hidden");
+}
+
+async function openPendingOutletModal(trigger){
+ if(!currentUser||currentUser.role!=="admin")return;
+ const area=String(trigger?.dataset?.area||"").trim();
+ const salesEmail=String(trigger?.dataset?.email||"").trim();
+ if(!area||!salesEmail)return;
+ await refreshVisitCache();
+ const p=areaProgressForSales(area,salesEmail);
+ const salesName=getSalesName(salesEmail);
+ const meta=document.getElementById("pendingOutletModalMeta");
+ const title=document.getElementById("pendingOutletModalTitle");
+ const summary=document.getElementById("pendingOutletModalSummary");
+ const list=document.getElementById("pendingOutletModalList");
+ if(meta)meta.textContent=`${salesName} • ${area}`;
+ if(title)title.textContent=`Outlet Belum Dikunjungi (${p.pending})`;
+ if(summary)summary.innerHTML=`<div class="pending-outlet-summary-main"><strong>${p.completed}/${p.total}</strong><span>outlet selesai hari ini</span></div><div class="pending-outlet-summary-badge ${p.pending?"has-pending":"all-done"}">${p.pending?`${p.pending} outlet belum dikunjungi`:`Semua outlet sudah dikunjungi`}</div>`;
+ if(list){
+   const rows=[...p.pendingOutlets].sort(compareCustomerCode).map(c=>`<div class="pending-outlet-item">
+     <div class="pending-outlet-item-icon" aria-hidden="true">•</div>
+     <div class="pending-outlet-item-main"><strong>${esc(c.code||"TANPA KODE")}</strong><span>${esc(c.name||"-")}</span><small>${esc(c.area||area)}</small></div>
+   </div>`).join("");
+   list.innerHTML=rows||`<div class="pending-outlet-empty"><strong>Semua outlet sudah dikunjungi.</strong><span>Tidak ada outlet yang tertinggal untuk ${esc(salesName)} di area ${esc(area)} hari ini.</span></div>`;
+ }
+ document.getElementById("pendingOutletModal")?.classList.remove("hidden");
+}
 
 let currentVisitDetailSalesEmail="";
 let currentVisitDetailStatus="";
