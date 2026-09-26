@@ -1667,19 +1667,50 @@ function renderDailyAreaProgress(){
    const rows=salesUsers.map(user=>{
      const p=areaProgressForSales(area,user.email);
      const visitCount=p.visits.length;
-     return `<div class="daily-area-progress-row">
+     const pendingLabel=p.pending===0?"Semua selesai • klik untuk melihat detail":"Klik progress untuk melihat outlet";
+     return `<div class="daily-area-progress-row daily-area-progress-row-clickable"
+       data-area="${esc(area)}" data-email="${esc(user.email)}"
+       role="button" tabindex="0"
+       title="Klik untuk melihat outlet yang belum dikunjungi hari ini"
+       aria-label="Lihat ${p.pending} outlet yang belum dikunjungi oleh ${esc(user.name)}">
        <div class="daily-area-progress-info"><strong>${esc(user.name)}</strong><span>${p.completed}/${p.total} outlet selesai hari ini • ${visitCount} kunjungan</span></div>
        <div class="daily-area-progress-value"><strong>${p.percent}%</strong><small>${p.pending} belum</small></div>
-       <button type="button" class="daily-area-progress-track daily-area-progress-track-clickable" data-area="${esc(area)}" data-email="${esc(user.email)}" title="Klik untuk melihat outlet yang belum dikunjungi hari ini" aria-label="Lihat ${p.pending} outlet yang belum dikunjungi">
+       <div class="daily-area-progress-track daily-area-progress-track-visual" aria-hidden="true">
          <span style="width:${Math.min(100,p.percent)}%"></span>
-       </button>
+       </div>
+       <div class="daily-area-progress-hint">${pendingLabel}</div>
      </div>`;
    }).join("");
    return `<section class="daily-area-group"><div class="daily-area-group-head"><strong>${esc(area)}</strong><span>${salesUsers.length} pengguna</span></div>${rows||'<div class="daily-area-empty"><span>Data sales tidak ditemukan.</span></div>'}</section>`;
  }).join("");
  list.innerHTML=groups;
+
+ // Bind directly after each redraw so dynamically generated rows always work.
+ list.querySelectorAll(".daily-area-progress-row-clickable").forEach(row=>{
+   const open=()=>{
+     row.classList.add("is-opening");
+     openPendingOutletModalByValues(row.dataset.area||"",row.dataset.email||"");
+     setTimeout(()=>row.classList.remove("is-opening"),180);
+   };
+   row.addEventListener("click",open);
+   row.addEventListener("keydown",e=>{
+     if(e.key==="Enter"||e.key===" "){
+       e.preventDefault();
+       open();
+     }
+   });
+ });
 }
 function onDashboardAreaProgressChange(){}
+
+// Direct entry point used by the clickable progress rows.
+function openPendingOutletModalByValues(area,salesEmail){
+ const a=String(area||"").trim();
+ const e=String(salesEmail||"").trim();
+ if(!a||!e)return;
+ const trigger={dataset:{area:a,email:e}};
+ return openPendingOutletModal(trigger);
+}
 
 function closePendingOutletModal(){
  const modal=document.getElementById("pendingOutletModal");
@@ -1691,24 +1722,42 @@ async function openPendingOutletModal(trigger){
  const area=String(trigger?.dataset?.area||"").trim();
  const salesEmail=String(trigger?.dataset?.email||"").trim();
  if(!area||!salesEmail)return;
- await refreshVisitCache();
- const p=areaProgressForSales(area,salesEmail);
- const salesName=getSalesName(salesEmail);
+
+ const modal=document.getElementById("pendingOutletModal");
  const meta=document.getElementById("pendingOutletModalMeta");
  const title=document.getElementById("pendingOutletModalTitle");
  const summary=document.getElementById("pendingOutletModalSummary");
  const list=document.getElementById("pendingOutletModalList");
- if(meta)meta.textContent=`${salesName} • ${area}`;
- if(title)title.textContent=`Outlet Belum Dikunjungi (${p.pending})`;
- if(summary)summary.innerHTML=`<div class="pending-outlet-summary-main"><strong>${p.completed}/${p.total}</strong><span>outlet selesai hari ini</span></div><div class="pending-outlet-summary-badge ${p.pending?"has-pending":"all-done"}">${p.pending?`${p.pending} outlet belum dikunjungi`:`Semua outlet sudah dikunjungi`}</div>`;
- if(list){
-   const rows=[...p.pendingOutlets].sort(compareCustomerCode).map(c=>`<div class="pending-outlet-item">
-     <div class="pending-outlet-item-icon" aria-hidden="true">•</div>
-     <div class="pending-outlet-item-main"><strong>${esc(c.code||"TANPA KODE")}</strong><span>${esc(c.name||"-")}</span><small>${esc(c.area||area)}</small></div>
-   </div>`).join("");
-   list.innerHTML=rows||`<div class="pending-outlet-empty"><strong>Semua outlet sudah dikunjungi.</strong><span>Tidak ada outlet yang tertinggal untuk ${esc(salesName)} di area ${esc(area)} hari ini.</span></div>`;
+ const salesName=getSalesName(salesEmail);
+
+ // Open immediately using the current cache. Do not make the user wait for Supabase.
+ const render=()=>{
+   const p=areaProgressForSales(area,salesEmail);
+   if(meta)meta.textContent=`${salesName} • ${area}`;
+   if(title)title.textContent=`Outlet Belum Dikunjungi (${p.pending})`;
+   if(summary)summary.innerHTML=`<div class="pending-outlet-summary-main"><strong>${p.completed}/${p.total}</strong><span>outlet selesai hari ini</span></div><div class="pending-outlet-summary-badge ${p.pending?"has-pending":"all-done"}">${p.pending?`${p.pending} outlet belum dikunjungi`:`Semua outlet sudah dikunjungi`}</div>`;
+   if(list){
+     const rows=[...p.pendingOutlets].sort(compareCustomerCode).map(c=>`<div class="pending-outlet-item">
+       <div class="pending-outlet-item-icon" aria-hidden="true">•</div>
+       <div class="pending-outlet-item-main"><strong>${esc(c.code||"TANPA KODE")}</strong><span>${esc(c.name||"-")}</span><small>${esc(c.area||area)}</small></div>
+     </div>`).join("");
+     list.innerHTML=rows||`<div class="pending-outlet-empty"><strong>Semua outlet sudah dikunjungi.</strong><span>Tidak ada outlet yang tertinggal untuk ${esc(salesName)} di area ${esc(area)} hari ini.</span></div>`;
+   }
+ };
+
+ render();
+ if(modal){
+   modal.classList.remove("hidden");
+   modal.style.setProperty("display","grid","important");
+   modal.style.setProperty("z-index","10000","important");
  }
- document.getElementById("pendingOutletModal")?.classList.remove("hidden");
+ // Refresh in background and update the modal when fresh data arrives.
+ try{
+   await refreshVisitCache();
+   render();
+ }catch(err){
+   console.warn("Pending outlet refresh skipped:",err);
+ }
 }
 
 let currentVisitDetailSalesEmail="";
