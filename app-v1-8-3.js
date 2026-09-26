@@ -3642,23 +3642,51 @@ window.addEventListener('keydown',event=>{if(event.key==='Escape'&&!document.get
 
 
 
-/* Pending outlet modal: robust single top-right X */
-(function bindPendingOutletModalCloseFixed(){
-  const bind=()=>{
-    const modal=document.getElementById("pendingOutletModal");
+
+
+
+/* Pending outlet modal: FIX8 — direct + coordinate-safe close */
+(function bindPendingOutletModalCloseFix8(){
+  const closeAtPoint = (ev)=>{
     const btn=document.getElementById("pendingOutletModalClose");
-    if(!modal||!btn||btn.dataset.rmlCloseBound)return;
-    btn.dataset.rmlCloseBound="1";
-    btn.type="button";
-    const close=(ev)=>{
-      if(ev){ev.preventDefault();ev.stopImmediatePropagation();ev.stopPropagation();}
+    const modal=document.getElementById("pendingOutletModal");
+    if(!btn||!modal||modal.classList.contains("hidden")) return;
+    const r=btn.getBoundingClientRect();
+    const x=ev.clientX, y=ev.clientY;
+    if(x>=r.left && x<=r.right && y>=r.top && y<=r.bottom){
+      ev.preventDefault();
+      ev.stopPropagation();
       closePendingOutletModal();
-    };
-    btn.addEventListener("click",close,{capture:true});
-    btn.addEventListener("pointerdown",(ev)=>{ev.stopPropagation();},{capture:true});
-    btn.addEventListener("touchstart",(ev)=>{ev.stopPropagation();},{capture:true,passive:true});
+    }
+  };
+  const bind=()=>{
+    const btn=document.getElementById("pendingOutletModalClose");
+    if(!btn) return;
+    btn.type="button";
+    btn.style.pointerEvents="auto";
+    btn.style.touchAction="manipulation";
+    if(!btn.dataset.rmlFix8){
+      btn.dataset.rmlFix8="1";
+      ["mousedown","pointerdown","mouseup","pointerup","click","touchend"].forEach(type=>{
+        btn.addEventListener(type, ev=>{
+          ev.preventDefault();
+          ev.stopPropagation();
+          closePendingOutletModal();
+        }, {capture:true, passive:false});
+      });
+      btn.addEventListener("keydown", ev=>{
+        if(ev.key==="Enter"||ev.key===" "){
+          ev.preventDefault();
+          ev.stopPropagation();
+          closePendingOutletModal();
+        }
+      }, {capture:true});
+    }
   };
   if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",bind);
   else bind();
-  setInterval(bind,500);
+  document.addEventListener("mousedown",closeAtPoint,true);
+  document.addEventListener("pointerup",closeAtPoint,true);
+  document.addEventListener("touchend",closeAtPoint,{capture:true,passive:false});
+  setInterval(bind,250);
 })();

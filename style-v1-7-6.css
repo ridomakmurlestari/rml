@@ -1316,3 +1316,41 @@ body.modal-open{overflow:hidden}
 #pendingOutletModal #pendingOutletModalClose.pending-outlet-modal-close-fixed:active{
   transform:scale(.96)!important;
 }
+
+/* FIX8: guaranteed hit area for the single modal close button */
+#pendingOutletModal #pendingOutletModalClose.pending-outlet-modal-close-fixed{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  position:relative!important;
+  flex:0 0 40px!important;
+  width:40px!important;
+  min-width:40px!important;
+  height:40px!important;
+  margin-left:auto!important;
+  margin-right:0!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:50%!important;
+  background:#EFF5FB!important;
+  color:#244943!important;
+  font-size:28px!important;
+  line-height:40px!important;
+  text-align:center!important;
+  cursor:pointer!important;
+  pointer-events:auto!important;
+  touch-action:manipulation!important;
+  user-select:none!important;
+  -webkit-user-select:none!important;
+  z-index:99999!important;
+  opacity:1!important;
+  visibility:visible!important;
+}
+#pendingOutletModal #pendingOutletModalClose.pending-outlet-modal-close-fixed::before{
+  content:""!important;
+  position:absolute!important;
+  inset:-8px!important;
+}
+#pendingOutletModal #pendingOutletModalClose.pending-outlet-modal-close-fixed:hover{
+  background:#DCEAF4!important;
+}
