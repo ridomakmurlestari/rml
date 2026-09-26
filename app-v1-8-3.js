@@ -3637,3 +3637,31 @@ document.addEventListener('keydown',event=>{
 });
 
 window.addEventListener('keydown',event=>{if(event.key==='Escape'&&!document.getElementById('productEditModal')?.classList.contains('hidden'))closeProductEditModal()});
+
+
+/* Pending outlet modal: single X close control */
+(function bindPendingOutletModalClose(){
+  const bind=()=>{
+    const modal=document.getElementById("pendingOutletModal");
+    if(!modal) return;
+    const btn=modal.querySelector(
+      '[data-close-pending-outlet], .pending-outlet-modal-close, .modal-close, button[aria-label="Tutup"], button[aria-label="Close"], button[title="Tutup"]'
+    );
+    if(btn && !btn.dataset.rmlCloseBound){
+      btn.dataset.rmlCloseBound="1";
+      btn.type="button";
+      btn.style.pointerEvents="auto";
+      btn.style.zIndex="10002";
+      btn.addEventListener("click",(ev)=>{
+        ev.preventDefault();
+        ev.stopPropagation();
+        if(typeof closePendingOutletModal==="function") closePendingOutletModal();
+        else modal.classList.add("hidden");
+      });
+    }
+  };
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",bind);
+  else bind();
+  document.addEventListener("click",()=>setTimeout(bind,0),true);
+  new MutationObserver(bind).observe(document.documentElement,{subtree:true,childList:true});
+})();

@@ -1229,3 +1229,20 @@ body.modal-open{overflow:hidden}
   font-weight:700;
 }
 #pendingOutletModal[style*="display: grid"]{display:grid!important}
+
+/* Single close button UX polish */
+#pendingOutletModal .pending-outlet-modal-close,
+#pendingOutletModal .modal-close,
+#pendingOutletModal button[aria-label="Tutup"],
+#pendingOutletModal button[aria-label="Close"],
+#pendingOutletModal button[title="Tutup"]{
+  pointer-events:auto!important;
+  position:relative!important;
+  z-index:10002!important;
+  cursor:pointer!important;
+}
+#pendingOutletModal .pending-outlet-modal-footer,
+#pendingOutletModal .modal-footer .secondary,
+#pendingOutletModal button[data-modal-close-footer]{
+  display:none!important;
+}
