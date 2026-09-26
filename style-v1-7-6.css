@@ -1354,3 +1354,8 @@ body.modal-open{overflow:hidden}
 #pendingOutletModal #pendingOutletModalClose.pending-outlet-modal-close-fixed:hover{
   background:#DCEAF4!important;
 }
+
+/* FIX9: modal visibility must be controlled by .hidden, not inline display !important */
+#pendingOutletModal.hidden{
+  display:none!important;
+}

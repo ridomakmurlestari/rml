@@ -1714,7 +1714,12 @@ function openPendingOutletModalByValues(area,salesEmail){
 
 function closePendingOutletModal(){
  const modal=document.getElementById("pendingOutletModal");
- if(modal)modal.classList.add("hidden");
+ if(!modal)return;
+ // Clear the inline display override used when opening the modal.
+ // Otherwise .hidden cannot hide it because the inline !important wins.
+ modal.style.removeProperty("display");
+ modal.classList.add("hidden");
+ modal.setAttribute("aria-hidden","true");
 }
 
 async function openPendingOutletModal(trigger){
@@ -1747,9 +1752,10 @@ async function openPendingOutletModal(trigger){
 
  render();
  if(modal){
+   modal.style.removeProperty("display");
+   modal.style.removeProperty("z-index");
    modal.classList.remove("hidden");
-   modal.style.setProperty("display","grid","important");
-   modal.style.setProperty("z-index","10000","important");
+   modal.setAttribute("aria-hidden","false");
  }
  // Refresh in background and update the modal when fresh data arrives.
  try{
