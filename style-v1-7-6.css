@@ -1277,3 +1277,42 @@ body.modal-open{overflow:hidden}
 #pendingOutletModalClose.pending-outlet-modal-close-fixed:active{transform:scale(.96)}
 #pendingOutletModalClose.pending-outlet-modal-close-fixed:focus-visible{outline:3px solid rgba(15,118,110,.25)!important;outline-offset:2px}
 #pendingOutletModalClose.pending-outlet-modal-close-fixed.hidden{display:grid!important}
+/* Progress modal X: keep it inside the header flow so it is always visible and clickable */
+#pendingOutletModal .visit-detail-modal-head{
+  position:sticky!important;
+  top:0!important;
+  z-index:10!important;
+}
+#pendingOutletModal #pendingOutletModalClose.pending-outlet-modal-close-fixed{
+  position:relative!important;
+  top:auto!important;
+  right:auto!important;
+  left:auto!important;
+  bottom:auto!important;
+  display:grid!important;
+  visibility:visible!important;
+  opacity:1!important;
+  pointer-events:auto!important;
+  flex:0 0 38px!important;
+  width:38px!important;
+  height:38px!important;
+  margin-left:auto!important;
+  align-self:flex-start!important;
+  z-index:20!important;
+  transform:none!important;
+  background:#EFF5FB!important;
+  color:#244943!important;
+  border:0!important;
+  border-radius:50%!important;
+  place-items:center!important;
+  padding:0!important;
+  font-size:26px!important;
+  line-height:1!important;
+  cursor:pointer!important;
+}
+#pendingOutletModal #pendingOutletModalClose.pending-outlet-modal-close-fixed:hover{
+  background:#DCEAF4!important;
+}
+#pendingOutletModal #pendingOutletModalClose.pending-outlet-modal-close-fixed:active{
+  transform:scale(.96)!important;
+}
