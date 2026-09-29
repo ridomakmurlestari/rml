@@ -1640,11 +1640,6 @@ function progressCustomerRoster(area){
    if(!c||c.isHidden)return false;
    return normalizeProgressArea(c.area)===target;
  });
- // Important repair path:
- // Some devices can have a customer cache/delta without the full master list for
- // one area. That caused Supervisor progress to become 0/0 even though visits existed.
- // DEFAULT_CUSTOMERS is already bundled with the app, so use it ONLY when the
- // local roster for this area is completely missing.
  if(local.length===0 && Array.isArray(window.DEFAULT_CUSTOMERS)){
    local=window.DEFAULT_CUSTOMERS.filter(c=>{
      if(!c)return false;
@@ -1653,14 +1648,26 @@ function progressCustomerRoster(area){
  }
  return local;
 }
+/* Resolve a visit to the customer's CURRENT area.
+   This keeps Progress accurate when an admin renames an area after visits
+   were recorded (e.g. PULAU BULUH -> PULAU BURU). */
+function progressCanonicalVisitArea(visit,customerMap){
+ const no=String(visit?.customerNo??"").trim();
+ const c=customerMap.get(no);
+ return String(c?.area||visit?.area||"").trim();
+}
 function areaProgressForSales(area,salesEmail){
  const target=String(salesEmail||"").trim().toLowerCase();
  const user=USERS.find(u=>String(u.email||"").trim().toLowerCase()===target);
  const isSupervisor=Boolean(user&&user.role==="supervisor");
  const areaKey=normalizeProgressArea(area);
 
- // Supervisor: progress is area coverage against the active outlet roster.
- // Sales: preserve assigned-outlet rules.
+ const allCustomers=customers();
+ const customerMap=new Map(
+   allCustomers
+    .filter(c=>c&&!c.isHidden)
+    .map(c=>[String(c.no??"").trim(),c])
+ );
  let outlets=progressCustomerRoster(area);
  if(!isSupervisor){
    outlets=outlets.filter(c=>isAreaAssigned(salesEmail,c.area)&&canSalesAccessCustomer(c,salesEmail));
@@ -1668,11 +1675,10 @@ function areaProgressForSales(area,salesEmail){
 
  const visits=visitCache.filter(v=>
    String(v.salesEmail||"").trim().toLowerCase()===target &&
-   normalizeProgressArea(v.area)===areaKey &&
+   normalizeProgressArea(progressCanonicalVisitArea(v,customerMap))===areaKey &&
    String(v.checkOutAt||v.createdAt||"").slice(0,10)===todayLocalKey()
  );
 
- // Count unique outlet numbers so repeated visits do not inflate coverage.
  const completedOutletNos=new Set(
    visits.map(v=>String(v.customerNo??"").trim()).filter(Boolean)
  );
@@ -1697,9 +1703,15 @@ function renderDailyAreaProgress(){
  if(!card||!list||currentUser?.role!=="admin")return;
  const todayKey=todayLocalKey();
  const todayVisits=visitCache.filter(v=>String(v.checkOutAt||v.createdAt||"").slice(0,10)===todayKey);
+ const customerMap=new Map(
+   customers()
+    .filter(c=>c&&!c.isHidden)
+    .map(c=>[String(c.no??"").trim(),c])
+ );
  const byArea=new Map();
  todayVisits.forEach(v=>{
-   const area=String(v.area||"").trim();
+   // Use the customer's CURRENT area so renamed areas move with the outlet.
+   const area=progressCanonicalVisitArea(v,customerMap);
    const email=String(v.salesEmail||"").trim().toLowerCase();
    if(!area||!email)return;
    if(!byArea.has(area))byArea.set(area,new Set());
