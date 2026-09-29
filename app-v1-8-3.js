@@ -1631,28 +1631,48 @@ async function refreshDashboard(){
 function dashboardAreaProgressKey(){return "rml_dashboard_selected_area_v1";}
 function getDashboardSelectedArea(){return "";}
 function setDashboardSelectedArea(area){}
+function normalizeProgressArea(value){
+ return String(value||"").trim().toLowerCase().replace(/[.\u00b7]/g,"").replace(/\s+/g," ");
+}
+function progressCustomerRoster(area){
+ const target=normalizeProgressArea(area);
+ let local=customers().filter(c=>{
+   if(!c||c.isHidden)return false;
+   return normalizeProgressArea(c.area)===target;
+ });
+ // Important repair path:
+ // Some devices can have a customer cache/delta without the full master list for
+ // one area. That caused Supervisor progress to become 0/0 even though visits existed.
+ // DEFAULT_CUSTOMERS is already bundled with the app, so use it ONLY when the
+ // local roster for this area is completely missing.
+ if(local.length===0 && Array.isArray(window.DEFAULT_CUSTOMERS)){
+   local=window.DEFAULT_CUSTOMERS.filter(c=>{
+     if(!c)return false;
+     return normalizeProgressArea(c.area)===target;
+   }).map(c=>({...c,isHidden:false}));
+ }
+ return local;
+}
 function areaProgressForSales(area,salesEmail){
  const target=String(salesEmail||"").trim().toLowerCase();
  const user=USERS.find(u=>String(u.email||"").trim().toLowerCase()===target);
  const isSupervisor=Boolean(user&&user.role==="supervisor");
- const areaKey=String(area||"").trim().toLowerCase();
+ const areaKey=normalizeProgressArea(area);
 
- // Progress per area:
- // - Supervisor: all active outlets in the selected area are part of the coverage target.
- // - Sales: keep the existing assigned-outlet rules.
- const outlets=customers().filter(c=>{
-   if(!c||c.isHidden)return false;
-   if(String(c.area||"").trim().toLowerCase()!==areaKey)return false;
-   if(isSupervisor)return true;
-   return isAreaAssigned(salesEmail,c.area)&&canSalesAccessCustomer(c,salesEmail);
- });
+ // Supervisor: progress is area coverage against the active outlet roster.
+ // Sales: preserve assigned-outlet rules.
+ let outlets=progressCustomerRoster(area);
+ if(!isSupervisor){
+   outlets=outlets.filter(c=>isAreaAssigned(salesEmail,c.area)&&canSalesAccessCustomer(c,salesEmail));
+ }
 
  const visits=visitCache.filter(v=>
    String(v.salesEmail||"").trim().toLowerCase()===target &&
-   String(v.area||"").trim().toLowerCase()===areaKey &&
+   normalizeProgressArea(v.area)===areaKey &&
    String(v.checkOutAt||v.createdAt||"").slice(0,10)===todayLocalKey()
  );
 
+ // Count unique outlet numbers so repeated visits do not inflate coverage.
  const completedOutletNos=new Set(
    visits.map(v=>String(v.customerNo??"").trim()).filter(Boolean)
  );
