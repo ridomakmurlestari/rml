@@ -1636,24 +1636,39 @@ function areaProgressForSales(area,salesEmail){
  const user=USERS.find(u=>String(u.email||"").trim().toLowerCase()===target);
  const isSupervisor=Boolean(user&&user.role==="supervisor");
  const areaKey=String(area||"").trim().toLowerCase();
- // Sales: only outlets assigned to that sales and area.
- // Supervisor: use the same customer visibility rules as the Supervisor customer list,
- // so completed supervisor visits are counted against the real outlet total.
+
+ // Progress per area:
+ // - Supervisor: all active outlets in the selected area are part of the coverage target.
+ // - Sales: keep the existing assigned-outlet rules.
  const outlets=customers().filter(c=>{
-   if(!c||c.isHidden||String(c.area||"").trim().toLowerCase()!==areaKey)return false;
-   if(isSupervisor)return canSupervisorAccessCustomer(c,salesEmail);
+   if(!c||c.isHidden)return false;
+   if(String(c.area||"").trim().toLowerCase()!==areaKey)return false;
+   if(isSupervisor)return true;
    return isAreaAssigned(salesEmail,c.area)&&canSalesAccessCustomer(c,salesEmail);
  });
+
  const visits=visitCache.filter(v=>
    String(v.salesEmail||"").trim().toLowerCase()===target &&
    String(v.area||"").trim().toLowerCase()===areaKey &&
    String(v.checkOutAt||v.createdAt||"").slice(0,10)===todayLocalKey()
  );
- const completedOutletNos=new Set(visits.map(v=>String(v.customerNo)));
- const completed=outlets.filter(c=>completedOutletNos.has(String(c.no))).length;
- const pendingOutlets=outlets.filter(c=>!completedOutletNos.has(String(c.no)));
+
+ const completedOutletNos=new Set(
+   visits.map(v=>String(v.customerNo??"").trim()).filter(Boolean)
+ );
+ const completed=outlets.filter(c=>completedOutletNos.has(String(c.no).trim())).length;
+ const pendingOutlets=outlets.filter(c=>!completedOutletNos.has(String(c.no).trim()));
  const total=outlets.length;
- return {completed,total,pending:Math.max(0,total-completed),percent:total?Math.round(completed/total*100):0,visits,outlets,pendingOutlets};
+
+ return {
+   completed,
+   total,
+   pending:Math.max(0,total-completed),
+   percent:total?Math.round(completed/total*100):0,
+   visits,
+   outlets,
+   pendingOutlets
+ };
 }
 function renderDailyAreaProgress(){
  const card=document.getElementById("dailyAreaProgressCard");
