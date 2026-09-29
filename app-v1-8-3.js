@@ -1632,8 +1632,23 @@ function dashboardAreaProgressKey(){return "rml_dashboard_selected_area_v1";}
 function getDashboardSelectedArea(){return "";}
 function setDashboardSelectedArea(area){}
 function areaProgressForSales(area,salesEmail){
- const outlets=customers().filter(c=>!c.isHidden&&c.area===area&&isAreaAssigned(salesEmail,area)&&canSalesAccessCustomer(c,salesEmail));
- const visits=visitCache.filter(v=>v.salesEmail===salesEmail&&v.area===area&&String(v.checkOutAt||v.createdAt||"").slice(0,10)===todayLocalKey());
+ const target=String(salesEmail||"").trim().toLowerCase();
+ const user=USERS.find(u=>String(u.email||"").trim().toLowerCase()===target);
+ const isSupervisor=Boolean(user&&user.role==="supervisor");
+ const areaKey=String(area||"").trim().toLowerCase();
+ // Sales: only outlets assigned to that sales and area.
+ // Supervisor: use the same customer visibility rules as the Supervisor customer list,
+ // so completed supervisor visits are counted against the real outlet total.
+ const outlets=customers().filter(c=>{
+   if(!c||c.isHidden||String(c.area||"").trim().toLowerCase()!==areaKey)return false;
+   if(isSupervisor)return canSupervisorAccessCustomer(c,salesEmail);
+   return isAreaAssigned(salesEmail,c.area)&&canSalesAccessCustomer(c,salesEmail);
+ });
+ const visits=visitCache.filter(v=>
+   String(v.salesEmail||"").trim().toLowerCase()===target &&
+   String(v.area||"").trim().toLowerCase()===areaKey &&
+   String(v.checkOutAt||v.createdAt||"").slice(0,10)===todayLocalKey()
+ );
  const completedOutletNos=new Set(visits.map(v=>String(v.customerNo)));
  const completed=outlets.filter(c=>completedOutletNos.has(String(c.no))).length;
  const pendingOutlets=outlets.filter(c=>!completedOutletNos.has(String(c.no)));
@@ -3486,7 +3501,8 @@ function formatDate(value){
 function getSalesName(email){
  if(!email)return "Belum ditentukan";
  if(email==="__ALL__")return "Semua Sales";
- const u=USERS.find(x=>x.email===email&&x.role==="sales");
+ const target=String(email||"").trim().toLowerCase();
+ const u=USERS.find(x=>String(x.email||"").trim().toLowerCase()===target&&(x.role==="sales"||x.role==="supervisor"));
  return u?u.name:"Sales tidak ditemukan";
 }
 function esc(v){return String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
