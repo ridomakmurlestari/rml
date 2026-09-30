@@ -1382,3 +1382,23 @@ body.modal-open{overflow:hidden}
 .promo-offer-grid input,.promo-offer-grid select{width:100%;box-sizing:border-box;margin-top:5px}
 .promo-saved-offer{display:block;margin-top:3px;font-size:11px;color:#0f766e}
 @media(max-width:640px){.promo-offer-title{display:grid}.promo-offer-title small{text-align:left}.promo-offer-grid{grid-template-columns:1fr 1fr}.promo-offer-grid label:last-child{grid-column:1/-1}}
+
+/* Promo item-level rules + editable period */
+.promo-period-label{display:block;margin-top:4px;margin-bottom:5px;font-size:10px;font-weight:800;color:#31556f}
+.promo-period-input{width:100%;max-width:520px;box-sizing:border-box;font-size:21px;font-weight:800;margin:0 0 4px}
+.promo-item-editor-fields{display:grid;grid-template-columns:minmax(0,1.4fr) .7fr .7fr 1.1fr;gap:10px;align-items:end;min-width:0}
+.promo-item-editor-fields label{min-width:0}
+.promo-item-editor-fields input,.promo-item-editor-fields select{width:100%;box-sizing:border-box;margin-top:5px}
+.promo-item-editor{grid-template-columns:minmax(0,1fr) auto!important}
+.promo-catalog-item-text{align-items:flex-start!important}
+.promo-catalog-item-text > div{min-width:0}
+.promo-catalog-item-text small{display:block;margin-top:4px;color:#64748b;font-size:10px;line-height:1.35}
+@media(max-width:760px){
+  .promo-item-editor-fields{grid-template-columns:1.5fr .8fr .8fr}
+  .promo-item-editor-fields label:last-child{grid-column:1/-1}
+}
+@media(max-width:520px){
+  .promo-item-editor-fields{grid-template-columns:1fr 1fr}
+  .promo-item-editor-fields label:first-child{grid-column:1/-1}
+  .promo-item-editor-fields label:last-child{grid-column:1/-1}
+}
