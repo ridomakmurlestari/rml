@@ -212,7 +212,7 @@
             const b=it.bonus??0;
             const mixText=it.mix==='YES'?'Boleh mix varian':it.mix==='NO'?'Tidak boleh mix varian':'Mix belum diatur';
             const mixClass=it.mix==='YES'?'mix-yes':it.mix==='NO'?'mix-no':'mix-unknown';
-            const note=it.keterangan?`<div class="promo-rule-note"><span class="promo-rule-note-label">Keterangan</span><span>${escP(it.keterangan)}</span></div>`:'';
+            const note=it.keterangan?`<div class="promo-rule-note"><span class="promo-rule-note-label">Keterangan</span><span class="promo-rule-note-text">${escP(it.keterangan)}</span></div>`:'';
             return `<div class="promo-catalog-item promo-catalog-item-text">
               <span class="promo-item-number">${i+1}</span>
               <div class="promo-catalog-item-main">

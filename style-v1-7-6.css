@@ -1782,3 +1782,203 @@ body.modal-open{overflow:hidden}
     font-size:11px!important;
   }
 }
+
+/* ============================================================
+   FINAL PROMO UI FIX — SALES / SUPERVISOR
+   Prevents generic span rules from breaking promo badges/notes.
+   ============================================================ */
+
+/* One clean row per promo item */
+.promo-catalog-item.promo-catalog-item-text{
+  display:grid!important;
+  grid-template-columns:32px minmax(0,1fr)!important;
+  align-items:start!important;
+  gap:10px!important;
+  width:100%!important;
+  min-height:0!important;
+  padding:14px!important;
+  box-sizing:border-box!important;
+  overflow:visible!important;
+}
+.promo-catalog-item.promo-catalog-item-text > span.promo-item-number{
+  display:grid!important;
+  place-items:center!important;
+  width:30px!important;
+  height:30px!important;
+  min-width:30px!important;
+  min-height:30px!important;
+  flex:none!important;
+  padding:0!important;
+  margin:0!important;
+  border-radius:9px!important;
+  background:#E9F7F5!important;
+  color:#0D7D73!important;
+  font-size:12px!important;
+  line-height:1!important;
+  font-weight:900!important;
+}
+
+/* Never let old generic "span" rules affect content inside these areas */
+.promo-catalog-item.promo-catalog-item-text .promo-catalog-item-main,
+.promo-catalog-item.promo-catalog-item-text .promo-offer-rules,
+.promo-catalog-item.promo-catalog-item-text .promo-rule-note{
+  width:100%!important;
+  min-width:0!important;
+  box-sizing:border-box!important;
+}
+.promo-catalog-item.promo-catalog-item-text .promo-catalog-item-main > strong{
+  display:block!important;
+  width:100%!important;
+  margin:0!important;
+  font-size:14px!important;
+  line-height:1.3!important;
+  color:#18253D!important;
+}
+
+/* Rules: real compact pills, never absolute/stacked */
+.promo-catalog-item.promo-catalog-item-text .promo-offer-rules{
+  display:flex!important;
+  flex-wrap:wrap!important;
+  align-items:center!important;
+  justify-content:flex-start!important;
+  gap:7px!important;
+  margin:9px 0 0!important;
+  padding:0!important;
+  position:static!important;
+}
+.promo-catalog-item.promo-catalog-item-text .promo-offer-rules .promo-rule{
+  position:static!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  box-sizing:border-box!important;
+  width:auto!important;
+  min-width:0!important;
+  max-width:100%!important;
+  height:auto!important;
+  min-height:30px!important;
+  margin:0!important;
+  padding:6px 10px!important;
+  border-radius:999px!important;
+  white-space:nowrap!important;
+  font-size:11px!important;
+  line-height:1.1!important;
+  font-weight:800!important;
+  overflow:visible!important;
+  flex:none!important;
+}
+.promo-catalog-item.promo-catalog-item-text .promo-offer-rules .promo-rule b{
+  position:static!important;
+  display:inline!important;
+  width:auto!important;
+  height:auto!important;
+  margin:0 0 0 2px!important;
+  padding:0!important;
+  font-size:11px!important;
+  line-height:1.1!important;
+}
+.promo-catalog-item.promo-catalog-item-text .promo-offer-rules .promo-rule-buy{
+  background:#EAF2FF!important;
+  border:1px solid #C7DBFF!important;
+  color:#1E4FA3!important;
+}
+.promo-catalog-item.promo-catalog-item-text .promo-offer-rules .promo-rule-bonus{
+  background:#FFF3CF!important;
+  border:1px solid #F0D58B!important;
+  color:#855900!important;
+}
+.promo-catalog-item.promo-catalog-item-text .promo-offer-rules .promo-rule-mix.mix-no{
+  background:#FFE9EA!important;
+  border:1px solid #F5BFC3!important;
+  color:#B02D35!important;
+}
+.promo-catalog-item.promo-catalog-item-text .promo-offer-rules .promo-rule-mix.mix-yes{
+  background:#E8F8F2!important;
+  border:1px solid #B7E4D4!important;
+  color:#08755F!important;
+}
+.promo-catalog-item.promo-catalog-item-text .promo-offer-rules .promo-rule-mix.mix-unknown{
+  background:#F1F4F7!important;
+  border:1px solid #DEE4EA!important;
+  color:#667181!important;
+}
+
+/* Keterangan block below the rules */
+.promo-catalog-item.promo-catalog-item-text .promo-rule-note{
+  display:flex!important;
+  align-items:flex-start!important;
+  gap:7px!important;
+  margin:9px 0 0!important;
+  padding:8px 10px!important;
+  border:1px solid #E2E8EF!important;
+  border-radius:10px!important;
+  background:#F8FAFC!important;
+  position:static!important;
+}
+.promo-catalog-item.promo-catalog-item-text .promo-rule-note .promo-rule-note-label{
+  display:inline!important;
+  position:static!important;
+  width:auto!important;
+  min-width:0!important;
+  max-width:none!important;
+  height:auto!important;
+  min-height:0!important;
+  flex:none!important;
+  margin:0!important;
+  padding:0!important;
+  background:none!important;
+  border:0!important;
+  color:#5A6F86!important;
+  font-size:9px!important;
+  line-height:1.35!important;
+  font-weight:900!important;
+  letter-spacing:.04em!important;
+  text-transform:uppercase;
+}
+.promo-catalog-item.promo-catalog-item-text .promo-rule-note .promo-rule-note-text{
+  display:block!important;
+  position:static!important;
+  width:auto!important;
+  min-width:0!important;
+  height:auto!important;
+  min-height:0!important;
+  margin:0!important;
+  padding:0!important;
+  background:none!important;
+  border:0!important;
+  color:#445467!important;
+  font-size:10px!important;
+  line-height:1.35!important;
+  font-weight:600!important;
+  white-space:normal!important;
+  overflow-wrap:anywhere!important;
+}
+
+/* Hide empty note space */
+.promo-catalog-item.promo-catalog-item-text .promo-rule-note:empty{display:none!important}
+
+/* Mobile: keep the item readable and allow badges to wrap naturally */
+@media(max-width:600px){
+  .promo-catalog-item.promo-catalog-item-text{
+    grid-template-columns:30px minmax(0,1fr)!important;
+    gap:9px!important;
+    padding:12px!important;
+  }
+  .promo-catalog-item.promo-catalog-item-text > span.promo-item-number{
+    width:28px!important;
+    height:28px!important;
+    min-width:28px!important;
+    min-height:28px!important;
+  }
+  .promo-catalog-item.promo-catalog-item-text .promo-offer-rules{
+    gap:5px!important;
+  }
+  .promo-catalog-item.promo-catalog-item-text .promo-offer-rules .promo-rule{
+    min-height:28px!important;
+    padding:5px 8px!important;
+    font-size:10px!important;
+  }
+  .promo-catalog-item.promo-catalog-item-text .promo-offer-rules .promo-rule b{
+    font-size:10px!important;
+  }
+}
