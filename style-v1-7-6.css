@@ -1982,3 +1982,76 @@ body.modal-open{overflow:hidden}
     font-size:10px!important;
   }
 }
+
+/* ============================================================
+   KETERANGAN FINAL TYPOGRAPHY FIX
+   Prevents old generic span rules from squeezing note text
+   one character per line.
+   ============================================================ */
+
+.promo-catalog-item.promo-catalog-item-text .promo-rule-note{
+  display:grid!important;
+  grid-template-columns:auto minmax(0,1fr)!important;
+  align-items:start!important;
+  column-gap:10px!important;
+  width:100%!important;
+  min-width:0!important;
+  max-width:100%!important;
+  box-sizing:border-box!important;
+  overflow:hidden!important;
+}
+
+.promo-catalog-item.promo-catalog-item-text .promo-rule-note .promo-rule-note-label{
+  display:block!important;
+  width:auto!important;
+  min-width:max-content!important;
+  max-width:none!important;
+  height:auto!important;
+  min-height:0!important;
+  margin:0!important;
+  padding:0!important;
+  background:transparent!important;
+  border:0!important;
+  white-space:nowrap!important;
+  word-break:normal!important;
+  overflow:visible!important;
+  text-transform:uppercase!important;
+  line-height:1.35!important;
+}
+
+.promo-catalog-item.promo-catalog-item-text .promo-rule-note .promo-rule-note-text{
+  display:block!important;
+  flex:none!important;
+  width:auto!important;
+  min-width:0!important;
+  max-width:none!important;
+  height:auto!important;
+  min-height:0!important;
+  margin:0!important;
+  padding:0!important;
+  background:transparent!important;
+  border:0!important;
+  white-space:normal!important;
+  word-break:normal!important;
+  overflow-wrap:anywhere!important;
+  hyphens:auto!important;
+  text-align:left!important;
+  line-height:1.45!important;
+  font-size:11px!important;
+  font-weight:600!important;
+  color:#445467!important;
+}
+
+@media(max-width:520px){
+  .promo-catalog-item.promo-catalog-item-text .promo-rule-note{
+    grid-template-columns:1fr!important;
+    row-gap:4px!important;
+  }
+  .promo-catalog-item.promo-catalog-item-text .promo-rule-note .promo-rule-note-label{
+    min-width:0!important;
+    width:auto!important;
+  }
+  .promo-catalog-item.promo-catalog-item-text .promo-rule-note .promo-rule-note-text{
+    font-size:10.5px!important;
+  }
+}
