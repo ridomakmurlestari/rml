@@ -1370,3 +1370,15 @@ body.modal-open{overflow:hidden}
 .promo-saved-title{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px;margin-bottom:10px;border-radius:12px;background:#f0fdfa;border:1px solid #cdebe5}
 .promo-saved-title span{font-size:11px;color:#64748b;font-weight:800}
 .promo-saved-title strong{color:#0f766e}
+
+
+/* v2.0.5 promo offer rules: quantity, bonus and mix-variant */
+.promo-offer-box{margin:10px 0 12px;padding:12px;border:1px solid #dbe7e5;border-radius:14px;background:linear-gradient(135deg,#f6fbfa,#fbfefe)}
+.promo-offer-title{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:9px}
+.promo-offer-title span{font-size:12px;font-weight:900;color:#0f766e}
+.promo-offer-title small{font-size:10px;color:#64748b;text-align:right}
+.promo-offer-grid{display:grid;grid-template-columns:.8fr .8fr 1.5fr;gap:8px}
+.promo-offer-grid label{margin:0!important;font-size:11px!important;color:#475569!important}
+.promo-offer-grid input,.promo-offer-grid select{width:100%;box-sizing:border-box;margin-top:5px}
+.promo-saved-offer{display:block;margin-top:3px;font-size:11px;color:#0f766e}
+@media(max-width:640px){.promo-offer-title{display:grid}.promo-offer-title small{text-align:left}.promo-offer-grid{grid-template-columns:1fr 1fr}.promo-offer-grid label:last-child{grid-column:1/-1}}
