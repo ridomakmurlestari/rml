@@ -1611,3 +1611,174 @@ body.modal-open{overflow:hidden}
   .promo-rule{min-height:28px!important;padding:5px 9px!important;font-size:10px!important}
   .promo-rule b{font-size:11px!important}
 }
+
+
+/* ============================================================
+   Promo UI FIX — item-level rules, no overlap, extra note
+   ============================================================ */
+
+/* Admin item grid */
+.promo-item-editor-fields{
+  display:grid!important;
+  grid-template-columns:minmax(0,1.55fr) .7fr .7fr 1.2fr!important;
+  gap:10px!important;
+  align-items:end!important;
+}
+.promo-item-editor-fields .promo-keterangan-field{
+  grid-column:1/-1!important;
+}
+.promo-item-editor-fields label{
+  min-width:0!important;
+}
+.promo-item-editor-fields input{
+  min-width:0!important;
+}
+.promo-mix-toggle{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:5px;
+  margin-top:5px;
+}
+.promo-mix-btn{
+  min-height:38px!important;
+  padding:7px 9px!important;
+  border-radius:10px!important;
+  border:1px solid #d8e2eb!important;
+  background:#fff!important;
+  color:#536579!important;
+  font-size:10px!important;
+  line-height:1.1!important;
+  font-weight:900!important;
+  cursor:pointer;
+  box-shadow:none!important;
+}
+.promo-mix-btn:hover{
+  border-color:#9eb9d5!important;
+  background:#f7fafc!important;
+}
+.promo-mix-btn.is-active.promo-mix-yes{
+  background:#e8f8f2!important;
+  color:#08745f!important;
+  border-color:#a9dfcf!important;
+  box-shadow:inset 0 0 0 1px rgba(8,116,95,.05)!important;
+}
+.promo-mix-btn.is-active.promo-mix-no{
+  background:#fff0f1!important;
+  color:#b32c34!important;
+  border-color:#f6c3c8!important;
+  box-shadow:inset 0 0 0 1px rgba(179,44,52,.05)!important;
+}
+
+/* Sales/Supervisor catalog — target only the number pill.
+   The previous generic span selector was styling every badge span too. */
+.promo-catalog-item.promo-catalog-item-text > span.promo-item-number{
+  flex:0 0 28px!important;
+  width:28px!important;
+  height:28px!important;
+  border-radius:8px!important;
+  background:#edf8f6!important;
+  color:#117b73!important;
+  display:grid!important;
+  place-items:center!important;
+  font-size:12px!important;
+  font-weight:900!important;
+}
+.promo-catalog-item-main{
+  min-width:0;
+  width:100%;
+}
+.promo-offer-rules{
+  display:flex!important;
+  flex-wrap:wrap!important;
+  align-items:center!important;
+  gap:6px!important;
+  margin-top:8px!important;
+  width:100%!important;
+}
+.promo-offer-rules .promo-rule{
+  flex:0 0 auto!important;
+  width:auto!important;
+  min-width:0!important;
+  max-width:100%!important;
+  height:auto!important;
+  min-height:30px!important;
+  padding:6px 10px!important;
+  border-radius:999px!important;
+  white-space:nowrap!important;
+  line-height:1.1!important;
+  box-sizing:border-box!important;
+}
+.promo-offer-rules .promo-rule b{
+  display:inline!important;
+  font-size:12px!important;
+}
+.promo-rule-note{
+  display:flex!important;
+  align-items:flex-start!important;
+  gap:7px!important;
+  margin-top:8px!important;
+  padding:7px 9px!important;
+  border-radius:10px!important;
+  background:#f7f9fc!important;
+  border:1px solid #e5eaf0!important;
+  color:#526173!important;
+  font-size:10px!important;
+  line-height:1.35!important;
+  width:100%!important;
+  box-sizing:border-box!important;
+}
+.promo-rule-note-label{
+  flex:0 0 auto!important;
+  width:auto!important;
+  height:auto!important;
+  display:inline!important;
+  background:none!important;
+  color:#315b87!important;
+  font-size:9px!important;
+  font-weight:900!important;
+  text-transform:uppercase;
+  letter-spacing:.04em;
+}
+
+/* Make each catalog item comfortably tall enough for badges + note */
+.promo-catalog-item.promo-catalog-item-text{
+  align-items:flex-start!important;
+  min-height:92px!important;
+}
+
+/* Mobile */
+@media(max-width:760px){
+  .promo-item-editor-fields{
+    grid-template-columns:1fr 1fr!important;
+  }
+  .promo-item-editor-fields label:first-child{
+    grid-column:1/-1!important;
+  }
+  .promo-item-editor-fields .promo-keterangan-field{
+    grid-column:1/-1!important;
+  }
+}
+@media(max-width:520px){
+  .promo-item-editor-fields{
+    grid-template-columns:1fr!important;
+  }
+  .promo-item-editor-fields label,
+  .promo-item-editor-fields label:first-child,
+  .promo-item-editor-fields .promo-keterangan-field{
+    grid-column:auto!important;
+  }
+  .promo-mix-toggle{
+    grid-template-columns:1fr 1fr;
+  }
+  .promo-offer-rules{
+    gap:5px!important;
+  }
+  .promo-offer-rules .promo-rule{
+    min-height:28px!important;
+    padding:5px 8px!important;
+    font-size:10px!important;
+  }
+  .promo-offer-rules .promo-rule b{
+    font-size:11px!important;
+  }
+}
