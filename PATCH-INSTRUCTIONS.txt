@@ -1,0 +1,11 @@
+TAMBAHAN INDEX.HTML
+
+Jangan mengganti seluruh index.html dengan file dari project lama. Tambahkan SATU baris script ini ke index.html yang sekarang:
+
+<script src="app-history-photo-lazy-v1.js?v=2.0.5-photo-lazy1"></script>
+
+Letakkan menjelang </body>, SETELAH script ini jika ada:
+<script src="app-admin-photo-v1-7-8.js"></script>
+<script src="app-admin-delete-all-photos-v1-7-9.js"></script>
+
+Jika urutan file berbeda, letakkan app-history-photo-lazy-v1.js setelah app-v1-8-3.js dan setelah seluruh plugin foto admin lainnya.
