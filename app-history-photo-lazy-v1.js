@@ -18,8 +18,12 @@
    if(!session?.session_token){if(!silent)toast("Silakan login kembali untuk menyinkronkan data");return false}
    const all=await getVisitsOffline();
    const pending=all.filter(v=>v.syncStatus!=="synced");
-   if(!pending.length){await updatePendingSyncCount();if(!silent)toast("Semua data sudah sinkron");return true}
-   syncInProgress=true;let successCount=0;
+   // Repair path: some already-synced rows may still have a local photo that
+   // predates the separate photo table. Upload just those photo blobs once.
+   const legacyLocalPhotos=all.filter(v=>v.syncStatus==="synced"&&dataUrl(v.checkInPhoto));
+   if(!pending.length&&!legacyLocalPhotos.length){await updatePendingSyncCount();if(!silent)toast("Semua data sudah sinkron");return true}
+   syncInProgress=true;let visitSuccess=0,photoSuccess=0,failed=0;
+   const keepLocalPhotoOnFailure=new Map();
    try{
      const batchSize=3;
      for(let i=0;i<pending.length;i+=batchSize){
@@ -38,22 +42,63 @@
            hasCheckInPhoto:Boolean(v.checkInPhoto||v.hasCheckInPhoto),
            syncStatus:"synced",updatedAt:new Date().toISOString()
          });
+         return {id:v.id,hadPhoto:dataUrl(v.checkInPhoto)};
+       }));
+       for(let j=0;j<results.length;j++){
+         if(results[j].status==="fulfilled"){
+           visitSuccess++;
+           if(results[j].value.hadPhoto)photoSuccess++;
+         }else{
+           failed++;
+           await idbPut(STORE_VISITS,{...batch[j],syncStatus:"failed"});
+           if(dataUrl(batch[j].checkInPhoto))keepLocalPhotoOnFailure.set(String(batch[j].id),{...batch[j],syncStatus:"failed"});
+           console.warn("Sinkronisasi kunjungan gagal",batch[j]?.id,results[j].reason);
+         }
+       }
+     }
+     // A synced record with a still-local photo should not need to re-upload the
+     // whole visit. Upload only the photo so normal history sync remains light.
+     for(let i=0;i<legacyLocalPhotos.length;i+=batchSize){
+       const batch=legacyLocalPhotos.slice(i,i+batchSize);
+       const results=await Promise.allSettled(batch.map(async v=>{
+         await rpc("app_upsert_visit_photo",{
+           p_token:session.session_token,p_visit_id:String(v.id),
+           p_sales_email:normalEmail(v.salesEmail||user()?.email),p_photo:v.checkInPhoto
+         });
+         photoCache.set(String(v.id),v.checkInPhoto);
+         await idbPut(STORE_VISITS,{
+           ...visitWithoutPhoto(v),hasCheckInPhoto:true,syncStatus:"synced"
+         });
          return v.id;
        }));
        for(let j=0;j<results.length;j++){
-         if(results[j].status==="fulfilled")successCount++;
-         else await idbPut(STORE_VISITS,{...batch[j],syncStatus:"failed"});
+         if(results[j].status==="fulfilled")photoSuccess++;
+         else{
+           failed++;
+           const v={...batch[j],syncStatus:"failed"};
+           keepLocalPhotoOnFailure.set(String(v.id),v);
+           await idbPut(STORE_VISITS,v);
+           console.warn("Upload foto lokal lama gagal",v.id,results[j].reason);
+         }
        }
      }
      await pullRemoteVisits();
+     // Remote pulls intentionally exclude image bytes; re-preserve any local
+     // photo that failed to upload so it can be retried rather than lost.
+     for(const v of keepLocalPhotoOnFailure.values())await idbPut(STORE_VISITS,v);
      await refreshVisitCache();
      await updatePendingSyncCount();
-     const failed=pending.length-successCount;
-     if(!silent)toast(failed?`${successCount} data sinkron, ${failed} data belum berhasil`:`${successCount} data berhasil disinkronkan`);
+     if(!silent){
+       const summary=[];
+       if(pending.length)summary.push(`${visitSuccess}/${pending.length} kunjungan`);
+       if(legacyLocalPhotos.length||photoSuccess)summary.push(`${photoSuccess} foto tersimpan`);
+       toast(failed?`${summary.join(", ")||"Sinkronisasi"}; ${failed} gagal, coba lagi setelah koneksi stabil`:(summary.join(", ")||"Semua data")+" berhasil disinkronkan");
+     }
      if(failed&&autoRetry){clearTimeout(autoSyncRetryTimer);autoSyncRetryTimer=setTimeout(()=>scheduleAutoSync(0),10000)}
      return failed===0;
    }catch(e){
      console.error("Sinkronisasi foto/kunjungan gagal",e);
+     for(const v of keepLocalPhotoOnFailure.values())await idbPut(STORE_VISITS,v);
      await updatePendingSyncCount();
      if(!silent)toast(`Sinkronisasi gagal: ${e.message||"periksa koneksi"}`);
      if(autoRetry){clearTimeout(autoSyncRetryTimer);autoSyncRetryTimer=setTimeout(()=>scheduleAutoSync(0),10000)}

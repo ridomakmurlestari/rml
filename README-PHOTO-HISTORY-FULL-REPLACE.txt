@@ -39,3 +39,9 @@ BUTTON VISIBILITY FIX
 - Button rendering no longer depends on hasCheckInPhoto metadata being present/true.
 - Clicking the button is the only action that fetches photo bytes.
 - If an old visit has no photo stored on the server, a toast explains that and the button remains retryable.
+
+
+PHOTO SYNC FIX 3
+- On Sync, if a visit is already marked synced but this browser still holds its local checkInPhoto data URL, it uploads just that photo to rml_visit_photos.
+- If upload fails, the local photo is preserved for a retry; a remote history refresh will not silently discard it.
+- This can recover photos only if they still exist locally. It cannot recreate a photo absent both locally and in Supabase.
