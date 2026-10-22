@@ -33,3 +33,9 @@ ADDITIONAL FIXES RETAINED IN THIS PACKAGE
 - Progress rows now resolve visits through the outlet/customer number to the current area label.
 - Supervisor progress uses all active outlets in the area.
 - Closing the progress modal removes inline display overrides so the X/close behavior can work.
+
+BUTTON VISIBILITY FIX
+- The 'Lihat Foto Check-in' button now renders for every visit row in Admin/Sales/Supervisor history.
+- Button rendering no longer depends on hasCheckInPhoto metadata being present/true.
+- Clicking the button is the only action that fetches photo bytes.
+- If an old visit has no photo stored on the server, a toast explains that and the button remains retryable.

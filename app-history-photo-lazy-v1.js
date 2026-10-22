@@ -121,7 +121,7 @@
    button.disabled=true;button.textContent="Memuat foto...";
    try{
      const data=obj(await rpc("app_pull_visit_photo",{p_token:token(),p_visit_id:String(id)}));
-     if(!data.found||!data.checkInPhoto){button.disabled=true;button.textContent="Foto belum tersedia";toast("Foto check-in tidak ditemukan di server.");return}
+     if(!data.found||!data.checkInPhoto){button.disabled=false;button.textContent="📷 Lihat Foto Check-in";toast("Foto check-in tidak ditemukan di server. Untuk kunjungan lama, foto mungkin tidak pernah tersinkron.");return}
      photoCache.set(id,data.checkInPhoto);renderImage(slot,id,data.checkInPhoto);
    }catch(e){console.error(e);button.disabled=false;button.textContent="📷 Lihat Foto Check-in";toast(e?.message||"Gagal memuat foto")}
  }
@@ -139,23 +139,39 @@
  }
  async function decorateHistory(){
    try{
-     await loadPhotoFlagsForVisibleHistory();
+     // Do not depend on hasCheckInPhoto metadata to show the action.
+     // Metadata may be missing on older/local visit rows; the user may still open
+     // a photo through the on-demand RPC. No image bytes are requested here.
      const rows=await getVisitsOffline(),byId=new Map(rows.map(v=>[String(v.id),v]));
      document.querySelectorAll(".history-card[data-visit-id]").forEach(card=>{
        const id=String(card.getAttribute("data-visit-id")||"");if(!id)return;
-       if(card.querySelector(".history-photo-slot"))return;
-       const v=byId.get(id);if(!v)return;
-       if(v.hasCheckInPhoto!==true&&!dataUrl(v.checkInPhoto))return;
-       const slot=document.createElement("div");slot.className="history-photo-slot";
+       if(card.querySelector(".history-photo-slot")||card.querySelector(".history-photo"))return;
+       const v=byId.get(id);
+       if(!v)return;
+
+       const slot=document.createElement("div");
+       slot.className="history-photo-slot";
        slot.setAttribute("data-history-photo-slot",id);
-       if(dataUrl(v.checkInPhoto)){photoCache.set(id,v.checkInPhoto);renderImage(slot,id,v.checkInPhoto)}
-       else{
+
+       // If this device still has a local check-in image, show it without a network request.
+       if(dataUrl(v.checkInPhoto)){
+         photoCache.set(id,v.checkInPhoto);
+         renderImage(slot,id,v.checkInPhoto);
+       }else{
+         // Always show the control, even if the photo-presence flag is absent/stale.
+         // Photo data is fetched only if the user explicitly clicks this button.
          const btn=document.createElement("button");
-         btn.type="button";btn.className="history-photo-load";btn.textContent="📷 Lihat Foto Check-in";
-         btn.addEventListener("click",()=>loadPhoto(id,btn));slot.appendChild(btn);
+         btn.type="button";
+         btn.className="history-photo-load";
+         btn.textContent="📷 Lihat Foto Check-in";
+         btn.setAttribute("aria-label","Lihat Foto Check-in");
+         btn.addEventListener("click",()=>loadPhoto(id,btn));
+         slot.appendChild(btn);
        }
+
        const pills=card.querySelector(".pills");
-       if(pills)pills.insertAdjacentElement("afterend",slot);else card.prepend(slot);
+       if(pills)pills.insertAdjacentElement("afterend",slot);
+       else card.prepend(slot);
      });
    }catch(e){console.warn("Foto riwayat belum siap",e)}
  }
