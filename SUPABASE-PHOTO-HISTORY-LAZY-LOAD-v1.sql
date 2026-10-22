@@ -7,10 +7,17 @@ create table if not exists public.rml_visit_photos (
   visit_id text primary key,
   sales_email text not null default '',
   mime_type text not null default 'image/jpeg',
-  photo_bytes bytea not null,
+  photo_bytes bytea,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+-- Upgrade-safe: CREATE TABLE IF NOT EXISTS does not add columns to an older table.
+alter table public.rml_visit_photos add column if not exists sales_email text not null default '';
+alter table public.rml_visit_photos add column if not exists mime_type text not null default 'image/jpeg';
+alter table public.rml_visit_photos add column if not exists photo_bytes bytea;
+alter table public.rml_visit_photos add column if not exists created_at timestamptz not null default now();
+alter table public.rml_visit_photos add column if not exists updated_at timestamptz not null default now();
 create index if not exists rml_visit_photos_created_at_idx on public.rml_visit_photos(created_at);
 alter table public.rml_visit_photos enable row level security;
 revoke all on table public.rml_visit_photos from public, anon, authenticated;
