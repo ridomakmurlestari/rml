@@ -14,7 +14,7 @@
     if(!session?.session_token) throw new Error("Sesi login tidak tersedia. Silakan login ulang.");
     if(!navigator.onLine) throw new Error("Penghapusan foto memerlukan koneksi internet.");
 
-    return rpc("app_admin_delete_visit_photo", {
+    return rpc("app_admin_delete_visit_photo_v2", {
       p_token: session.session_token,
       p_visit_id: String(id)
     });
@@ -26,6 +26,7 @@
     if(!row) return;
     const next = {...row};
     delete next.checkInPhoto;
+    next.hasCheckInPhoto = false;
     await idbPut(STORE_VISITS, next);
   }
 

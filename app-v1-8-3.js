@@ -74,12 +74,14 @@ async function sbProfile(){const session=getSbSession();if(!session?.session_tok
 async function sbUpdatePassword(oldPassword,newPassword){const session=getSbSession();if(!session?.session_token)throw new Error('Sesi login tidak tersedia');return rpc('app_change_password',{p_token:session.session_token,p_old_password:oldPassword,p_new_password:newPassword})}
 function visitToRemote(v){
  const payload={...(v||{})};
- // Foto check-in hanya menjadi bukti wajib saat proses check-in; jangan kirim/retensi di Supabase.
+ // Foto dikirim melalui RPC terpisah setelah visit tersimpan. Payload kunjungan biasa tetap ringan.
  delete payload.checkInPhoto;
+ delete payload.hasCheckInPhoto;
  return {id:v.id,sales_email:v.salesEmail||currentUser?.email||'',sales_name:v.salesName||currentUser?.name||'',customer_no:String(v.customerNo||''),customer_code:v.code||'',customer_name:v.name||'',area:v.area||'',status:v.status||'',visit_type:v.visitType||'Kunjungan Area',check_in_at:v.checkInAt||null,check_out_at:v.checkOutAt||null,updated_at:v.updatedAt||new Date().toISOString(),payload};
 }
 function visitWithoutPhoto(v){
  const clean={...(v||{})};
+ if(clean.checkInPhoto)clean.hasCheckInPhoto=true;
  delete clean.checkInPhoto;
  return clean;
 }
@@ -1634,61 +1636,33 @@ function setDashboardSelectedArea(area){}
 function normalizeProgressArea(value){
  return String(value||"").trim().toLowerCase().replace(/[.\u00b7]/g,"").replace(/\s+/g," ");
 }
-function progressCustomerRoster(area){
- const target=normalizeProgressArea(area);
- let local=customers().filter(c=>{
-   if(!c||c.isHidden)return false;
-   return normalizeProgressArea(c.area)===target;
- });
- // Important repair path:
- // Some devices can have a customer cache/delta without the full master list for
- // one area. That caused Supervisor progress to become 0/0 even though visits existed.
- // DEFAULT_CUSTOMERS is already bundled with the app, so use it ONLY when the
- // local roster for this area is completely missing.
- if(local.length===0 && Array.isArray(window.DEFAULT_CUSTOMERS)){
-   local=window.DEFAULT_CUSTOMERS.filter(c=>{
-     if(!c)return false;
-     return normalizeProgressArea(c.area)===target;
-   }).map(c=>({...c,isHidden:false}));
- }
- return local;
+function areaProgressCustomerMap(){
+ return new Map(customers().filter(c=>c&&!c.isHidden).map(c=>[String(c.no??"").trim(),c]));
+}
+function canonicalVisitAreaForProgress(v, customerMap){
+ const key=String(v?.customerNo??"").trim();
+ const c=customerMap.get(key);
+ return String(c?.area||v?.area||"").trim();
 }
 function areaProgressForSales(area,salesEmail){
  const target=String(salesEmail||"").trim().toLowerCase();
+ const areaKey=normalizeProgressArea(area);
  const user=USERS.find(u=>String(u.email||"").trim().toLowerCase()===target);
  const isSupervisor=Boolean(user&&user.role==="supervisor");
- const areaKey=normalizeProgressArea(area);
-
- // Supervisor: progress is area coverage against the active outlet roster.
- // Sales: preserve assigned-outlet rules.
- let outlets=progressCustomerRoster(area);
- if(!isSupervisor){
-   outlets=outlets.filter(c=>isAreaAssigned(salesEmail,c.area)&&canSalesAccessCustomer(c,salesEmail));
- }
-
+ const allCustomers=customers().filter(c=>c&&!c.isHidden);
+ const customerMap=new Map(allCustomers.map(c=>[String(c.no??"").trim(),c]));
+ let outlets=allCustomers.filter(c=>normalizeProgressArea(c.area)===areaKey);
+ if(!isSupervisor)outlets=outlets.filter(c=>isAreaAssigned(salesEmail,c.area)&&canSalesAccessCustomer(c,salesEmail));
  const visits=visitCache.filter(v=>
    String(v.salesEmail||"").trim().toLowerCase()===target &&
-   normalizeProgressArea(v.area)===areaKey &&
+   normalizeProgressArea(canonicalVisitAreaForProgress(v,customerMap))===areaKey &&
    String(v.checkOutAt||v.createdAt||"").slice(0,10)===todayLocalKey()
  );
-
- // Count unique outlet numbers so repeated visits do not inflate coverage.
- const completedOutletNos=new Set(
-   visits.map(v=>String(v.customerNo??"").trim()).filter(Boolean)
- );
- const completed=outlets.filter(c=>completedOutletNos.has(String(c.no).trim())).length;
- const pendingOutlets=outlets.filter(c=>!completedOutletNos.has(String(c.no).trim()));
+ const completedOutletNos=new Set(visits.map(v=>String(v.customerNo??"").trim()).filter(Boolean));
+ const completed=outlets.filter(c=>completedOutletNos.has(String(c.no??"").trim())).length;
+ const pendingOutlets=outlets.filter(c=>!completedOutletNos.has(String(c.no??"").trim()));
  const total=outlets.length;
-
- return {
-   completed,
-   total,
-   pending:Math.max(0,total-completed),
-   percent:total?Math.round(completed/total*100):0,
-   visits,
-   outlets,
-   pendingOutlets
- };
+ return {completed,total,pending:Math.max(0,total-completed),percent:total?Math.round(completed/total*100):0,visits,outlets,pendingOutlets};
 }
 function renderDailyAreaProgress(){
  const card=document.getElementById("dailyAreaProgressCard");
@@ -1697,9 +1671,10 @@ function renderDailyAreaProgress(){
  if(!card||!list||currentUser?.role!=="admin")return;
  const todayKey=todayLocalKey();
  const todayVisits=visitCache.filter(v=>String(v.checkOutAt||v.createdAt||"").slice(0,10)===todayKey);
+ const customerMap=areaProgressCustomerMap();
  const byArea=new Map();
  todayVisits.forEach(v=>{
-   const area=String(v.area||"").trim();
+   const area=canonicalVisitAreaForProgress(v,customerMap);
    const email=String(v.salesEmail||"").trim().toLowerCase();
    if(!area||!email)return;
    if(!byArea.has(area))byArea.set(area,new Set());
@@ -1765,9 +1740,8 @@ function openPendingOutletModalByValues(area,salesEmail){
 function closePendingOutletModal(){
  const modal=document.getElementById("pendingOutletModal");
  if(!modal)return;
- // Clear the inline display override used when opening the modal.
- // Otherwise .hidden cannot hide it because the inline !important wins.
  modal.style.removeProperty("display");
+ modal.style.removeProperty("z-index");
  modal.classList.add("hidden");
  modal.setAttribute("aria-hidden","true");
 }
@@ -3401,7 +3375,10 @@ async function syncPendingVisits(options={}){
    const batch=pending.slice(i,i+batchSize);
    const results=await Promise.allSettled(batch.map(async v=>{
     await rpc('app_upsert_visit',{p_token:session.session_token,p_visit:visitToRemote(v)});
-    await idbPut(STORE_VISITS,{...visitWithoutPhoto(v),syncStatus:"synced",updatedAt:new Date().toISOString()});
+    if(typeof v.checkInPhoto==="string" && /^data:image\/(jpeg|jpg|png|webp);base64,/i.test(v.checkInPhoto)){
+     await rpc('app_upsert_visit_photo',{p_token:session.session_token,p_visit_id:String(v.id),p_sales_email:String(v.salesEmail||currentUser?.email||"").toLowerCase(),p_photo:v.checkInPhoto});
+    }
+    await idbPut(STORE_VISITS,{...visitWithoutPhoto(v),hasCheckInPhoto:Boolean(v.checkInPhoto||v.hasCheckInPhoto),syncStatus:"synced",updatedAt:new Date().toISOString()});
     return v.id;
    }));
    for(let j=0;j<results.length;j++){
