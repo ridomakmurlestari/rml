@@ -77,7 +77,7 @@ begin
   select lower(trim(coalesce(p.role::text,''))),lower(trim(coalesce(p.account_key::text,'')))
     into v_role,v_email from public.app_get_profile(p_token) p limit 1;
   if coalesce(v_email,'')='' then raise exception 'Sesi login tidak valid. Silakan login kembali.'; end if;
-  if v_role not in ('admin','sales','supervisor') then raise exception 'Tidak memiliki izin melihat foto check-in.'; end if;
+  if v_role <> 'admin' then raise exception 'Hanya admin yang bisa lihat foto check-in'; end if;
 
   -- Check whether the authenticated app role can see this visit using existing visit-level ACL.
   select to_jsonb(x) into v_visit

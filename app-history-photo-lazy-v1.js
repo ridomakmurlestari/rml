@@ -156,6 +156,11 @@
    actions.insertBefore(b,actions.firstChild);
  }
  async function loadPhoto(id,button){
+   // Strict UI gate: non-admin users never read a local or remote photo.
+   if(user()?.role!=="admin"){
+     toast("Hanya admin yang bisa lihat foto check-in");
+     return;
+   }
    const slot=button.closest(".history-photo-slot");if(!slot)return;
    const cached=photoCache.get(id);if(cached){renderImage(slot,id,cached);return}
    const localRows=await getVisitsOffline();
@@ -198,19 +203,25 @@
        slot.className="history-photo-slot";
        slot.setAttribute("data-history-photo-slot",id);
 
-       // If this device still has a local check-in image, show it without a network request.
-       if(dataUrl(v.checkInPhoto)){
+       // Only admins may view image bytes, including any image cached locally.
+       // Sales/Supervisor get a harmless button that only shows an explanatory toast.
+       const isAdmin=user()?.role==="admin";
+       if(isAdmin && dataUrl(v.checkInPhoto)){
          photoCache.set(id,v.checkInPhoto);
          renderImage(slot,id,v.checkInPhoto);
        }else{
-         // Always show the control, even if the photo-presence flag is absent/stale.
-         // Photo data is fetched only if the user explicitly clicks this button.
          const btn=document.createElement("button");
          btn.type="button";
          btn.className="history-photo-load";
          btn.textContent="📷 Lihat Foto Check-in";
          btn.setAttribute("aria-label","Lihat Foto Check-in");
-         btn.addEventListener("click",()=>loadPhoto(id,btn));
+         btn.addEventListener("click",()=>{
+           if(user()?.role!=="admin"){
+             toast("Hanya admin yang bisa lihat foto check-in");
+             return;
+           }
+           loadPhoto(id,btn);
+         });
          slot.appendChild(btn);
        }
 
@@ -240,5 +251,5 @@
  window.loadHistoryCheckInPhoto=loadPhoto;
  document.addEventListener("DOMContentLoaded",installCss);
  installCss();
- window.RML_PHOTO_HISTORY_VERSION="2.0.5-full-lazy1";
+ window.RML_PHOTO_HISTORY_VERSION="2.0.5-admin-only-future-photo1";
 })();
