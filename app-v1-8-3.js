@@ -98,10 +98,9 @@ async function pullRemoteVisits({reconcile=false}={}){
   const remoteIds=new Set((remoteRows||[]).map(r=>String(r.id)));
   const localRows=await idbGetAll(STORE_VISITS);
   for(const local of localRows){
-   const belongsToCurrentUser=currentUser?.role==='admin'||local.salesEmail===currentUser?.email;
-   // Admin deletion must be reflected locally immediately after a forced reconciliation.
-   // Do not keep a stale synced history row when its remote ID no longer exists.
-   if(belongsToCurrentUser&&!remoteIds.has(String(local.id)))await idbDelete(STORE_VISITS,local.id);
+   // A server deletion is authoritative for previously synced rows across every role.
+   // Keep pending/failed local-only visits so offline work is never lost.
+   if(local.syncStatus==='synced'&&!remoteIds.has(String(local.id)))await idbDelete(STORE_VISITS,local.id);
   }
   return remoteRows||[];
  }else if(!fullSyncDone){
@@ -1465,7 +1464,7 @@ function openApp(){
  document.getElementById("salesCustomerFilter")?.classList.toggle("hidden",currentUser.role!=="admin");
  fillCustomerSalesFilter();
  document.getElementById("exportPdfBtn")?.classList.toggle("hidden",currentUser.role!=="admin");
- document.getElementById("historyRefreshBtn")?.classList.toggle("hidden",!canViewAllSalesHistory());
+ document.getElementById("historyRefreshBtn")?.classList.toggle("hidden",false);
  document.getElementById("assignmentNavBtn")?.classList.toggle("hidden",!(currentUser.role==="admin"||isSupervisorUser()));
  document.getElementById("targetNavBtn")?.classList.add("hidden");
  document.getElementById("accountNavBtn")?.classList.remove("hidden");
@@ -3018,7 +3017,7 @@ function stopCamera(){
  if(video)video.srcObject=null;
 }
 async function refreshHistoryFromServer(){
- if(!currentUser||!canViewAllSalesHistory())return;
+ if(!currentUser)return;
  if(!navigator.onLine)return toast('Tidak ada internet. Menampilkan riwayat yang tersimpan di perangkat.');
  const button=document.getElementById('historyRefreshBtn');
  const originalText=button?.textContent||'Refresh';
@@ -3026,6 +3025,10 @@ async function refreshHistoryFromServer(){
  try{
   await syncPendingVisits({silent:true,autoRetry:false});
   await pullRemoteVisits();
+  // Reconcile only visit IDs (never photo bytes) so Admin deletions disappear
+  // from Sales/Supervisor offline caches when they refresh history.
+  await reconcileRemoteVisits({force:true});
+  await refreshVisitCache();
   historyRenderLimit=HISTORY_PAGE_SIZE;
   await renderHistory();
   toast('Riwayat berhasil diperbarui');
@@ -3051,6 +3054,9 @@ function showHistory(){
  document.getElementById("adminHistoryDeleteToolbar")?.classList.toggle("hidden",!isAdmin);
  if(!isAdmin)cancelHistorySelectMode(false);
  renderHistory();
+ if(navigator.onLine&&getSbSession()?.session_token){
+   reconcileRemoteVisits({force:false}).then(async()=>{await refreshVisitCache();await renderHistory()}).catch(e=>console.warn("Rekonsiliasi riwayat lokal gagal",e));
+ }
 }
 function startOfLocalDay(date){const d=new Date(date);d.setHours(0,0,0,0);return d}
 function endOfLocalDay(date){const d=new Date(date);d.setHours(23,59,59,999);return d}
@@ -3241,7 +3247,7 @@ async function renderHistory(){
         <span class="pill">${esc(String(v.durationMinutes??calculateDurationMinutes(v.checkInAt,v.checkOutAt)))} menit</span>
         <span class="sync-badge ${getSyncClass(v.syncStatus)}">${getSyncLabel(v.syncStatus)}</span>
       </div>
-      ${v.checkInPhoto?`<img class="history-photo" src="${v.checkInPhoto}" alt="Foto check in" loading="lazy" decoding="async" onclick="openPhotoModal(this.src)">`:""}
+      ${currentUser?.role==="admin"&&v.checkInPhoto?`<img class="history-photo" src="${v.checkInPhoto}" alt="Foto check in" loading="lazy" decoding="async" onclick="openPhotoModal(this.src)">`:""}
       <div class="history-time">
         <span>Check In: ${esc(formatVisitDateTime(v.checkInAt||v.createdAt))}</span>
         <span>Check Out: ${esc(formatVisitDateTime(v.checkOutAt||v.createdAt))}</span>

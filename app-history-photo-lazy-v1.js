@@ -18,90 +18,105 @@
    if(!session?.session_token){if(!silent)toast("Silakan login kembali untuk menyinkronkan data");return false}
    const all=await getVisitsOffline();
    const pending=all.filter(v=>v.syncStatus!=="synced");
-   // Repair path: some already-synced rows may still have a local photo that
-   // predates the separate photo table. Upload just those photo blobs once.
-   const legacyLocalPhotos=all.filter(v=>v.syncStatus==="synced"&&dataUrl(v.checkInPhoto));
-   if(!pending.length&&!legacyLocalPhotos.length){await updatePendingSyncCount();if(!silent)toast("Semua data sudah sinkron");return true}
-   syncInProgress=true;let visitSuccess=0,photoSuccess=0,failed=0;
-   const keepLocalPhotoOnFailure=new Map();
+   // Retry only local photo blobs whose visit is already synced. Never re-upload the whole history.
+   const localPhotoRetries=all.filter(v=>v.syncStatus==="synced"&&dataUrl(v.checkInPhoto));
+   if(!pending.length&&!localPhotoRetries.length){await updatePendingSyncCount();if(!silent)toast("Semua data sudah sinkron");return true}
+   syncInProgress=true;
+   let visitSuccess=0,visitFailed=0,photoSuccess=0,photoFailed=0;
+   let firstPhotoError="";
+   const preserveLocal=new Map();
    try{
      const batchSize=3;
      for(let i=0;i<pending.length;i+=batchSize){
        const batch=pending.slice(i,i+batchSize);
        const results=await Promise.allSettled(batch.map(async v=>{
+         // The visit record is the primary sync unit. A photo RPC failure must not
+         // incorrectly mark a visit failed when its visit record is already remote.
          await rpc("app_upsert_visit",{p_token:session.session_token,p_visit:visitToRemote(v)});
+         let photoError=null;
          if(dataUrl(v.checkInPhoto)){
-           await rpc("app_upsert_visit_photo",{
-             p_token:session.session_token,p_visit_id:String(v.id),
-             p_sales_email:normalEmail(v.salesEmail||user()?.email),p_photo:v.checkInPhoto
-           });
-           photoCache.set(String(v.id),v.checkInPhoto);
+           try{
+             await rpc("app_upsert_visit_photo",{
+               p_token:session.session_token,p_visit_id:String(v.id),
+               p_sales_email:normalEmail(v.salesEmail||user()?.email),p_photo:v.checkInPhoto
+             });
+             photoCache.set(String(v.id),v.checkInPhoto);
+           }catch(e){photoError=e;preserveLocal.set(String(v.id),{...v,syncStatus:"synced",photoSyncPending:true});}
+         }
+         if(photoError){
+           await idbPut(STORE_VISITS,{...v,syncStatus:"synced",photoSyncPending:true,updatedAt:new Date().toISOString()});
+           return {id:v.id,hadPhoto:dataUrl(v.checkInPhoto),photoError:String(photoError?.message||photoError)};
          }
          await idbPut(STORE_VISITS,{
            ...visitWithoutPhoto(v),
            hasCheckInPhoto:Boolean(v.checkInPhoto||v.hasCheckInPhoto),
+           photoSyncPending:false,
            syncStatus:"synced",updatedAt:new Date().toISOString()
          });
-         return {id:v.id,hadPhoto:dataUrl(v.checkInPhoto)};
+         return {id:v.id,hadPhoto:dataUrl(v.checkInPhoto),photoError:""};
        }));
        for(let j=0;j<results.length;j++){
-         if(results[j].status==="fulfilled"){
+         const r=results[j];
+         if(r.status==="fulfilled"){
            visitSuccess++;
-           if(results[j].value.hadPhoto)photoSuccess++;
+           if(r.value.hadPhoto){
+             if(r.value.photoError){photoFailed++;if(!firstPhotoError)firstPhotoError=r.value.photoError;}
+             else photoSuccess++;
+           }
          }else{
-           failed++;
-           await idbPut(STORE_VISITS,{...batch[j],syncStatus:"failed"});
-           if(dataUrl(batch[j].checkInPhoto))keepLocalPhotoOnFailure.set(String(batch[j].id),{...batch[j],syncStatus:"failed"});
-           console.warn("Sinkronisasi kunjungan gagal",batch[j]?.id,results[j].reason);
+           visitFailed++;
+           const v={...batch[j],syncStatus:"failed"};
+           await idbPut(STORE_VISITS,v);
+           if(dataUrl(v.checkInPhoto))preserveLocal.set(String(v.id),v);
+           console.warn("Sinkronisasi kunjungan gagal",batch[j]?.id,r.reason);
          }
        }
      }
-     // A synced record with a still-local photo should not need to re-upload the
-     // whole visit. Upload only the photo so normal history sync remains light.
-     for(let i=0;i<legacyLocalPhotos.length;i+=batchSize){
-       const batch=legacyLocalPhotos.slice(i,i+batchSize);
+     // Retry only the photo RPC for already-synced visits; don't send visit payload again.
+     for(let i=0;i<localPhotoRetries.length;i+=batchSize){
+       const batch=localPhotoRetries.slice(i,i+batchSize);
        const results=await Promise.allSettled(batch.map(async v=>{
          await rpc("app_upsert_visit_photo",{
            p_token:session.session_token,p_visit_id:String(v.id),
            p_sales_email:normalEmail(v.salesEmail||user()?.email),p_photo:v.checkInPhoto
          });
          photoCache.set(String(v.id),v.checkInPhoto);
-         await idbPut(STORE_VISITS,{
-           ...visitWithoutPhoto(v),hasCheckInPhoto:true,syncStatus:"synced"
-         });
+         await idbPut(STORE_VISITS,{...visitWithoutPhoto(v),hasCheckInPhoto:true,photoSyncPending:false,syncStatus:"synced"});
          return v.id;
        }));
        for(let j=0;j<results.length;j++){
          if(results[j].status==="fulfilled")photoSuccess++;
          else{
-           failed++;
-           const v={...batch[j],syncStatus:"failed"};
-           keepLocalPhotoOnFailure.set(String(v.id),v);
-           await idbPut(STORE_VISITS,v);
-           console.warn("Upload foto lokal lama gagal",v.id,results[j].reason);
+           photoFailed++;
+           if(!firstPhotoError)firstPhotoError=String(results[j].reason?.message||results[j].reason||"");
+           preserveLocal.set(String(batch[j].id),{...batch[j],syncStatus:"synced",photoSyncPending:true});
+           console.warn("Upload foto check-in gagal; kunjungan tetap tersinkron",batch[j].id,results[j].reason);
          }
        }
      }
      await pullRemoteVisits();
-     // Remote pulls intentionally exclude image bytes; re-preserve any local
-     // photo that failed to upload so it can be retried rather than lost.
-     for(const v of keepLocalPhotoOnFailure.values())await idbPut(STORE_VISITS,v);
+     // Preserve local photo bytes only for failed photo uploads / failed visit uploads.
+     for(const v of preserveLocal.values())await idbPut(STORE_VISITS,v);
      await refreshVisitCache();
      await updatePendingSyncCount();
      if(!silent){
-       const summary=[];
-       if(pending.length)summary.push(`${visitSuccess}/${pending.length} kunjungan`);
-       if(legacyLocalPhotos.length||photoSuccess)summary.push(`${photoSuccess} foto tersimpan`);
-       toast(failed?`${summary.join(", ")||"Sinkronisasi"}; ${failed} gagal, coba lagi setelah koneksi stabil`:(summary.join(", ")||"Semua data")+" berhasil disinkronkan");
+       const parts=[];
+       if(pending.length)parts.push(`${visitSuccess}/${pending.length} kunjungan tersinkron`);
+       if(photoSuccess)parts.push(`${photoSuccess} foto tersimpan`);
+       if(photoFailed)parts.push(`${photoFailed} foto belum tersimpan`);
+       if(visitFailed)parts.push(`${visitFailed} kunjungan gagal sinkron`);
+       const detail=photoFailed&&firstPhotoError?` (${firstPhotoError})`:"";
+       toast((parts.join("; ")||"Data sudah sinkron")+detail);
      }
-     if(failed&&autoRetry){clearTimeout(autoSyncRetryTimer);autoSyncRetryTimer=setTimeout(()=>scheduleAutoSync(0),10000)}
-     return failed===0;
+     if((visitFailed||photoFailed)&&autoRetry){clearTimeout(autoSyncRetryTimer);autoSyncRetryTimer=setTimeout(()=>scheduleAutoSync(0),15000)}
+     // A photo retry must not report the already-saved visit itself as failed.
+     return visitFailed===0;
    }catch(e){
      console.error("Sinkronisasi foto/kunjungan gagal",e);
-     for(const v of keepLocalPhotoOnFailure.values())await idbPut(STORE_VISITS,v);
+     for(const v of preserveLocal.values())await idbPut(STORE_VISITS,v);
      await updatePendingSyncCount();
      if(!silent)toast(`Sinkronisasi gagal: ${e.message||"periksa koneksi"}`);
-     if(autoRetry){clearTimeout(autoSyncRetryTimer);autoSyncRetryTimer=setTimeout(()=>scheduleAutoSync(0),10000)}
+     if(autoRetry){clearTimeout(autoSyncRetryTimer);autoSyncRetryTimer=setTimeout(()=>scheduleAutoSync(0),15000)}
      return false;
    }finally{syncInProgress=false}
  }
