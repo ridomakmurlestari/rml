@@ -264,7 +264,30 @@
  }
  window.syncPendingVisits=uploadPhotoAwareSync;
  window.loadHistoryCheckInPhoto=loadPhoto;
+
+ // Low-egress stale-row reconciliation: only IDs are requested, never visit payloads/photos.
+ // This makes remote Admin deletions disappear from Sales/Supervisor local IndexedDB
+ // when the app returns online or the tab becomes active.
+ let reconcileBusy=false;
+ async function reconcileDeletedRows(){
+   if(reconcileBusy||!navigator.onLine||!token()||typeof reconcileRemoteVisits!=="function")return;
+   reconcileBusy=true;
+   try{
+     const before=await getVisitsOffline();
+     await reconcileRemoteVisits({force:false});
+     const after=await getVisitsOffline();
+     if(after.length!==before.length){
+       await refreshVisitCache();
+       if(typeof refreshDashboard==="function")await refreshDashboard();
+       if(typeof renderHistory==="function")await renderHistory();
+     }
+   }catch(e){console.warn("Rekonsiliasi ID kunjungan gagal",e)}
+   finally{reconcileBusy=false}
+ }
+ window.addEventListener("online",()=>{setTimeout(reconcileDeletedRows,1200)});
+ window.addEventListener("focus",()=>{reconcileDeletedRows()});
+ document.addEventListener("visibilitychange",()=>{if(!document.hidden)reconcileDeletedRows()});
  document.addEventListener("DOMContentLoaded",installCss);
  installCss();
- window.RML_PHOTO_HISTORY_VERSION="2.0.5-admin-only-future-photo1";
+ window.RML_PHOTO_HISTORY_VERSION="2.0.5-admin-only-sync-fix2";
 })();

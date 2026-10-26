@@ -18,6 +18,21 @@ alter table public.rml_visit_photos add column if not exists mime_type text not 
 alter table public.rml_visit_photos add column if not exists photo_bytes bytea;
 alter table public.rml_visit_photos add column if not exists created_at timestamptz not null default now();
 alter table public.rml_visit_photos add column if not exists updated_at timestamptz not null default now();
+
+-- Compatibility with an older deployment that has a legacy photo_data column.
+-- The current RPC writes photo_bytes; a NOT NULL legacy column without a default
+-- would reject every insert. Keep existing values intact but allow new writes.
+do $$
+begin
+  if exists (
+    select 1 from information_schema.columns
+    where table_schema='public' and table_name='rml_visit_photos'
+      and column_name='photo_data'
+  ) then
+    execute 'alter table public.rml_visit_photos alter column photo_data drop not null';
+  end if;
+end $$;
+
 create index if not exists rml_visit_photos_created_at_idx on public.rml_visit_photos(created_at);
 alter table public.rml_visit_photos enable row level security;
 revoke all on table public.rml_visit_photos from public, anon, authenticated;
