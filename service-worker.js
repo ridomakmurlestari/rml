@@ -1,6 +1,6 @@
-const CACHE_NAME="rml-sales-visit-2.0.4";
+const CACHE_NAME="rml-sales-visit-2.0.6-promo-mobile-fix1";
 const APP_SHELL=[
- "./","./index.html","./style-v1-7-6.css",
+ "./","./index.html","./style-v1-7-6.css?v=2.0.6-promo-mobile-fix1",
  "./pdf-preview.html","./pdf-preview.css","./pdf-preview.js",
  "./app-v1-8-3.js?v=2.0.4","./promo-v1-8-51.js?v=2.0.4-text","./customers-v0-10-3.js",
  "./dashboard-target-v1-8-63.js?v=2.0.4","./admin-sales-v1-8-9.js?v=2.0.4",

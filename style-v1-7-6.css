@@ -1398,3 +1398,110 @@ body.modal-open{overflow:hidden}
 @media(max-width:560px){.history-photo-load{width:100%}.history-photo-slot img.history-photo{width:100%;max-height:280px}}
 
 #pendingOutletModal.hidden{display:none!important}
+
+
+/* RML Promo mobile layout fix 2026-10-31
+   Keep offer chips at their natural width and let them wrap instead of
+   inheriting the 26px badge sizing from .promo-catalog-item span. */
+.promo-catalog-item.promo-catalog-item-text {
+  display: grid !important;
+  grid-template-columns: 28px minmax(0, 1fr) !important;
+  align-items: start !important;
+  gap: 10px !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+}
+.promo-catalog-item.promo-catalog-item-text > .promo-item-number {
+  display: grid !important;
+  place-items: center !important;
+  width: 28px !important;
+  min-width: 28px !important;
+  max-width: 28px !important;
+  height: 28px !important;
+  min-height: 28px !important;
+  flex: 0 0 28px !important;
+  box-sizing: border-box !important;
+}
+.promo-catalog-item-main {
+  display: block !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  overflow: visible !important;
+}
+.promo-catalog-item-main > strong {
+  display: block !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  line-height: 1.4 !important;
+  white-space: normal !important;
+  overflow-wrap: anywhere !important;
+}
+.promo-offer-rules {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 7px !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  margin-top: 9px !important;
+  overflow: visible !important;
+}
+.promo-offer-rules .promo-rule,
+.promo-catalog-item .promo-offer-rules span.promo-rule {
+  display: inline-flex !important;
+  flex: 0 0 auto !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: auto !important;
+  min-width: max-content !important;
+  max-width: 100% !important;
+  height: auto !important;
+  min-height: 30px !important;
+  padding: 6px 10px !important;
+  margin: 0 !important;
+  border-radius: 999px !important;
+  box-sizing: border-box !important;
+  white-space: nowrap !important;
+  line-height: 1.25 !important;
+  font-size: 11px !important;
+  position: static !important;
+  transform: none !important;
+}
+.promo-rule-note {
+  display: grid !important;
+  grid-template-columns: minmax(0, auto) minmax(0, 1fr) !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+}
+.promo-rule-note-text {
+  min-width: 0 !important;
+  overflow-wrap: anywhere !important;
+}
+@media (max-width: 600px) {
+  .promo-catalog-item.promo-catalog-item-text {
+    grid-template-columns: 26px minmax(0, 1fr) !important;
+    gap: 9px !important;
+    padding: 11px !important;
+  }
+  .promo-catalog-item.promo-catalog-item-text > .promo-item-number {
+    width: 26px !important;
+    min-width: 26px !important;
+    max-width: 26px !important;
+    height: 26px !important;
+    min-height: 26px !important;
+  }
+  .promo-offer-rules {
+    gap: 6px !important;
+  }
+  .promo-offer-rules .promo-rule,
+  .promo-catalog-item .promo-offer-rules span.promo-rule {
+    font-size: 10px !important;
+    padding: 6px 9px !important;
+  }
+}
