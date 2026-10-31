@@ -59,7 +59,7 @@
       <select id="targetUnitInput" onchange="refreshTargetUnitFields()">
         <option value="rupiah">Rupiah (Rp)</option><option value="points">Poin</option><option value="quantity">Quantity / Jumlah barang</option><option value="custom">Satuan lain</option>
       </select>
-      <div id="targetCustomUnitWrap" class="hidden"><label>Nama Satuan</label><input id="targetCustomUnitInput" type="text" maxlength="30" placeholder="Contoh: dus, paket, kunjungan" oninput="refreshTargetUnitFields()"></div>
+      <div id="targetCustomUnitWrap" class="hidden"><label>Nama Satuan</label><input id="targetCustomUnitInput" oninput="refreshTargetUnitFields()" type="text" maxlength="30" placeholder="Contoh: dus, paket, kunjungan" oninput="refreshTargetUnitFields()"></div>
       <label>Mulai Periode</label><input id="targetMonthInput" type="month">
       <label>Durasi Target</label><select id="targetDurationInput"><option value="1">1 Bulan</option><option value="3">3 Bulan</option><option value="6">6 Bulan</option><option value="12">12 Bulan</option></select>
       <label id="targetOwnerLabel">Sales</label><select id="targetOwnerInput"></select>
