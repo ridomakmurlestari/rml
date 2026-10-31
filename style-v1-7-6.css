@@ -1505,3 +1505,61 @@ body.modal-open{overflow:hidden}
     padding: 6px 9px !important;
   }
 }
+
+
+/* RML Promo Keterangan layout fix 2026-10-31
+   Reset the generic catalog span badge dimensions for the note label/text.
+   Show Keterangan as a compact heading with the note on its own full-width line. */
+.promo-catalog-item.promo-catalog-item-text .promo-rule-note {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  justify-content: flex-start !important;
+  gap: 3px !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  height: auto !important;
+  min-height: 0 !important;
+  margin: 9px 0 0 !important;
+  padding: 9px 11px !important;
+  box-sizing: border-box !important;
+  overflow: visible !important;
+}
+.promo-catalog-item.promo-catalog-item-text .promo-rule-note > span,
+.promo-catalog-item.promo-catalog-item-text .promo-rule-note-label,
+.promo-catalog-item.promo-catalog-item-text .promo-rule-note-text {
+  display: block !important;
+  position: static !important;
+  inset: auto !important;
+  width: auto !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  flex: 0 1 auto !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  transform: none !important;
+  white-space: normal !important;
+  overflow: visible !important;
+  box-sizing: border-box !important;
+}
+.promo-catalog-item.promo-catalog-item-text .promo-rule-note-label {
+  color: #087568 !important;
+  font-size: 10px !important;
+  font-weight: 800 !important;
+  line-height: 1.3 !important;
+}
+.promo-catalog-item.promo-catalog-item-text .promo-rule-note-text {
+  color: #445467 !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  line-height: 1.45 !important;
+  overflow-wrap: anywhere !important;
+  word-break: normal !important;
+}
