@@ -72,14 +72,10 @@
         <button type="button" class="secondary compact" onclick="addTargetTier()">＋ Tambah Tingkat Reward</button>
       </div>
       <div id="targetOutletRewardSection" class="hidden">
-        <label id="targetOutletAmountLabel">Target Outlet</label>
-        <input id="targetAmountInput" type="number" min="0" step="1000" placeholder="Contoh: 2500000">
-        <label>Reward Outlet</label>
-        <div class="target-reward-inline">
-          <select id="targetRewardTypeInput"><option value="nominal">Nominal</option><option value="percent">Persentase</option><option value="none">Tanpa Reward</option></select>
-          <input id="targetRewardValueInput" type="number" min="0" step="0.01" placeholder="Contoh: 5">
-        </div>
-        <small id="targetRewardValueLabel" class="target-form-help">Isi nominal reward atau persentase reward.</small>
+        <label>Target & Reward Outlet Bertingkat</label>
+        <small class="target-form-help">Buat beberapa tingkat target dan reward outlet, sama seperti Target Sales.</small>
+        <div id="targetOutletTierList" class="target-tier-list"></div>
+        <button type="button" class="secondary compact" onclick="addTargetOutletTier()">＋ Tambah Tingkat Reward Outlet</button>
       </div>
       <label id="targetAchievedLabel">Pencapaian / Realisasi</label><input id="targetAchievedInput" type="number" min="0" step="1" placeholder="Isi realisasi">
       <small class="target-form-help">Tanggal dan jam update otomatis mengikuti waktu saat tombol Simpan Target ditekan.</small>
